@@ -1,4 +1,42 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> 个人简历 · flyer</title><meta name="description" content="个人简历 - flyer"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://yoursite.com/atom.xml" title="flyer"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="http://weibo.com/sunchongsheng" target="_blank" class="nav-list-link">WEIBO</a></li><li class="nav-list-item"><a href="https://github.com/pinggod" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li></ul></header><section class="container"><div class="post"><article class="post-block"><h1 class="post-title">个人简历</h1><div class="post-info">Oct 7, 2016</div><div class="post-content"><h2 id="个人基本信息">个人基本信息</h2><p><strong>姓名:</strong> 许鹏飞 </p>
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>flyer</title>
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://yoursite.com/"/>
+  <updated>2016-10-07T06:10:15.000Z</updated>
+  <id>http://yoursite.com/</id>
+  
+  <author>
+    <name>flyer</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>about</title>
+    <link href="http://yoursite.com/2016/10/07/about/"/>
+    <id>http://yoursite.com/2016/10/07/about/</id>
+    <published>2016-10-07T06:10:15.000Z</published>
+    <updated>2016-10-07T06:10:15.000Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>个人简历</title>
+    <link href="http://yoursite.com/2016/10/07/%E4%B8%AA%E4%BA%BA%E7%AE%80%E5%8E%86/"/>
+    <id>http://yoursite.com/2016/10/07/个人简历/</id>
+    <published>2016-10-07T05:44:35.000Z</published>
+    <updated>2016-10-07T05:45:04.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="个人基本信息">个人基本信息</h2><p><strong>姓名:</strong> 许鹏飞 </p>
 <p><strong>学校及专业</strong>: 杭州电子科技大学 软件工程学院 本科 </p>
 <p><strong>工作年限:</strong> 1年零6个月 </p>
 <p><strong>联系方式:</strong> flyer88xu@gmail.com </p>
@@ -111,4 +149,17 @@
 </ol>
 </li>
 </ul>
-</div></article></div></section><footer><div class="paginator"><a href="/2016/10/07/about/" class="prev">上一篇</a></div><div class="copyright"><p>© 2015 - 2016 <a href="http://yoursite.com">flyer</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-MML-AM_CHTML"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-65933410-1",'auto');ga('send','pageview');</script></body></html>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;个人基本信息&quot;&gt;个人基本信息&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;姓名:&lt;/strong&gt; 许鹏飞 &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;学校及专业&lt;/strong&gt;: 杭州电子科技大学 软件工程学院 本科 &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;工作年限:&lt;/strong&gt; 1年零
+    
+    </summary>
+    
+    
+  </entry>
+  
+</feed>
