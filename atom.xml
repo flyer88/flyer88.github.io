@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2016-11-18T08:28:24.000Z</updated>
+  <updated>2016-11-18T08:30:15.000Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://yoursite.com/2016/11/18/dagger2-%E5%AD%A6%E4%B9%A0-%E4%BA%8C/"/>
     <id>http://yoursite.com/2016/11/18/dagger2-学习-二/</id>
     <published>2016-11-18T08:27:46.000Z</published>
-    <updated>2016-11-18T08:28:24.000Z</updated>
+    <updated>2016-11-18T08:30:15.000Z</updated>
     
     <content type="html"><![CDATA[<h3 id="前言">前言</h3><p>之前记录了最简单的<code>Dagger 2</code>  使用，现在记录一下面对多层依赖时的问题，同时配合 <code>@Module</code> 进行注入的情况。</p>
 <h3 id="A_多层依赖情况">A 多层依赖情况</h3><h4 id="1-_多层依赖情况模拟">1. 多层依赖情况模拟</h4><p>添加 <code>ClassRoom</code> 类</p>
@@ -80,7 +80,7 @@
 <p>以上就是关于 <code>Dagger</code>  在面对多层依赖的简单情况下，生成代码的分析</p>
 <p>其中关于 <code>@Module</code> <code>@Provides</code> 两个注解是关键部分，一个标注当前类是<code>Module</code>，一个标注的函数会生成<code>xxxModule_providexxxFactory</code> 从而为 <code>Component</code> 注入提供实例。</p>
 <p>然后附上<code>Component</code> <code>Module</code> 和被注入类的整体关系图，因为上面写的比较详细，此处就只给一个整体图了</p>
-<p> <img src="[http://ob9rvakdw.bkt.clouddn.com/dagger2%20%E5%AD%A6%E4%B9%A0%28%E4%BA%](http://ob9rvakdw.bkt.clouddn.com/dagger2%20%E5%AD%A6%E4%B9%A0%28%E4%BA%8C%29.png" alt="dagger2 学习(二)">)</p>
+<p> <img src="http://ob9rvakdw.bkt.clouddn.com/dagger2%20%E5%AD%A6%E4%B9%A0%28%E4%BA%8C%29.png" alt="dagger2 学习(二)"></p>
 <blockquote>
 <p>一家之言，如有错误，轻喷。</p>
 </blockquote>
