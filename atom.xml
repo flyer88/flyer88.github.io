@@ -4,9 +4,9 @@
   
   <link href="/atom.xml" rel="self"/>
   
-  <link href="http://yoursite.com/"/>
+  <link href="http://dove.im/"/>
   <updated>2016-11-19T06:35:33.000Z</updated>
-  <id>http://yoursite.com/</id>
+  <id>http://dove.im/</id>
   
   <author>
     <name>flyer</name>
@@ -17,8 +17,8 @@
   
   <entry>
     <title>[旧] LayoutInflater 源码流程记录</title>
-    <link href="http://yoursite.com/2016/11/19/%E6%97%A7-LayoutInflater-%E6%BA%90%E7%A0%81%E6%B5%81%E7%A8%8B%E8%AE%B0%E5%BD%95/"/>
-    <id>http://yoursite.com/2016/11/19/旧-LayoutInflater-源码流程记录/</id>
+    <link href="http://dove.im/2016/11/19/%E6%97%A7-LayoutInflater-%E6%BA%90%E7%A0%81%E6%B5%81%E7%A8%8B%E8%AE%B0%E5%BD%95/"/>
+    <id>http://dove.im/2016/11/19/旧-LayoutInflater-源码流程记录/</id>
     <published>2016-11-19T06:30:12.000Z</published>
     <updated>2016-11-19T06:35:33.000Z</updated>
     
@@ -56,8 +56,8 @@
   
   <entry>
     <title>[旧] LayoutInflater 后记--替换系统控件</title>
-    <link href="http://yoursite.com/2016/11/19/%E6%97%A7-LayoutInflater-%E5%90%8E%E8%AE%B0-%E6%9B%BF%E6%8D%A2%E7%B3%BB%E7%BB%9F%E6%8E%A7%E4%BB%B6/"/>
-    <id>http://yoursite.com/2016/11/19/旧-LayoutInflater-后记-替换系统控件/</id>
+    <link href="http://dove.im/2016/11/19/%E6%97%A7-LayoutInflater-%E5%90%8E%E8%AE%B0-%E6%9B%BF%E6%8D%A2%E7%B3%BB%E7%BB%9F%E6%8E%A7%E4%BB%B6/"/>
+    <id>http://dove.im/2016/11/19/旧-LayoutInflater-后记-替换系统控件/</id>
     <published>2016-11-19T06:30:00.000Z</published>
     <updated>2016-11-19T06:36:11.000Z</updated>
     
@@ -87,8 +87,8 @@
   
   <entry>
     <title>[旧] Android 贝塞尔曲线，QQ 删除小红点类似效果实现</title>
-    <link href="http://yoursite.com/2016/11/19/%E6%97%A7-Android-%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%EF%BC%8CQQ-%E5%88%A0%E9%99%A4%E5%B0%8F%E7%BA%A2%E7%82%B9%E7%B1%BB%E4%BC%BC%E6%95%88%E6%9E%9C%E5%AE%9E%E7%8E%B0/"/>
-    <id>http://yoursite.com/2016/11/19/旧-Android-贝塞尔曲线，QQ-删除小红点类似效果实现/</id>
+    <link href="http://dove.im/2016/11/19/%E6%97%A7-Android-%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF%EF%BC%8CQQ-%E5%88%A0%E9%99%A4%E5%B0%8F%E7%BA%A2%E7%82%B9%E7%B1%BB%E4%BC%BC%E6%95%88%E6%9E%9C%E5%AE%9E%E7%8E%B0/"/>
+    <id>http://dove.im/2016/11/19/旧-Android-贝塞尔曲线，QQ-删除小红点类似效果实现/</id>
     <published>2016-11-19T06:29:51.000Z</published>
     <updated>2016-11-19T06:36:30.000Z</updated>
     
@@ -116,8 +116,8 @@
   
   <entry>
     <title>[旧]引用传递和值传递(pass by value vs pass by reference)</title>
-    <link href="http://yoursite.com/2016/11/19/%E6%97%A7-%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%E5%92%8C%E5%80%BC%E4%BC%A0%E9%80%92-pass-by-value-vs-pass-by-reference/"/>
-    <id>http://yoursite.com/2016/11/19/旧-引用传递和值传递-pass-by-value-vs-pass-by-reference/</id>
+    <link href="http://dove.im/2016/11/19/%E6%97%A7-%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%E5%92%8C%E5%80%BC%E4%BC%A0%E9%80%92-pass-by-value-vs-pass-by-reference/"/>
+    <id>http://dove.im/2016/11/19/旧-引用传递和值传递-pass-by-value-vs-pass-by-reference/</id>
     <published>2016-11-19T06:29:39.000Z</published>
     <updated>2016-11-19T06:37:13.000Z</updated>
     
@@ -176,8 +176,8 @@
   
   <entry>
     <title>[旧]Android 代码混淆(二)</title>
-    <link href="http://yoursite.com/2016/11/19/%E6%97%A7-Android-%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86-%E4%BA%8C/"/>
-    <id>http://yoursite.com/2016/11/19/旧-Android-代码混淆-二/</id>
+    <link href="http://dove.im/2016/11/19/%E6%97%A7-Android-%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86-%E4%BA%8C/"/>
+    <id>http://dove.im/2016/11/19/旧-Android-代码混淆-二/</id>
     <published>2016-11-19T06:29:28.000Z</published>
     <updated>2016-11-19T07:15:45.000Z</updated>
     
@@ -241,8 +241,8 @@
   
   <entry>
     <title>[旧]Android 代码混淆(一)</title>
-    <link href="http://yoursite.com/2016/11/19/%E6%97%A7-Android-%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86-%E4%B8%80/"/>
-    <id>http://yoursite.com/2016/11/19/旧-Android-代码混淆-一/</id>
+    <link href="http://dove.im/2016/11/19/%E6%97%A7-Android-%E4%BB%A3%E7%A0%81%E6%B7%B7%E6%B7%86-%E4%B8%80/"/>
+    <id>http://dove.im/2016/11/19/旧-Android-代码混淆-一/</id>
     <published>2016-11-19T06:29:03.000Z</published>
     <updated>2016-11-19T07:17:44.000Z</updated>
     
@@ -326,8 +326,8 @@
   
   <entry>
     <title>dagger2 学习(二)</title>
-    <link href="http://yoursite.com/2016/11/18/dagger2-%E5%AD%A6%E4%B9%A0-%E4%BA%8C/"/>
-    <id>http://yoursite.com/2016/11/18/dagger2-学习-二/</id>
+    <link href="http://dove.im/2016/11/18/dagger2-%E5%AD%A6%E4%B9%A0-%E4%BA%8C/"/>
+    <id>http://dove.im/2016/11/18/dagger2-学习-二/</id>
     <published>2016-11-18T08:27:46.000Z</published>
     <updated>2016-11-18T08:30:15.000Z</updated>
     
@@ -407,8 +407,8 @@
   
   <entry>
     <title>dagger2 学习(一)</title>
-    <link href="http://yoursite.com/2016/11/11/dagger2-%E5%AD%A6%E4%B9%A0-%E4%B8%80/"/>
-    <id>http://yoursite.com/2016/11/11/dagger2-学习-一/</id>
+    <link href="http://dove.im/2016/11/11/dagger2-%E5%AD%A6%E4%B9%A0-%E4%B8%80/"/>
+    <id>http://dove.im/2016/11/11/dagger2-学习-一/</id>
     <published>2016-11-11T09:39:59.000Z</published>
     <updated>2016-11-18T06:42:34.000Z</updated>
     
@@ -476,8 +476,8 @@
   
   <entry>
     <title>个人简历</title>
-    <link href="http://yoursite.com/2016/10/07/%E4%B8%AA%E4%BA%BA%E7%AE%80%E5%8E%86/"/>
-    <id>http://yoursite.com/2016/10/07/个人简历/</id>
+    <link href="http://dove.im/2016/10/07/%E4%B8%AA%E4%BA%BA%E7%AE%80%E5%8E%86/"/>
+    <id>http://dove.im/2016/10/07/个人简历/</id>
     <published>2016-10-07T05:44:35.000Z</published>
     <updated>2016-11-19T07:21:46.000Z</updated>
     
