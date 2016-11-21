@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://dove.im/"/>
-  <updated>2016-11-21T08:02:28.000Z</updated>
+  <updated>2016-11-21T08:11:01.000Z</updated>
   <id>http://dove.im/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://dove.im/2016/11/21/dagger2-%E5%AD%A6%E4%B9%A0-%E4%B8%89-scope-%E4%BD%BF%E7%94%A8/"/>
     <id>http://dove.im/2016/11/21/dagger2-学习-三-scope-使用/</id>
     <published>2016-11-21T07:56:30.000Z</published>
-    <updated>2016-11-21T08:02:28.000Z</updated>
+    <updated>2016-11-21T08:11:01.000Z</updated>
     
     <content type="html"><![CDATA[<h2 id="关于Scope">关于<code>Scope</code></h2><p>Dagger 2 自带的 <code>Scope</code> 只有一个 <code>@Singleton</code> ，其他的可以通过自定义来实现</p>
 <p><a href="https://github.com/flyer88/LearnDagger2/tree/%E5%AD%A6%E4%B9%A03Scope-%E4%BD%BF%E7%94%A8" target="_blank" rel="external">本文代码</a></p>
@@ -84,12 +84,12 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">injectMembers</span><span class="params">(ClassARoomActivity instance)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">"Cannot inject members into a null reference"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  instance.mUser = mUserProvider.get();<span class="comment">// 注意该部分会调用不同的实例对应的方法</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </li>
 <li><p><code>mUserProvider.get()</code> -&gt; <code>DoubleCheck&lt;User&gt;.get()</code></p>
-<p>未加上<code>@UserScop</code> 时，实例是 <code>UserModule_ProvideUserFactory</code></p>
-<p>调用的是<code>UserModule_ProvideUserFactory.java</code> 中的方法，如下</p>
+<p>   未加上<code>@UserScop</code> 时，实例是 <code>UserModule_ProvideUserFactory</code></p>
+<p>   调用的是<code>UserModule_ProvideUserFactory.java</code> 中的方法，如下</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> User <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> Preconditions.checkNotNull(</span><br><span class="line">      module.provideUser(), <span class="string">"Cannot return null from a non-@Nullable @Provides method"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>加上<code>@UserScop</code> 时，实例是<code>DoubleCheck&lt;User&gt;</code></p>
-<p>调用的是 <code>DoubleCheck&lt;T&gt;</code> 中的方法，如下，该部分也是实现 <code>Scope</code> 功能重要的一部分</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Object result = instance;</span><br><span class="line">  <span class="keyword">if</span> (result == UNINITIALIZED) &#123;<span class="comment">// 如果该对象从来没有初始化，那就初始化一次</span></span><br><span class="line">    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">      result = instance;<span class="comment">// 获取最新实例，防止线程之间同时修改</span></span><br><span class="line">      <span class="keyword">if</span> (result == UNINITIALIZED) &#123;</span><br><span class="line">        result = provider.get();<span class="comment">// 此处依旧调用了 UserModule_ProvideUserFactory.get() 方法</span></span><br><span class="line">        Object currentInstance = instance;</span><br><span class="line">        <span class="keyword">if</span> (currentInstance != UNINITIALIZED &amp;&amp; currentInstance != result) &#123;</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Scoped provider was invoked recursively returning "</span></span><br><span class="line">+ <span class="string">"different results: "</span> + currentInstance + <span class="string">" &amp; "</span> + result);</span><br><span class="line">           &#125;</span><br><span class="line">      instance = result;</span><br><span class="line">      <span class="comment">// 赋值最新的值</span></span><br><span class="line">      provider = <span class="keyword">null</span>;</span><br><span class="line">      <span class="comment">// 初始化一次以后，该对象对应的 Provider 在当前 Scope 中其实已经没有意义了，</span></span><br><span class="line">      <span class="comment">// 所以直接置为空，方便 GC 回收</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> (T) result;<span class="comment">// 返回结果</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>   加上<code>@UserScop</code> 时，实例是<code>DoubleCheck&lt;User&gt;</code></p>
+<p>   调用的是 <code>DoubleCheck&lt;T&gt;</code> 中的方法，如下，该部分也是实现 <code>Scope</code> 功能重要的一部分</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">   <span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     Object result = instance;</span><br><span class="line">     <span class="keyword">if</span> (result == UNINITIALIZED) &#123;<span class="comment">// 如果该对象从来没有初始化，那就初始化一次</span></span><br><span class="line">       <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">         result = instance;<span class="comment">// 获取最新实例，防止线程之间同时修改</span></span><br><span class="line">         <span class="keyword">if</span> (result == UNINITIALIZED) &#123;</span><br><span class="line">           result = provider.get();<span class="comment">// 此处依旧调用了 UserModule_ProvideUserFactory.get() 方法</span></span><br><span class="line">           Object currentInstance = instance;</span><br><span class="line">           <span class="keyword">if</span> (currentInstance != UNINITIALIZED &amp;&amp; currentInstance != result) &#123;</span><br><span class="line">             <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Scoped provider was invoked recursively returning "</span></span><br><span class="line">+ <span class="string">"different results: "</span> + currentInstance + <span class="string">" &amp; "</span> + result);</span><br><span class="line">           &#125;</span><br><span class="line">      instance = result;</span><br><span class="line">      <span class="comment">// 赋值最新的值</span></span><br><span class="line">      provider = <span class="keyword">null</span>;</span><br><span class="line">      <span class="comment">// 初始化一次以后，该对象对应的 Provider 在当前 Scope 中其实已经没有意义了，</span></span><br><span class="line">      <span class="comment">// 所以直接置为空，方便 GC 回收</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> (T) result;<span class="comment">// 返回结果</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <blockquote>
 <blockquote>
 <p>注意，Provider 的置空</p>
@@ -108,7 +108,11 @@
 <p> 此处抛弃的就是 <code>UserModule_ProviderUserFactory</code> 的实例</p>
 </blockquote>
 <p>只有当实例化的 <code>Component</code> 对象被重新构建，被标注的实例提供者才会重新创建</p>
-<p><img src="http://ob9rvakdw.bkt.clouddn.com//Dagger2 学习(三" alt="Dagger2 学习(三)">.png)</p>
+<p><img src="http://ob9rvakdw.bkt.clouddn.com/Dagger2 学习(三" alt="Dagger2 学习(三)">.png)</p>
+<blockquote>
+<p>一家之言，仅供参考</p>
+<p><a href="https://github.com/flyer88/LearnDagger2/tree/%E5%AD%A6%E4%B9%A03Scope-%E4%BD%BF%E7%94%A8" target="_blank" rel="external">本文代码</a></p>
+</blockquote>
 ]]></content>
     
     <summary type="html">
@@ -435,10 +439,10 @@
     <link href="http://dove.im/2016/11/18/dagger2-%E5%AD%A6%E4%B9%A0-%E4%BA%8C/"/>
     <id>http://dove.im/2016/11/18/dagger2-学习-二/</id>
     <published>2016-11-18T08:27:46.000Z</published>
-    <updated>2016-11-21T08:05:02.000Z</updated>
+    <updated>2016-11-21T08:12:00.000Z</updated>
     
     <content type="html"><![CDATA[<h3 id="前言">前言</h3><p>之前记录了最简单的<code>Dagger 2</code>  使用，现在记录一下面对多层依赖时的问题，同时配合 <code>@Module</code> 进行注入的情况。</p>
-<h3 id="A_多层依赖情况">A 多层依赖情况</h3><p><a href="https://github.com/flyer88/LearnDagger2/tree/%E5%AD%A6%E4%B9%A02" target="_blank" rel="external">该部分代码</a></p>
+<h3 id="A_多层依赖情况">A 多层依赖情况</h3><p><a href="https://github.com/flyer88/LearnDagger2/tree/%E5%AD%A6%E4%B9%A02" target="_blank" rel="external">该部分代码A</a></p>
 <h4 id="1-_多层依赖情况模拟">1. 多层依赖情况模拟</h4><p>添加 <code>ClassRoom</code> 类</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ClassRoom</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    User mUser;</span><br><span class="line"></span><br><span class="line">    <span class="annotation">@Inject</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ClassRoom</span><span class="params">(User user)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mUser = user;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> User <span class="title">getUser</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mUser;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUser</span><span class="params">(User user)</span> </span>&#123;</span><br><span class="line">        mUser = user;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>修改 <code>MainActivity.java</code></p>
@@ -458,7 +462,7 @@
 <p>最大变化主要是初始化 <code>DaggerUserComponent</code> 时候，多了对 <code>classRoomProvider</code> 的初始化赋值。</p>
 <p>即 <code>A</code> 依赖 <code>B</code>  时，<code>Dagger</code>  在生成 <code>Component</code> 实例的时候，会调用 <code>B</code> 的<code>B_Factory</code>来生成 <code>mAProvider</code> </p>
 <p>然后才能对 <code>mainActiivtyMembersInjector</code> 进行初始化</p>
-<h3 id="B_配合@Module_解决多层依赖">B 配合<code>@Module</code> 解决多层依赖</h3><p><a href="https://github.com/flyer88/LearnDagger2/tree/%E5%AD%A6%E4%B9%A02.1Module" target="_blank" rel="external">该部分代码</a></p>
+<h3 id="B_配合@Module_解决多层依赖">B 配合<code>@Module</code> 解决多层依赖</h3><p><a href="https://github.com/flyer88/LearnDagger2/tree/%E5%AD%A6%E4%B9%A02.1Module" target="_blank" rel="external">该部分代码B</a></p>
 <h4 id="1-_总述">1. 总述</h4><p><code>@Module</code> 作用，某个模块依赖的提供者，<code>@Provides</code> 配合使用，其主要是下面两种情况：</p>
 <ol>
 <li>需要的依赖并没有存在实例，需要 <code>new</code> 出来</li>
@@ -500,6 +504,8 @@
 <p> <img src="http://ob9rvakdw.bkt.clouddn.com/dagger2%20%E5%AD%A6%E4%B9%A0%28%E4%BA%8C%29.png" alt="dagger2 学习(二)"></p>
 <blockquote>
 <p>一家之言，如有错误，轻喷。</p>
+<p><a href="https://github.com/flyer88/LearnDagger2/tree/%E5%AD%A6%E4%B9%A02" target="_blank" rel="external">该部分代码A</a></p>
+<p><a href="https://github.com/flyer88/LearnDagger2/tree/%E5%AD%A6%E4%B9%A02.1Module" target="_blank" rel="external">该部分代码B</a></p>
 </blockquote>
 ]]></content>
     
@@ -518,7 +524,7 @@
     <link href="http://dove.im/2016/11/11/dagger2-%E5%AD%A6%E4%B9%A0-%E4%B8%80/"/>
     <id>http://dove.im/2016/11/11/dagger2-学习-一/</id>
     <published>2016-11-11T09:39:59.000Z</published>
-    <updated>2016-11-21T08:05:41.000Z</updated>
+    <updated>2016-11-21T08:12:02.000Z</updated>
     
     <content type="html"><![CDATA[<h3 id="前言">前言</h3><p><a href="https://github.com/flyer88/LearnDagger2/tree/%E5%AD%A6%E4%B9%A01" target="_blank" rel="external">该部分代码</a></p>
 <p>记录一下自己的基本的认识，<code>Dagger 2</code> 的目的是为了解决依赖问题</p>
@@ -570,6 +576,7 @@
 <p>以上。</p>
 <blockquote>
 <p>一家之言，如有错误，轻喷。</p>
+<p><a href="https://github.com/flyer88/LearnDagger2/tree/%E5%AD%A6%E4%B9%A01" target="_blank" rel="external">该部分代码</a></p>
 </blockquote>
 ]]></content>
     
