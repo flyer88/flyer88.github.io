@@ -592,7 +592,7 @@
     <link href="http://dove.im/2016/10/07/%E4%B8%AA%E4%BA%BA%E7%AE%80%E5%8E%86/"/>
     <id>http://dove.im/2016/10/07/个人简历/</id>
     <published>2016-10-07T05:44:35.000Z</published>
-    <updated>2017-01-23T11:21:29.000Z</updated>
+    <updated>2017-01-23T11:23:09.000Z</updated>
     
     <content type="html"><![CDATA[<h2 id="个人基本信息">个人基本信息</h2><p><strong>姓名:</strong> 许鹏飞 </p>
 <p><strong>学校及专业</strong>: 杭州电子科技大学 软件工程学院 本科 </p>
@@ -696,7 +696,7 @@
 <ol>
 <li>本人大三跟随大神创业,写 <code>Android</code> 约一年半,共参加杭州尘埃科技公司三个项目。整个过程中，几乎从零开始自学<code>Android</code>，在专注 <code>Android</code> 的同时，折腾过一些其他的技术，包括 <code>Android</code>上的 VR demo，<code>Linux</code>服务器的一些知识，<code>Web</code>前后端的相关知识。</li>
 <li>于6月份毕业，同时辞职，7月份入职杭州火小二科技有限公司，目前依旧就职于该公司</li>
-<li>现在专注于 <code>Android</code> 的深入,主要是针对源码的阅读,已在计划中的包括<code>View</code> 的事件传递，以及 <code>xml</code> 的 <code>inflate</code>，目前以及完成对 <code>inflate</code> 源码的解析，(并写了一个库，虽然没人star，蛤蛤)， <code>Handler</code> 机制 <code>Java</code> 层代码的跟踪，正在看 <code>View</code> 的事件传递。</li>
+<li>现在专注于 <code>Android</code> 的深入,主要是针对源码的阅读,已在计划中的包括<code>View</code> 的事件传递，以及 <code>xml</code> 的 <code>inflate</code>，目前以及完成对 <code>inflate</code> <code>Java</code> 层源码的解析，(并写了一个库，虽然没人star，蛤蛤)， <code>Handler</code> 机制 <code>Java</code> 层代码的跟踪，正在看 <code>View</code> 的事件传递。</li>
 </ol>
 </li>
 <li><p>为人上</p>
