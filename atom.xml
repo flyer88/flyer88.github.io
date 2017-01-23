@@ -437,12 +437,12 @@
     <link href="http://dove.im/2016/11/18/dagger2-%E5%AD%A6%E4%B9%A0-%E4%BA%8C/"/>
     <id>http://dove.im/2016/11/18/dagger2-学习-二/</id>
     <published>2016-11-18T08:27:46.000Z</published>
-    <updated>2016-11-21T08:12:00.000Z</updated>
+    <updated>2017-01-15T12:48:11.000Z</updated>
     
     <content type="html"><![CDATA[<h3 id="前言">前言</h3><p>之前记录了最简单的<code>Dagger 2</code>  使用，现在记录一下面对多层依赖时的问题，同时配合 <code>@Module</code> 进行注入的情况。</p>
 <h3 id="A_多层依赖情况">A 多层依赖情况</h3><p><a href="https://github.com/flyer88/LearnDagger2/tree/%E5%AD%A6%E4%B9%A02" target="_blank" rel="external">该部分代码A</a></p>
 <h4 id="1-_多层依赖情况模拟">1. 多层依赖情况模拟</h4><p>添加 <code>ClassRoom</code> 类</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ClassRoom</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    User mUser;</span><br><span class="line"></span><br><span class="line">    <span class="annotation">@Inject</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ClassRoom</span><span class="params">(User user)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mUser = user;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> User <span class="title">getUser</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mUser;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUser</span><span class="params">(User user)</span> </span>&#123;</span><br><span class="line">        mUser = user;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ClassRoom</span> </span>&#123;</span><br><span class="line">、、</span><br><span class="line">    User mUser;</span><br><span class="line"></span><br><span class="line">    <span class="annotation">@Inject</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ClassRoom</span><span class="params">(User user)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mUser = user;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> User <span class="title">getUser</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mUser;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUser</span><span class="params">(User user)</span> </span>&#123;</span><br><span class="line">        mUser = user;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>修改 <code>MainActivity.java</code></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="comment">//@Inject User mUser;// 注释掉这行</span></span><br><span class="line"><span class="annotation">@Inject</span> ClassRoom mClassRoom;<span class="comment">// 添加这行注入</span></span><br><span class="line">...</span><br><span class="line">mUserAgeTv.setText(<span class="string">""</span> + mClassRoom.getUser().getAge());</span><br><span class="line"><span class="comment">// 修改获取方式，测试注入是否成功</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 <h4 id="2-_生成代码对比">2. 生成代码对比</h4><p><code>ClassRoom.java</code> =&gt; <code>ClassRoom_Factory.java</code> </p>
@@ -592,19 +592,19 @@
     <link href="http://dove.im/2016/10/07/%E4%B8%AA%E4%BA%BA%E7%AE%80%E5%8E%86/"/>
     <id>http://dove.im/2016/10/07/个人简历/</id>
     <published>2016-10-07T05:44:35.000Z</published>
-    <updated>2016-11-23T05:29:04.000Z</updated>
+    <updated>2017-01-23T11:21:29.000Z</updated>
     
     <content type="html"><![CDATA[<h2 id="个人基本信息">个人基本信息</h2><p><strong>姓名:</strong> 许鹏飞 </p>
 <p><strong>学校及专业</strong>: 杭州电子科技大学 软件工程学院 本科 </p>
-<p><strong>工作年限:</strong> 1年零6个月 </p>
+<p><strong>工作年限:</strong> 1年零9个月 </p>
 <p><strong>联系方式:</strong> flyer88xu@gmail.com </p>
 <p><strong>电话:</strong> 18667009152</p>
 <p><strong>性别:</strong> 男 </p>
-<p><strong>年龄:</strong> 23 </p>
+<p><strong>年龄:</strong> 24 </p>
 <p><strong>GitHub:</strong> <a href="https://github.com/flyer88" target="_blank" rel="external">https://github.com/flyer88</a> </p>
-<p><strong>个人博客:</strong> <a href="https://dove.im" target="_blank" rel="external">https://dove.im</a></p>
+<p><strong>个人博客:</strong> <a href="http://dove.im" target="_blank" rel="external">http://dove.im</a></p>
 <p><strong>期望职位:</strong> Android 开发工程师 </p>
-<p><strong>期望薪资:</strong> 税前 10k+ </p>
+<p><strong>期望薪资:</strong> 税前 12k+ </p>
 <p><strong>期望工作地:</strong> 杭州</p>
 <hr>
 <h2 id="工作经历">工作经历</h2><h3 id="杭州尘埃科技有限公司_Android_开发工程师">杭州尘埃科技有限公司 Android 开发工程师</h3><pre><code>本人在杭州尘埃科技有限公司 (2015.04-2016.06)任职 Android 开发工程师,共计一年零二个月,期间参与,设计并开发三个<span class="keyword">APP</span>,具体介绍如下：
@@ -661,12 +661,13 @@
 <li><p><strong>应用地址:</strong> <a href="http://2dfire.com/twodownload.html" target="_blank" rel="external">http://2dfire.com/twodownload.html</a></p>
 </li>
 <li><p><strong>主要负责工作:</strong></p>
-<p>​    Dagger1 到 Dagger2 的技术升级，整个项目的混淆，提高安全性，部分小功能改造</p>
+<p>​    Dagger1 到 Dagger2 的技术升级，整个项目的混淆，提高安全性，错误统计的接入部，测试环境的切换，分小功能改造，完成基本的业务需求。</p>
 </li>
 <li><p>相关处理及技术细节:</p>
 <ol>
 <li>老项目的 Dagger1 多数都是以单例静态方式使用，所以升级不难，麻烦的是注入的时候用的是 Object，所以需要一个反射，同时配合自己用<code>python</code>写的脚本，进行代码生成</li>
 <li>混淆问题在于老项目太大，开启混下后报错信息高达 4000 多行，同时由于混淆过程中，项目多个<code>module</code>之间有同包名情况，无法进行单个模块混淆，因此只能在主<code>module</code>中处理，需要极大的耐性</li>
+<li>测试环境切换，问题在于 <code>gradle</code> 中的配置，更具编译后的 <code>Builconfig.java</code> 进行切换 <code>URL</code>，</li>
 </ol>
 </li>
 </ul>
@@ -674,9 +675,9 @@
 <li><strong><code>Android</code> 技能点:</strong><ol>
 <li>首先数据层,熟悉主流的网络请求方案,<code>OkHttpClient</code>+<code>Retrofit</code>+<code>RxJava</code>+<code>Gson</code>,本地存储上,熟悉 常用第三方库<code>greenDao</code>,并熟悉对其封装,也熟悉原生<code>SQLite</code>使用和封装,数据解析上,熟悉<code>xml</code>和<code>json</code>的解析常用解析方案。</li>
 <li>界面层,一般自定<code>view</code>都没问题,熟悉常见布局上及控件使用,包括 <code>RecycleView</code>,<code>GridView</code>,<code>ViewPager</code>等等。图片处理上,了解 <code>LurCache</code> ,使用过<code>Glide</code> 以及 <code>Fresco</code>,会做一些自定义的操作,例如本地图品缓存,画质控制等等。动画方面,常见的 <code>Property Animation</code>, <code>View Animation</code> 和<code>Drawable Animation</code> 等动画效果也较为熟悉,对 SVG 动画也在 demo 实现过。</li>
-<li>架构上,了解常见的设计模式。熟悉自己构建 <code>MVP</code> 架构,在上述【Pero 项目】中已经实践过,感觉很不错,依赖什么的处 理也不错,在自己的 demo 上跑过 <code>Dagger 2</code>+<code>DataBinding</code>+<code>EventBus</code> 架构的,感觉比自己架构的好,代码简洁,正在深入看其注解生成的代码类,进行进一步掌握。了解常见的<code>dex</code>插桩类的热补丁方案。</li>
+<li>架构上,了解常见的设计模式。熟悉自己构建 <code>MVP</code> 架构,在上述【Pero 项目】中已经实践过,感觉很不错,依赖什么的处 理也不错,在自己的 demo 上跑过 <code>Dagger 2</code>+<code>DataBinding</code>+<code>EventBus</code> 架构的,感觉比自己架构的好,代码简洁,正在深入看其注解生成的代码类,进行进一步掌握。有用过部分的<code>dex</code>插桩类的热补丁方案。</li>
 <li><code>Android</code> 的容器化上(热部署)，了解过一些常见方案,跑过一些demo。其中自己写过 <code>dynamic-load-apk</code> 的缩小版(即代理方式实现的动态加载)，<code>native hook</code>方案只跑过现成框架，<code>React-Native</code>有接入过，但不怎么会写<code>JS</code>,<code>LuaView</code>方案没有去试验过</li>
-<li>有基本的网络层知识，了解<code>DNS</code>，<code>HTTPS</code>的原理，会用常见的<code>Http</code>库，开发中喜欢 <code>OkHttpClient</code> + <code>Retrofit</code></li>
+<li>有基本的网络层知识，了解 <code>DNS</code>，<code>HTTPS</code>，会用常见的<code>Http</code>库，开发中喜欢 <code>OkHttpClient</code> + <code>Retrofit</code></li>
 <li>其他方面,熟悉常用的第三方统计和分析接入,包括友盟，<code>ShareSDK</code>,熟悉常见 <code>bug</code> 统计,熟悉用 <code>Android Studio</code> 进行代码混淆,多渠道打包等等。熟悉 <code>Android studio</code> 开发环境。</li>
 </ol>
 </li>
@@ -684,8 +685,7 @@
 <li>开发技术上，了解一些后端知识,用 php 配合 <code>laravel</code>, 搭建过个人博客, 也偶尔会一点<code>python</code>写写脚本，正在学习<code>scala</code>，喜欢<code>scala</code>强悍的类型系统以及函数式的特性，熟悉 <code>macOS</code> 环境开发</li>
 <li>设计上，喜欢<code>MD</code>设计，了解 <code>sketch</code> ,设计过自己的 毕业设计 <code>APP</code></li>
 <li>合作技能，熟悉<code>git</code>，熟悉<code>tower</code>，钉钉等常用团队合作工具</li>
-<li>附加技能，英语6级,配合词典无障碍阅读文档，自带梯子,熟练使用 <code>google</code> 和 <code>StackOverflow</code> 解决问题</li>
-<li>最近正在学习的技能，编译原理的基础知识，<code>x86</code> 汇编的基本知识。</li>
+<li>附加技能，英语6，配合词典无障碍阅读文档，自带梯子,熟练使用 <code>google</code> 和 <code>StackOverflow</code> 解决问题</li>
 </ol>
 </li>
 </ul>
@@ -695,9 +695,9 @@
 <li><p>经历上</p>
 <ol>
 <li>本人大三跟随大神创业,写 <code>Android</code> 约一年半,共参加杭州尘埃科技公司三个项目。整个过程中，几乎从零开始自学<code>Android</code>，在专注 <code>Android</code> 的同时，折腾过一些其他的技术，包括 <code>Android</code>上的 VR demo，<code>Linux</code>服务器的一些知识，<code>Web</code>前后端的相关知识。</li>
-<li>于6月份毕业，同时辞职，7月份入职杭州火小二科技有限公司，主要技术性上的包括上述的<code>Dagger</code>升级和混淆</li>
+<li>于6月份毕业，同时辞职，7月份入职杭州火小二科技有限公司，目前依旧就职于该公司</li>
+<li>现在专注于 <code>Android</code> 的深入,主要是针对源码的阅读,已在计划中的包括<code>View</code> 的事件传递，以及 <code>xml</code> 的 <code>inflate</code>，目前以及完成对 <code>inflate</code> 源码的解析，(并写了一个库，虽然没人star，蛤蛤)， <code>Handler</code> 机制 <code>Java</code> 层代码的跟踪，正在看 <code>View</code> 的事件传递。</li>
 </ol>
-<p>​    3. 现在专注于 <code>Android</code> 的深入,主要是针对源码的阅读,已在计划中的包括 <code>Handler</code> 机制,<code>View</code> 的事件传递以及 <code>xml</code> 的 <code>inflate</code>，目前以及完成对 <code>inflate</code> 源码的解析，并写了一个库(虽然没人star，蛤蛤)，正在看 <code>View</code> 的事件传递。</p>
 </li>
 <li><p>为人上</p>
 <ol>
