@@ -11,7 +11,7 @@
 <h4 id="剩下的就是考虑Activity会在何时才会创建view，自然是setContentView，该方法会触发整个xml的inflate，"><a href="#剩下的就是考虑Activity会在何时才会创建view，自然是setContentView，该方法会触发整个xml的inflate，" class="headerlink" title="剩下的就是考虑Activity会在何时才会创建view，自然是setContentView，该方法会触发整个xml的inflate，"></a>剩下的就是考虑<code>Activity</code>会在何时才会创建<code>view</code>，自然是<code>setContentView</code>，该方法会触发整个<code>xml</code>的<code>inflate</code>，</h4><p>所以剩下的就是在<code>onCreate</code>的时候，在<code>setContentView</code>之前，把自己的<code>Factory</code>给设置进去，把传进来的名字，修改成自己的<code>view</code>就可以了。</p>
 <hr>
 <p>以上三点拼在一起就可以进行系统控件的同意替换，具体<code>Factory</code>重写的细节请参考源码。</p>
-</div></article></div></section><footer><div class="paginator"><a href="/2016/11/19/旧-LayoutInflater-源码流程记录/" class="prev">上一篇</a><a href="/2016/11/19/旧-Android-贝塞尔曲线，QQ-删除小红点类似效果实现/" class="next">下一篇</a></div><div data-thread-key="2016/11/19/旧-LayoutInflater-后记-替换系统控件/" data-title="[旧] LayoutInflater 后记--替换系统控件" data-url="http://dove.im/2016/11/19/旧-LayoutInflater-后记-替换系统控件/" data-author-key="1" class="ds-thread"></div><script>var duoshuoQuery = {short_name:"baiyanwu"};
+</div></article></div></section><footer><div class="paginator"><a href="/2016/11/19/旧-LayoutInflater-源码流程记录/" class="prev">PREV</a><a href="/2016/11/19/旧-Android-贝塞尔曲线，QQ-删除小红点类似效果实现/" class="next">NEXT</a></div><div data-thread-key="2016/11/19/旧-LayoutInflater-后记-替换系统控件/" data-title="[旧] LayoutInflater 后记--替换系统控件" data-url="http://dove.im/2016/11/19/旧-LayoutInflater-后记-替换系统控件/" data-author-key="1" class="ds-thread"></div><script>var duoshuoQuery = {short_name:"baiyanwu"};
 (function() {
     var ds = document.createElement('script');
     ds.type = 'text/javascript';ds.async = true;
