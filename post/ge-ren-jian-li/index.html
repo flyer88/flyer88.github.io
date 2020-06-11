@@ -1,13 +1,20 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" >
+
 <title>个人简历 | Gridea</title>
-<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1591847655947">
-<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1591850080443">
 <link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
-<link rel="alternate" type="application/atom+xml" title="个人简历 | Gridea - Atom Feed" href="https://flyer88.github.io/atom.xml">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 
 
 
@@ -17,82 +24,81 @@
 工作年限:  4年 				邮箱: flyer88xu@gmail.com
 GitHub: https://gi..." />
     <meta name="keywords" content="" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
   </head>
   <body>
-    <div class="main">
-      <div class="main-content">
-        <div class="site-header">
-  <a href="https://flyer88.github.io">
-  <img class="avatar" src="https://flyer88.github.io/images/avatar.png?v=1591847655947" alt="">
-  </a>
-  <h1 class="site-title">
-    Gridea
-  </h1>
-  <p class="site-description">
-    温故而知新
-  </p>
-  <div class="menu-container">
-    
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://flyer88.github.io">
+        <img src="https://flyer88.github.io/images/avatar.png?v=1591850080443" class="site-logo">
+        <h1 class="site-title">Gridea</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
       
-        <a href="/" class="menu">
-          首页
-        </a>
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
       
-    
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
       
-        <a href="/archives" class="menu">
-          归档
-        </a>
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
       
-    
+        
+          <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="site-nav">
+            关于
+          </a>
+        
       
-        <a href="/tags" class="menu">
-          标签
-        </a>
-      
-    
-      
-        <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="menu">
-          关于
-        </a>
-      
-    
+    </div>
   </div>
-  <div class="social-container">
-    
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
   </div>
 </div>
 
-        <div class="post-detail">
-          <article class="post">
-            <h2 class="post-title">
-              个人简历
-            </h2>
-            <div class="post-info">
-              <span>
-                2020-06-11
-              </span>
-              <span>
-                9 min read
-              </span>
-              
-            </div>
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">个人简历</h2>
+            <div class="post-date">2020-06-11</div>
             
-            <div class="post-content-wrapper">
-              <div class="post-content">
-                <h2 id="个人基本信息">个人基本信息</h2>
+            <div class="post-content" v-pre>
+              <h2 id="个人基本信息">个人基本信息</h2>
 <p><strong>姓名:</strong> 许鹏飞  					<strong>性别:</strong> 男					<strong>年龄:</strong> 26</p>
 <p><strong>学校及专业</strong>: 杭州电子科技大学 软件工程学院 本科</p>
 <p><strong>工作年限:</strong>  4年 				<strong>邮箱:</strong> flyer88xu@gmail.com</p>
@@ -309,90 +315,36 @@ GitHub: https://gi..." />
 </li>
 </ul>
 
-              </div>
-              <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#%E4%B8%AA%E4%BA%BA%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF">个人基本信息</a></li>
-<li><a href="#%E6%8A%80%E8%83%BD%E7%82%B9">技能点</a></li>
-<li><a href="#%E5%B7%A5%E4%BD%9C%E7%BB%8F%E5%8E%86">工作经历</a><br>
-*
-<ul>
-<li><a href="#%E6%9D%AD%E5%B7%9E%E7%81%AB%E5%B0%8F%E4%BA%8C%E7%A7%91%E6%8A%80%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8%E4%BA%8C%E7%BB%B4%E7%81%AB-201607-201902%E4%BB%BB%E8%81%8C-android-%E5%BC%80%E5%8F%91%E5%B7%A5%E7%A8%8B%E5%B8%88">【杭州火小二科技有限公司（二维火）】--  (2016.07-2019.02)任职 <code>Android</code> 开发工程师</a></li>
-<li><a href="#%E6%9D%AD%E5%B7%9E%E6%B7%98%E7%B2%89%E5%90%A7%E7%BD%91%E7%BB%9C%E6%8A%80%E6%9C%AF%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8-201903-%E8%87%B3%E4%BB%8A%E4%BB%BB%E8%81%8C-android-%E5%BC%80%E5%8F%91%E5%B7%A5%E7%A8%8B%E5%B8%88">【杭州淘粉吧网络技术有限公司】--  (2019.03-至今)任职 <code>Android</code> 开发工程师</a></li>
-</ul>
-</li>
-<li><a href="#%E4%B8%BB%E8%A6%81%E9%A1%B9%E7%9B%AE%E4%BB%8B%E7%BB%8D">主要项目介绍</a><br>
-*
-<ul>
-<li><a href="#1-celebi-%E8%B7%A8%E5%B9%B3%E5%8F%B0ios-%E5%92%8C-android%E9%80%9A%E7%94%A8%E5%8A%A8%E6%80%81%E5%8C%96%E6%8A%80%E6%9C%AF%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">1. <code>Celebi</code> -- 跨平台(<code>iOS</code> 和 <code>Android</code>)通用动态化技术解决方案。</a></li>
-<li><a href="#2-%E6%B7%98%E7%B2%89%E5%90%A7-%E7%88%B1%E7%A9%BF%E6%90%AD%E5%8A%9F%E8%83%BD%E5%BC%80%E5%8F%91">2. 【淘粉吧-爱穿搭】功能开发</a></li>
-</ul>
-</li>
-<li><a href="#%E8%87%AA%E6%88%91%E6%8F%8F%E8%BF%B0">自我描述</a></li>
-</ul>
-</li>
-</ul>
-
-              </div>
             </div>
-          </article>
+            
+            
+
+            
+
+          </div>
+
         </div>
-
-        
-
-        
-
-        <div class="site-footer">
-  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
-  <a class="rss" href="https://flyer88.github.io/atom.xml" target="_blank">
-    <i class="ri-rss-line"></i> RSS
-  </a>
-</div>
-
       </div>
     </div>
 
-    <script>
-      hljs.initHighlightingOnLoad()
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
 
-      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+AOS.init();
 
-      // This should probably be throttled.
-      // Especially because it triggers during smooth scrolling.
-      // https://lodash.com/docs/4.17.10#throttle
-      // You could do like...
-      // window.addEventListener("scroll", () => {
-      //    _.throttle(doThatStuff, 100);
-      // });
-      // Only not doing it here to keep this Pen dependency-free.
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
 
-      window.addEventListener("scroll", event => {
-        let fromTop = window.scrollY;
+</script>
 
-        mainNavLinks.forEach((link, index) => {
-          let section = document.getElementById(decodeURI(link.hash).substring(1));
-          let nextSection = null
-          if (mainNavLinks[index + 1]) {
-            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
-          }
-          if (section.offsetTop <= fromTop) {
-            if (nextSection) {
-              if (nextSection.offsetTop > fromTop) {
-                link.classList.add("current");
-              } else {
-                link.classList.remove("current");    
-              }
-            } else {
-              link.classList.add("current");
-            }
-          } else {
-            link.classList.remove("current");
-          }
-        });
-      });
 
-    </script>
+
+
+
+
   </body>
 </html>

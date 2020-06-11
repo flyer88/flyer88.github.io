@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>repo 管理 git 仓库 | Gridea</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1591850080443">
+<link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="技术方案
+
+git submodule/git subtree，都是把代码当做一个单一的大仓库，进行管理处理
+repo，是把所有的代码当做一个工程处理，各个模块可以是独立的仓库，而 repo 只是一个执行 git 命令的脚本，方便组织各个 ..." />
+    <meta name="keywords" content="开发工具" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://flyer88.github.io">
+        <img src="https://flyer88.github.io/images/avatar.png?v=1591850080443" class="site-logo">
+        <h1 class="site-title">Gridea</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">repo 管理 git 仓库</h2>
+            <div class="post-date">2020-06-11</div>
+            
+            <div class="post-content" v-pre>
+              <h3 id="技术方案">技术方案</h3>
+<ol>
+<li><code>git submodule</code>/<code>git subtree</code>，都是把代码当做一个单一的大仓库，进行管理处理</li>
+<li><code>repo</code>，是把所有的代码当做一个工程处理，各个模块可以是独立的仓库，而 <code>repo</code> 只是一个执行 <code>git</code> 命令的脚本，方便组织各个 <code>git</code> 仓库，<code>repo</code> 的最佳实践就是 <code>AOSP</code> 源码的管理</li>
+</ol>
+<blockquote>
+<p>注： 此处只对比了 <code>submodule</code> 和 <code>repo</code> 部分内容，<code>subtree</code> 和 <code>submodule</code> 差不多，核心区别是一个是引用仓库，一个是导入仓库，会增大 <code>.git</code> 文件容量</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>核心部分对比</th>
+<th>git submodule</th>
+<th>Repo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>管理方式</td>
+<td>查看 <code>.gitmodules</code> 文件可以看到所有 <code>submodule</code> 介绍，知己用，无须维护</td>
+<td><code>manifest</code> 文件管理，需要根据分支维护</td>
+</tr>
+<tr>
+<td>更新方式</td>
+<td>子仓库更新，父级也要更新，容易出现坑</td>
+<td>各个仓库独立更，无坑</td>
+</tr>
+<tr>
+<td>命令工具方面</td>
+<td><code>git</code> 的展示效果</td>
+<td>更多批量效果，具体可以看本文后续的几个命令介绍</td>
+</tr>
+</tbody>
+</table>
+<h4 id="repo-的使用">Repo 的使用</h4>
+<h5 id="repo-配置">repo 配置</h5>
+<ol>
+<li>
+<p>下载 <code>repo</code> 脚本</p>
+<pre><code class="language-shell">brew install repo	
+</code></pre>
+</li>
+<li>
+<p>修改镜像地址，避免墙的问题</p>
+<p><code>.zshrc</code> 或者 <code>.bashrc</code> 加入</p>
+<pre><code class="language-shell">export REPO_URL='https://mirrors.tuna.tsinghua.edu.cn/git/git-repo/'
+</code></pre>
+</li>
+</ol>
+<h5 id="项目中使用">项目中使用</h5>
+<ol>
+<li>
+<p>初始化设置 <code>manifest</code> 文件</p>
+<ul>
+<li>
+<p>放置位置</p>
+<blockquote>
+<ol>
+<li>主项目 <code>git</code> 仓库中</li>
+<li>另开一个<code>git</code> 仓库</li>
+</ol>
+<p>项目 <code>git</code> 仓库数量不大，频繁新增修改切出分支时，<code>manifest</code> 独立仓库不具有优势，</p>
+<p>嵌入主仓库有明显的优势，在 <code>develop</code> 中，改动 <code>mainifest</code> 文件，快速切出对应的工作分支</p>
+</blockquote>
+</li>
+<li>
+<p>文件内容</p>
+<blockquote>
+<p><a href="https://gerrit.googlesource.com/git-repo/+/master/docs/manifest-format.md"><strong><code>repo manifest</code> 参数文档</strong></a></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;manifest&gt;
+  &lt;!-- remote 指定远程分支，name 是远程分支的名字，fetch 拉去地址的 host，sync-j 是指同步拉去线程数量 --&gt;
+    &lt;remote name=&quot;taofen8&quot; fetch=&quot;http://gitlab.taofen8.com/&quot;  sync-j=&quot;1&quot;/&gt;
+	&lt;!-- default 是配置默认的参数，默认情况下，拉去 master，用远程名字叫 taofen8 的地址--&gt;  
+    &lt;default revision=&quot;master&quot; remote=&quot;taofen8&quot;/&gt;
+  &lt;!-- 此处配置项目仓库地址，name 是指在 remote 的 host 之后，补充上对应的名字即可，path 是指本地的配置路径地址--&gt;
+  &lt;!-- 注意，第一个 project 没有指定 remote，就会使用 default 中的配置参数了--&gt;
+    &lt;project name=&quot;taofen8_app/b_taofen8_flutter&quot; path=&quot;b_taofen8_flutter&quot;/&gt;
+    &lt;project name=&quot;taofen8_app/b-taofen8_phone-iOS&quot; remote=&quot;taofen8&quot; path=&quot;b-taofen8_phone-iOS&quot;/&gt;
+&lt;/manifest&gt;
+</code></pre>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>
+<p>拉取同步仓库</p>
+<pre><code class="language-shell"># 该步骤指，拉取 manifest 文件，
+# -u 指定 manifest 文件所在的仓库地址，-b 指定 manifest 仓库的分支
+# 如果要拉取 develop 的分支，就 -b develop 就可以
+# 此处把 manifest 文件放置在 flutter 主项目中
+➜ repo init -u http://gitlab.taofen8.com/taofen8_app/b_taofen8_flutter -b master
+# 该步骤指，根据 manifest 文件进行 git pull 对应分支，放置到对应位置
+➜ repo sync
+</code></pre>
+</li>
+<li>
+<p>切出分支</p>
+<pre><code class="language-shell"># 根据 manifest 文件 revision 中指定的分支，切出分支，进行开发
+# 当前栗子中，feature/flutter 的 head 和 master head 是相同的
+# 因为 manifest 中 default 的 revision 值是 master
+➜ repo start feature/flutter --all
+# 查看当前仓库的分支
+➜ repo branch
+*  feature/flutter              | in all projects
+</code></pre>
+</li>
+<li>
+<p>几个特别命令介绍</p>
+<pre><code class="language-shell"># 查看各个仓库的状态
+➜ repo status
+project b-taofen8_phone-iOS/                    branch feature/flutter
+project b_taofen8_flutter/                      branch feature/flutter
+
+# 当有改动以后
+➜ repo status
+project b-taofen8_phone-iOS/                    branch feature/flutter
+ -m     README.md
+project b_taofen8_flutter/                      branch feature/flutter
+
+# 所有的仓库执行同一个命令
+# repo forall -c &quot;git push&quot; 等等
+➜ repo forall -c &quot;pwd&quot;
+/Users/dove/Documents/code/work/taofen8/b-taofen8_phone-iOS
+/Users/dove/Documents/code/work/taofen8/b_taofen8_flutter
+</code></pre>
+</li>
+<li>
+<p><code>local manifest</code> 使用</p>
+<p>有时候会出现本地临时新增一些仓库进去，或者移除部分仓库，但又不需要更新到 <code>manifest</code> 中，这个时候 <code>local manifest</code>  就有作用了。</p>
+<p>在对应目录新增  <code>.repo/local_manifests/default.xml</code></p>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;manifest&gt;
+    &lt;project name=&quot;taofen8_app/b-taofen8-Android&quot; remote=&quot;taofen8&quot; path=&quot;b-taofen8-Android&quot;/&gt;
+&lt;/manifest&gt;
+</code></pre>
+<p>执行 <code>repo sync</code>， 执行会拉取新增的项目</p>
+<pre><code class="language-shell">➜ repo sync
+warning: redirecting to http://gitlab.taofen8.com/taofen8_app/b_taofen8_flutter.git/
+Fetching project taofen8_app/b_taofen8_flutter
+warning: redirecting to http://gitlab.taofen8.com/taofen8_app/b_taofen8_flutter.git/
+Fetching projects:  50% (1/2)
+Fetching project taofen8_app/b-taofen8-Android
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+curl: (22) The requested URL returned error: 401 Unauthorized
+Server does not provide clone.bundle; ignoring.
+warning: redirecting to http://gitlab.taofen8.com/taofen8_app/b-taofen8-Android.git/
+....
+....
+</code></pre>
+<p>​</p>
+<blockquote>
+<p>此处简单解释下原理，<code>repo</code> 会合并 <code>default.xml</code> 和 <code>local_manifest/default.xml</code></p>
+<p>再去拉取合并后的 <code>manifest</code> 的内容，具体可以 <a href="https://duanqz.github.io/2016-04-15-Android-Local-Manifests-Practice"><strong>参考该文章</strong></a></p>
+</blockquote>
+</li>
+</ol>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://flyer88.github.io/tag/tools/" class="tag">
+                    开发工具
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://flyer88.github.io/post/ge-ren-jian-li/">
+                  <h3 class="post-title">
+                    个人简历
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>
