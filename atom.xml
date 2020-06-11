@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://flyer88.github.io</id>
     <title>Gridea</title>
-    <updated>2020-06-11T05:07:33.191Z</updated>
+    <updated>2020-06-11T05:10:51.761Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://flyer88.github.io"/>
     <link rel="self" href="https://flyer88.github.io/atom.xml"/>
@@ -183,7 +183,12 @@ warning: redirecting to http://gitlab.taofen8.com/taofen8_app/b-taofen8-Android.
         <link href="https://flyer88.github.io/post/ge-ren-jian-li/">
         </link>
         <updated>2020-06-11T03:51:55.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="个人基本信息">个人基本信息</h2>
+        <content type="html"><![CDATA[<blockquote>
+<p>🚧🚧本简历分为以下五部分：<br>
+【个人基本信息】【技能点】【工作经历】<br>
+【主要项目介绍】【自我描述】</p>
+</blockquote>
+<h2 id="个人基本信息">个人基本信息</h2>
 <p><strong>姓名:</strong> 许鹏飞  					<strong>性别:</strong> 男					<strong>年龄:</strong> 26</p>
 <p><strong>学校及专业</strong>: 杭州电子科技大学 软件工程学院 本科</p>
 <p><strong>工作年限:</strong>  4年 				<strong>邮箱:</strong> flyer88xu@gmail.com</p>
