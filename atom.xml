@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://flyer88.github.io</id>
+    <title>Gridea</title>
+    <updated>2020-06-11T03:54:20.163Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://flyer88.github.io"/>
+    <link rel="self" href="https://flyer88.github.io/atom.xml"/>
+    <subtitle>温故而知新</subtitle>
+    <logo>https://flyer88.github.io/images/avatar.png</logo>
+    <icon>https://flyer88.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2020, Gridea</rights>
+    <entry>
+        <title type="html"><![CDATA[个人简历]]></title>
+        <id>https://flyer88.github.io/post/ge-ren-jian-li/</id>
+        <link href="https://flyer88.github.io/post/ge-ren-jian-li/">
+        </link>
+        <updated>2020-06-11T03:51:55.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="个人基本信息">个人基本信息</h2>
+<p><strong>姓名:</strong> 许鹏飞  					<strong>性别:</strong> 男					<strong>年龄:</strong> 26</p>
+<p><strong>学校及专业</strong>: 杭州电子科技大学 软件工程学院 本科</p>
+<p><strong>工作年限:</strong>  4年 				<strong>邮箱:</strong> flyer88xu@gmail.com</p>
+<p><strong>GitHub:</strong> <a href="https://github.com/flyer88">https://github.com/flyer88</a> 		<strong>个人博客:</strong> <a href="http://flyer88.github.io">http://flyer88.github.io</a></p>
+<p><strong>期望职位:</strong> <code>Android</code> 开发工程师 		<strong>期望薪资:</strong>  25k+ 		<strong>期望工作地:</strong> 杭州</p>
+<hr>
+<h2 id="技能点">技能点</h2>
+<ul>
+<li>
+<p><strong><code>Android</code> 技能点:</strong></p>
+<ol>
+<li>
+<p>熟练掌握 <code>Android</code> 基础，包括四大组件的，常见布局的使用，了解 <code>inflate</code> 过程的源码（借用其中的 <code>LayoutFactory</code> 实现过一个开源库，用来批量替换控件）。</p>
+</li>
+<li>
+<p><code>View</code> 层，了解 <code>View</code> 层源码，能实现常见自定 <code>View</code>，能使用<code>ListView</code>,   <code>RecycleView</code>, <code>ViewPager</code> 等常见控件，了解  <code>RecyclerView</code> 原理。</p>
+</li>
+<li>
+<p>了解 <code>webview</code>，有 <code>Vue</code> 开发经验，能进行 <code>Hybird</code> 开发，写过 <code>JSBridge</code> 的库，实现 <code>Java</code> 和 <code>JavaScript</code> 的异步通信。</p>
+</li>
+<li>
+<p>熟悉使用 <code>RxJava</code> + <code>OkHttp</code> + <code>Retrofit</code> + <code>Gson</code> 进行开发，阅读过部分 <code>OkHttp</code> 和 <code>Retrofit</code> 源码。</p>
+</li>
+<li>
+<p>架构上，使用 <code>MVP</code> 和 <code>MVVM</code> 开发。两种架构都熟练掌握，了解原理，偏爱 <code>MVVM</code>，参考 <code>DataBinding</code> ，实现过自己的双向绑定库。</p>
+</li>
+<li>
+<p>业务架构上，设计过大型 <code>App</code> 的底层架构，并实现 <code>maven</code> 化工作，从而推进上层业务的模块化工作。</p>
+</li>
+</ol>
+</li>
+<li>
+<p><strong>基础技能点</strong></p>
+<ol>
+<li>
+<p>有一定的网络基础，熟悉 <code>http</code> 协议，了解 <code>websocket</code> 等相关协议，了解下层 <code>TCP/IP</code> 协议。</p>
+</li>
+<li>
+<p>熟练掌握 <code>Android Studio</code> ，了解 <code>gradle</code> 一些常见配置，会用 <code>python</code> 脚本处理一些常见问题，由自动化经验，了解 <code>jekins</code>。</p>
+</li>
+<li>
+<p>掌握基本的 <code>git</code> 操作，了解并实行过 <code>gitflow</code> 开发流程，配合 <code>repo</code> 工具，管理仓库。</p>
+</li>
+<li>
+<p>在 <code>Linux/Unix</code> 上，会用基本的命令，对 <code>Unix</code> 类的系统整体结构有所把握。</p>
+</li>
+</ol>
+</li>
+<li>
+<p><strong>额外技能点:</strong></p>
+<ol>
+<li>后端上，用 <code>node</code> 写过一些简单的后台服务，<code>php</code> 构建过自己的个人博客，<code>会用 docker</code>。</li>
+<li>前端上，会简单使用 <code>vue</code> 搭建单页应用。</li>
+<li>设计上，会用 <code>sketch</code> ，做过自己小项目的设计稿。</li>
+<li>合作上，常见第三方团队合作工具，包括不限于 钉钉, <code>bearchat</code>, <code>tower</code>, <code>github</code>, <code>gitflow</code> <code>jenkins</code> 等。</li>
+<li>管理上，有带人经验，管理过 3 人小组，能很好的分配工作，并推进工作。</li>
+<li>附加技能，英语 6 级，基本无障碍阅读文档，自带梯子，熟练使用 <code>google</code> 和 <code>StackOverflow</code>。</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h2 id="工作经历">工作经历</h2>
+<p>####【杭州尘埃科技有限公司】--  (2015.04-2016.06)任职 <code>Android</code> 开发工程师</p>
+<ul>
+<li>【云集】- <code>Android</code> 客户端(2015.04-2016.06）， 一个浏览器应用，简洁，<code>h5</code> 性能高于 <code>Chrome</code> 等浏览器。
+<ol>
+<li>菜单栏模块，包括页面收藏动画及功能，分享模块实现，网页 刷新前进后退，已打开的网页应用列表显示，回到应用主页功能等等。</li>
+<li>整个用户模块，包括用户登陆注册登 录，用户数据同步。设置模块，夜间模式的实现，语言切换功能。</li>
+</ol>
+</li>
+<li>【<code>Link</code>】- <code>Android</code> 客户端(2015.06-2016.06)，一个工具型应用，主要作用是串联一些操作，举例，一键同时发送文字等内容到 <code>QQ</code> 好友，微信朋友圈，微博。 整个 <code>APP</code> 的功能实现，下面是几个重要模块介绍。
+<ol>
+<li>主界面商店界面实现。</li>
+<li>云任务操作模块，具体单个操作的解析以及界面的实现，责任链的使用。</li>
+</ol>
+</li>
+<li>【<code>Pero</code>】- <code>Android</code> 客户端(2016.01-2016.06)， 图片社区应用。
+<ol>
+<li>首页图片瀑布流的展示处理。</li>
+<li>上传模块 的设计与实现。</li>
+<li>第三方支付模块(支付宝)的接入，以及界面的实现。</li>
+</ol>
+</li>
+</ul>
+<h4 id="杭州火小二科技有限公司二维火-201607-201902任职-android-开发工程师">【杭州火小二科技有限公司（二维火）】--  (2016.07-2019.02)任职 <code>Android</code> 开发工程师</h4>
+<p>​	【火掌柜】- Android 客户端，面向B端的餐饮客户端。官网地址为，<a href="http://2dfire.com">http://2dfire.com</a>。</p>
+<ul>
+<li><strong>主要业务项目</strong>
+<ol>
+<li>微信营销，对接微信，设计整个业务子模块。</li>
+<li>信用贷，对接 <code>web</code> 端，实现通用通信方案，实现 <code>JSBridge</code> 库。</li>
+</ol>
+</li>
+</ul>
+<ul>
+<li><strong>主要技术项目</strong>
+<ol>
+<li><code>Celebi</code> -- 针对表单页面的跨平台通用动态化技术解决方案。</li>
+<li><code>App</code> 内部统一路由，包裹 <code>ARouter</code> ，用拦截器模式，方便加入业务层需要的通用代码。</li>
+<li><code>App</code> 模块化，底层 <code>Maven</code> 化，抽离各个业务层，设计底层依赖结构，同时配合 <code>facade</code> 方式，实现跨模块通信。</li>
+</ol>
+</li>
+</ul>
+<h4 id="杭州淘粉吧网络技术有限公司-201903-至今任职-android-开发工程师">【杭州淘粉吧网络技术有限公司】--  (2019.03-至今)任职 <code>Android</code> 开发工程师</h4>
+<p>【淘粉吧】- <code>Android</code> 客户端，返利类 <code>App</code>，同时支持一个虚拟穿衣类功能。官网地址:<a href="https://taofen8.com">http://taofen8.com</a></p>
+<ul>
+<li>
+<p>【淘粉吧】</p>
+<ol>
+<li>本地购物车，爬虫调用，倒计时动态刷新列表等基本功能的维护</li>
+<li>商城页面改造开发，支付宝提现功能实现，最初版本的实现，已经后期多个优化项目。</li>
+<li>抖音等第三方 <code>sdk</code> 接入与对应功能开发</li>
+</ol>
+</li>
+<li>
+<p>【爱穿搭】<code>App</code> 并入【淘粉吧】</p>
+<ol>
+<li>业务上： 脸部建模，虚拟形象，身体脸部细节调整等等。</li>
+<li>代码层： <code>native</code> 代码的打 <code>so</code> 包，删除无用依赖，抽离虚拟形象核心层等。</li>
+<li>新增业务功能，搭配师相关功能开发，接入第三方美颜等等</li>
+</ol>
+</li>
+<li>
+<p>【海狐海淘】- Android 客户端(2019.03-至今)</p>
+<ol>
+<li>购物车/结算页功能开发更新等</li>
+<li>日常维护</li>
+</ol>
+</li>
+<li>
+<p>其他技术内容</p>
+<ol>
+<li><code>target</code> 升级 26，包括 <code>service</code> 兼容，顶部透明栏兼容等等</li>
+<li><code>Jenkins</code> 自动打包机器人</li>
+<li>爱穿搭优化，图片 <code>OOM</code> 奔溃修复，多图合成流程逻辑优化</li>
+<li><code>kotlin</code> 引入，开发</li>
+<li>搭建基于<code>sentry</code>的性能统计后台，并接入</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h2 id="主要项目介绍">主要项目介绍</h2>
+<h4 id="1-celebi-跨平台ios-和-android通用动态化技术解决方案">1. <code>Celebi</code> -- 跨平台(<code>iOS</code> 和 <code>Android</code>)通用动态化技术解决方案。</h4>
+<ul>
+<li>
+<p><strong>项目介绍</strong>：掌柜 <code>APP</code> 中存在大量类似的表单页面，每次开发都会耗费大量时间，因此，考虑后端下发 <code>JSON</code> 数据，客户端读取数据，动态渲染表单页面，目前已经在 <code>App</code> 中铺了大量页面。</p>
+</li>
+<li>
+<p><strong>同类方案对比</strong>：项目区别于 <code>ReactNative</code> 和 <code>Weex</code> 相关原理，该方案中所有的控件渲染，都是本地 <code>java</code> 代码执行。<code>JSON</code> 描述中只处理简单逻辑，复杂逻辑均由本地代码实现，针对表单页面具有很强的适用性。</p>
+</li>
+<li>
+<p><strong>本人工作</strong>：后端，<code>iOS</code> 端，和 <code>Android</code> 端，三端架构推进，<code>Android</code> 端负责人，<code>Android</code> 端技术架构设计并落地具体代码。</p>
+</li>
+<li>
+<p><strong>技术实现</strong>上:</p>
+<ol>
+<li>
+<p>底层解释器实现: 用来解析通用的的一些表达式和函数。</p>
+<blockquote>
+<p>PS： 个人喜欢捣鼓各种语言，喜欢编译原理，实现过一些简单的解释器</p>
+</blockquote>
+</li>
+<li>
+<p>运行时变量池实现：页面内变量的缓存池，全局变量和局部变量的实现。</p>
+</li>
+<li>
+<p>双向绑定等功能的实现：页面交互时，控件上的数据和变量池中变量的双向绑定。</p>
+</li>
+<li>
+<p>注解方案落地并实现：解耦并剔除模板代码，最初用反射处理过，发现字符串拼接耗时过多，后改为 <code>annotation processor</code>。</p>
+</li>
+</ol>
+</li>
+<li>
+<p><strong>项目成果</strong>:</p>
+<ol>
+<li>
+<p>单个表单页面，在没有新增控件情况下，熟练情况下，半小时对接完一个页面，同时适配 iOS 和 Android。</p>
+</li>
+<li>
+<p>在本人离职前，已经介入 5 个项目的开发，涉及 10 多个页面。</p>
+</li>
+</ol>
+</li>
+</ul>
+<h4 id="2-淘粉吧-爱穿搭功能开发">2. 【淘粉吧-爱穿搭】功能开发</h4>
+<ul>
+<li><strong>项目介绍</strong>:【爱穿搭】 功能是一个虚拟穿衣的业务，该项目主要包括接入该功能，以及后续业务开发。</li>
+<li><strong>本人工作</strong>: 由于原有功能代码过于老旧，接近完全重写，同时完成接入核心功能开发
+<ol>
+<li>原有美颜功能的 <code>native</code> 代码进行打包最新的 <code>so</code> 包</li>
+<li>基于 <code>RxJava</code> 设计整套人物部位图片的下载，并且基于坐标，进行合成完整的人物形象的流程</li>
+<li>完善建脸部分失败重试逻辑</li>
+</ol>
+</li>
+<li><strong>项目成果</strong>: 人物形象加载速度从原来 2-3秒，提升至 1-2秒</li>
+</ul>
+<hr>
+<h2 id="自我描述">自我描述</h2>
+<ul>
+<li><strong>经历</strong>
+<ol>
+<li>本人大三跟随大神创业，写 <code>Android</code> 约一年半，共参加杭州尘埃科技公司三个项目。整个过程中，几乎从零开始自学 <code>Android</code>，在专注 <code>Android</code> 的同时，折腾过一些其他的技术，包括 <code>Linux</code> 服务器的一些知识，<code>Web</code> 前后端的相关知识。</li>
+<li>于2016年6月份毕业，同时辞职，7月份入职杭州火小二科技有限公司，于 2019 年 1 月底离职。在职期间，只有一次没有<code>OKRS</code> 7 分。除此之外，技术上打好了 <code>Android</code> 的基础，也推动了组内技术能力的发展，同时个人还了解了其他语言，包括 <code>Scala</code> <code>Python</code> <code>JavaScript</code> 等，并或多或少应用于一些小项目上。</li>
+<li>2019 年 3 月，加入淘粉吧，在此期间，主要学习了 <code>kotlin</code>，了解 <code>native</code> 编译。初步了解了 <code>flutter</code>,基于 <code>python</code> 和 <code>jenkins</code> 完成自动化(包括多渠道等)打包，通知钉钉或邮件，同时备份到 <code>NAS</code> 上，推送到蒲公英第三方平台。</li>
+</ol>
+</li>
+<li><strong>为人</strong>
+<ol>
+<li>对技术充满热情，喜欢技术驱动的工作氛围，有小小的技术崇拜，热爱推广技术，喜欢分享。</li>
+<li>工作负责，学习能力强，方向明确，积极向上，不怕折腾，爱折腾。</li>
+<li>与人为善，能积极融入团队，带人积极，三观端正，不用技术作恶。</li>
+</ol>
+</li>
+</ul>
+]]></content>
+    </entry>
+</feed>
