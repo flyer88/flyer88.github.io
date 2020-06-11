@@ -1,104 +1,102 @@
-<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" >
-
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>个人简历 | Gridea</title>
-
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1591850080443">
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1591851498774">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
 
 
 
-<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-
-
-
-    <meta name="description" content="个人基本信息
-姓名: 许鹏飞  					性别: 男					年龄: 26
-学校及专业: 杭州电子科技大学 软件工程学院 本科
-工作年限:  4年 				邮箱: flyer88xu@gmail.com
-GitHub: https://gi..." />
-    <meta name="keywords" content="" />
-  </head>
-  <body>
-    <div id="app" class="main">
-
-      <div class="sidebar" :class="{ 'full-height': menuVisible }">
-  <div class="top-container" data-aos="fade-right">
-    <div class="top-header-container">
-      <a class="site-title-container" href="https://flyer88.github.io">
-        <img src="https://flyer88.github.io/images/avatar.png?v=1591850080443" class="site-logo">
-        <h1 class="site-title">Gridea</h1>
-      </a>
-      <div class="menu-btn" @click="menuVisible = !menuVisible">
-        <div class="line"></div>
-      </div>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Gridea
+        </div>
     </div>
-    <div>
-      
-        
-          <a href="/" class="site-nav">
-            首页
-          </a>
-        
-      
-        
-          <a href="/archives" class="site-nav">
-            归档
-          </a>
-        
-      
-        
-          <a href="/tags" class="site-nav">
-            标签
-          </a>
-        
-      
-        
-          <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="site-nav">
-            关于
-          </a>
-        
-      
-    </div>
-  </div>
-  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
-    <div class="social-container">
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    </div>
-    <div class="site-description">
-      温故而知新
-    </div>
-    <div class="site-footer">
-      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a>
-    </div>
-  </div>
-</div>
-
-
-      <div class="main-container">
-        <div class="content-container" data-aos="fade-up">
-          <div class="post-detail">
-            <h2 class="post-title">个人简历</h2>
-            <div class="post-date">2020-06-11</div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
             
-            <div class="post-content" v-pre>
-              <h2 id="个人基本信息">个人基本信息</h2>
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    个人简历
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-06-11 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="个人基本信息">个人基本信息</h2>
 <p><strong>姓名:</strong> 许鹏飞  					<strong>性别:</strong> 男					<strong>年龄:</strong> 26</p>
 <p><strong>学校及专业</strong>: 杭州电子科技大学 软件工程学院 本科</p>
 <p><strong>工作年限:</strong>  4年 				<strong>邮箱:</strong> flyer88xu@gmail.com</p>
@@ -106,9 +104,7 @@ GitHub: https://gi..." />
 <p><strong>期望职位:</strong> <code>Android</code> 开发工程师 		<strong>期望薪资:</strong>  25k+ 		<strong>期望工作地:</strong> 杭州</p>
 <hr>
 <h2 id="技能点">技能点</h2>
-<ul>
-<li>
-<p><strong><code>Android</code> 技能点:</strong></p>
+<h4 id="1-android-技能点">1. <code>Android</code> 技能点</h4>
 <ol>
 <li>
 <p>熟练掌握 <code>Android</code> 基础，包括四大组件的，常见布局的使用，了解 <code>inflate</code> 过程的源码（借用其中的 <code>LayoutFactory</code> 实现过一个开源库，用来批量替换控件）。</p>
@@ -129,9 +125,7 @@ GitHub: https://gi..." />
 <p>业务架构上，设计过大型 <code>App</code> 的底层架构，并实现 <code>maven</code> 化工作，从而推进上层业务的模块化工作。</p>
 </li>
 </ol>
-</li>
-<li>
-<p><strong>基础技能点</strong></p>
+<h4 id="2-基础技能点">2. 基础技能点</h4>
 <ol>
 <li>
 <p>有一定的网络基础，熟悉 <code>http</code> 协议，了解 <code>websocket</code> 等相关协议，了解下层 <code>TCP/IP</code> 协议。</p>
@@ -146,9 +140,7 @@ GitHub: https://gi..." />
 <p>在 <code>Linux/Unix</code> 上，会用基本的命令，对 <code>Unix</code> 类的系统整体结构有所把握。</p>
 </li>
 </ol>
-</li>
-<li>
-<p><strong>额外技能点:</strong></p>
+<h4 id="3-额外技能点">3. 额外技能点</h4>
 <ol>
 <li>后端上，用 <code>node</code> 写过一些简单的后台服务，<code>php</code> 构建过自己的个人博客，<code>会用 docker</code>。</li>
 <li>前端上，会简单使用 <code>vue</code> 搭建单页应用。</li>
@@ -157,11 +149,9 @@ GitHub: https://gi..." />
 <li>管理上，有带人经验，管理过 3 人小组，能很好的分配工作，并推进工作。</li>
 <li>附加技能，英语 6 级，基本无障碍阅读文档，自带梯子，熟练使用 <code>google</code> 和 <code>StackOverflow</code>。</li>
 </ol>
-</li>
-</ul>
 <hr>
 <h2 id="工作经历">工作经历</h2>
-<p>####【杭州尘埃科技有限公司】--  (2015.04-2016.06)任职 <code>Android</code> 开发工程师</p>
+<h4 id="1杭州尘埃科技有限公司-201504-201606任职-android-开发工程师">1.【杭州尘埃科技有限公司】--  (2015.04-2016.06)任职 <code>Android</code> 开发工程师</h4>
 <ul>
 <li>【云集】- <code>Android</code> 客户端(2015.04-2016.06）， 一个浏览器应用，简洁，<code>h5</code> 性能高于 <code>Chrome</code> 等浏览器。
 <ol>
@@ -183,7 +173,7 @@ GitHub: https://gi..." />
 </ol>
 </li>
 </ul>
-<h4 id="杭州火小二科技有限公司二维火-201607-201902任职-android-开发工程师">【杭州火小二科技有限公司（二维火）】--  (2016.07-2019.02)任职 <code>Android</code> 开发工程师</h4>
+<h4 id="2杭州火小二科技有限公司二维火-201607-201902任职-android-开发工程师">2.【杭州火小二科技有限公司（二维火）】--  (2016.07-2019.02)任职 <code>Android</code> 开发工程师</h4>
 <p>​	【火掌柜】- Android 客户端，面向B端的餐饮客户端。官网地址为，<a href="http://2dfire.com">http://2dfire.com</a>。</p>
 <ul>
 <li><strong>主要业务项目</strong>
@@ -202,7 +192,7 @@ GitHub: https://gi..." />
 </ol>
 </li>
 </ul>
-<h4 id="杭州淘粉吧网络技术有限公司-201903-至今任职-android-开发工程师">【杭州淘粉吧网络技术有限公司】--  (2019.03-至今)任职 <code>Android</code> 开发工程师</h4>
+<h4 id="3杭州淘粉吧网络技术有限公司-201903-至今任职-android-开发工程师">3.【杭州淘粉吧网络技术有限公司】--  (2019.03-至今)任职 <code>Android</code> 开发工程师</h4>
 <p>【淘粉吧】- <code>Android</code> 客户端，返利类 <code>App</code>，同时支持一个虚拟穿衣类功能。官网地址:<a href="https://taofen8.com">http://taofen8.com</a></p>
 <ul>
 <li>
@@ -298,53 +288,66 @@ GitHub: https://gi..." />
 </ul>
 <hr>
 <h2 id="自我描述">自我描述</h2>
+<h4 id="1-经历">1. 经历</h4>
 <ul>
-<li><strong>经历</strong>
-<ol>
 <li>本人大三跟随大神创业，写 <code>Android</code> 约一年半，共参加杭州尘埃科技公司三个项目。整个过程中，几乎从零开始自学 <code>Android</code>，在专注 <code>Android</code> 的同时，折腾过一些其他的技术，包括 <code>Linux</code> 服务器的一些知识，<code>Web</code> 前后端的相关知识。</li>
 <li>于2016年6月份毕业，同时辞职，7月份入职杭州火小二科技有限公司，于 2019 年 1 月底离职。在职期间，只有一次没有<code>OKRS</code> 7 分。除此之外，技术上打好了 <code>Android</code> 的基础，也推动了组内技术能力的发展，同时个人还了解了其他语言，包括 <code>Scala</code> <code>Python</code> <code>JavaScript</code> 等，并或多或少应用于一些小项目上。</li>
 <li>2019 年 3 月，加入淘粉吧，在此期间，主要学习了 <code>kotlin</code>，了解 <code>native</code> 编译。初步了解了 <code>flutter</code>,基于 <code>python</code> 和 <code>jenkins</code> 完成自动化(包括多渠道等)打包，通知钉钉或邮件，同时备份到 <code>NAS</code> 上，推送到蒲公英第三方平台。</li>
-</ol>
-</li>
-<li><strong>为人</strong>
-<ol>
+</ul>
+<h4 id="2-为人">2. 为人</h4>
+<ul>
 <li>对技术充满热情，喜欢技术驱动的工作氛围，有小小的技术崇拜，热爱推广技术，喜欢分享。</li>
 <li>工作负责，学习能力强，方向明确，积极向上，不怕折腾，爱折腾。</li>
 <li>与人为善，能积极融入团队，带人积极，三观端正，不用技术作恶。</li>
-</ol>
-</li>
 </ul>
 
-            </div>
-            
-            
-
-            
-
-          </div>
-
+                </div>
+            </article>
         </div>
-      </div>
+
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="http://github.com/flyer88" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
     </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
 
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-<script type="application/javascript">
-
-AOS.init();
-
-var app = new Vue({
-  el: '#app',
-  data: {
-    menuVisible: false,
-  },
-})
-
+<script>
+    hljs.initHighlightingOnLoad()
 </script>
 
-
-
-
-
-
-  </body>
+    </div>
+</div>
+</body>
 </html>
