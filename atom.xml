@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://flyer88.github.io</id>
     <title>Gridea</title>
-    <updated>2020-06-11T06:32:25.913Z</updated>
+    <updated>2020-06-11T06:35:24.799Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://flyer88.github.io"/>
     <link rel="self" href="https://flyer88.github.io/atom.xml"/>
@@ -16,7 +16,7 @@
         <link href="https://flyer88.github.io/post/repo-guan-li-git-cang-ku/">
         </link>
         <updated>2020-06-11T04:25:26.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="技术方案">技术方案</h3>
+        <content type="html"><![CDATA[<h2 id="1-同类技术方案对比">1. 同类技术方案对比</h2>
 <ol>
 <li><code>git submodule</code>/<code>git subtree</code>，都是把代码当做一个单一的大仓库，进行管理处理</li>
 <li><code>repo</code>，是把所有的代码当做一个工程处理，各个模块可以是独立的仓库，而 <code>repo</code> 只是一个执行 <code>git</code> 命令的脚本，方便组织各个 <code>git</code> 仓库，<code>repo</code> 的最佳实践就是 <code>AOSP</code> 源码的管理</li>
@@ -50,22 +50,17 @@
 </tr>
 </tbody>
 </table>
-<h4 id="repo-的使用">Repo 的使用</h4>
-<h5 id="repo-配置">repo 配置</h5>
+<h2 id="2-repo-的使用">2. Repo 的使用</h2>
+<h3 id="repo-配置">repo 配置</h3>
 <ol>
-<li>
-<p>下载 <code>repo</code> 脚本</p>
-<pre><code class="language-shell">brew install repo	
+<li>下载 <code>repo</code> 脚本<pre><code class="language-shell">brew install repo	
 </code></pre>
 </li>
-<li>
-<p>修改镜像地址，避免墙的问题</p>
-<p><code>.zshrc</code> 或者 <code>.bashrc</code> 加入</p>
-<pre><code class="language-shell">export REPO_URL='https://mirrors.tuna.tsinghua.edu.cn/git/git-repo/'
+<li>修改镜像地址，避免墙的问题， <code>.zshrc</code> 或者 <code>.bashrc</code> 加入<pre><code class="language-shell">export REPO_URL='https://mirrors.tuna.tsinghua.edu.cn/git/git-repo/'
 </code></pre>
 </li>
 </ol>
-<h5 id="项目中使用">项目中使用</h5>
+<h3 id="项目中使用">项目中使用</h3>
 <ol>
 <li>
 <p>初始化设置 <code>manifest</code> 文件</p>
@@ -144,9 +139,9 @@ project b_taofen8_flutter/                      branch feature/flutter
 </code></pre>
 </li>
 <li>
-<p><code>local manifest</code> 使用</p>
-<p>有时候会出现本地临时新增一些仓库进去，或者移除部分仓库，但又不需要更新到 <code>manifest</code> 中，这个时候 <code>local manifest</code>  就有作用了。</p>
-<p>在对应目录新增  <code>.repo/local_manifests/default.xml</code></p>
+<p><code>local manifest</code> 使用<br>
+有时候会出现本地临时新增一些仓库进去，或者移除部分仓库，但又不需要更新到 <code>manifest</code> 中，这个时候 <code>local manifest</code>  就有作用了。<br>
+在对应目录新增  <code>.repo/local_manifests/default.xml</code></p>
 <pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
 &lt;manifest&gt;
     &lt;project name=&quot;taofen8_app/b-taofen8-Android&quot; remote=&quot;taofen8&quot; path=&quot;b-taofen8-Android&quot;/&gt;
@@ -168,7 +163,6 @@ warning: redirecting to http://gitlab.taofen8.com/taofen8_app/b-taofen8-Android.
 ....
 ....
 </code></pre>
-<p>​</p>
 <blockquote>
 <p>此处简单解释下原理，<code>repo</code> 会合并 <code>default.xml</code> 和 <code>local_manifest/default.xml</code></p>
 <p>再去拉取合并后的 <code>manifest</code> 的内容，具体可以 <a href="https://duanqz.github.io/2016-04-15-Android-Local-Manifests-Practice"><strong>参考该文章</strong></a></p>
