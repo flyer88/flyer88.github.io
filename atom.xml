@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://flyer88.github.io</id>
     <title>键盘敲击者</title>
-    <updated>2020-06-15T10:06:06.883Z</updated>
+    <updated>2020-06-15T10:49:25.853Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://flyer88.github.io"/>
     <link rel="self" href="https://flyer88.github.io/atom.xml"/>
@@ -11,6 +11,694 @@
     <logo>https://flyer88.github.io/images/avatar.png</logo>
     <icon>https://flyer88.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, 键盘敲击者</rights>
+    <entry>
+        <title type="html"><![CDATA[【旧】如何实现 RxJava 的链式调用 -- flatmap 方法的实现]]></title>
+        <id>https://flyer88.github.io/post/jiu-ru-he-shi-xian-rxjava-de-lian-shi-diao-yong-flatmap-fang-fa-de-shi-xian/</id>
+        <link href="https://flyer88.github.io/post/jiu-ru-he-shi-xian-rxjava-de-lian-shi-diao-yong-flatmap-fang-fa-de-shi-xian/">
+        </link>
+        <updated>2020-06-15T10:39:16.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>写于 2017年 05 月 24 日</p>
+</blockquote>
+<pre><code class="language-java">public interface Api{
+    void queryPhoto(String query,QueryCallback QueryCallback);
+    void store(Photo photo,StoreCallback storeCallback);
+    interface QueryCallback{
+        void onQuerySuccess(List&lt;Photo&gt; photoList);
+        void onQueryFailed(Exception e);
+    }
+    interface StoreCallback{
+        void onCatStored(Uri uri);
+        void onStoredFailed(Exception e);
+    }
+}
+</code></pre>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  				@Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+
+RxJob&lt;List&lt;Photo&gt;&gt; storePhotoJob = new RxJob&lt;Uri&gt;() {
+            @Override
+            public void doJob(RxCallback&lt;Uri&gt; rxCallback) {
+                mApi.store(photo, new Api.StoreCallback() {
+                    @Override
+                    public void onCatStored(Uri uri) {
+                        rxCallback.onNext(uri);
+                    }
+
+                    @Override
+                    public void onStoredFailed(Exception e) {
+			rxCallback.onError(e);
+                    }
+                });
+            }
+        };
+
+
+queryPhotoJob.map(photoList -&gt; { return getBestPhoto(photoList);})
+  	.flatMap(photo -&gt; { return storePhotoJob;} )
+	.map(photo -&gt; {return photo.getUrl();})
+	.doJob(new RxCallback&lt;String&gt;() {
+            @Override
+            public void onNext(String s) {
+		ToastUtils.show(s);
+            }
+
+            @Override
+            public void onError(Exception e) {
+		ToastUtils.show(e);
+            }
+   });
+</code></pre>
+<pre><code class="language-java">public abstract class RxJob&lt;T&gt;{
+	public abstract void doJob(RxCallback&lt;T&gt; rxCallback){}
+  	public RxJob map(){
+        final RxJob&lt;T&gt; curJob = this;
+        return new RxJob&lt;R&gt;() {
+            @Override
+            public void doJob(final RxCallback&lt;R&gt; rxCallback) {
+                curJob.doJob(new RxCallback&lt;T&gt;() {
+                    @Override
+                    public void onNext(T t) {
+                        R mapped = func.call(t);
+                        rxCallback.onNext(mapped);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        rxCallback.onError(e);
+                    }
+                });
+            }
+        };
+    }
+  	public RxJob flatMap(){...};
+}
+</code></pre>
+<h3 id="flatmap-的实现"><code>flatMap</code> 的实现</h3>
+<p>前一篇文章介绍了链式调用的形成以及 <code>map</code> 方法的实现，<code>map</code> 方法实现的是 T -&gt; R 的类型转换</p>
+<blockquote>
+<p><a href="https://gist.github.com/flyer88/5d7129fc2ca9010ff6109a81157fbafa">如何实现 RxJava 的链式调用 -- map 方法的实现</a></p>
+</blockquote>
+<p>但如果 <code>map</code> 方法中需要实现 一个异步方法呢？</p>
+<pre><code class="language-java">queryPhotoJob.map(photoList -&gt; { return getBestPhoto(photoList);})
+		.map(photo -&gt; {mApi.store(photo)} )
+  		.map(uri -&gt; {loadImage(uri)})
+</code></pre>
+<p>注意 <code>mApi.store(photo)</code> 是异步任务，无法直接返还一个<code>uri</code> 类型。</p>
+<p>于是需要用到 <code>flatMap</code> 方法。</p>
+<p><code>flatMap</code> 同样需要用到 <code>R call(T t)</code> 这个转变函数</p>
+<blockquote>
+<p><strong>首先回头考虑，我们最开始的第一个异步方法是如何实现的，也就是 <code>queryPhotoJob</code> 的创建</strong></p>
+<p><strong>执行是在 <code>doJob()</code> 方法中执行了 <code>mApi.queryPhoto()</code> 然后调用 <code>rxCallback.onNext()</code> 继续往下走</strong></p>
+</blockquote>
+<p>代码如下：</p>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  				@Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+</code></pre>
+<p>由此考虑，<code>flatMap</code> 方法中也可以把那个异步方法处理成一个 <code>RxJob</code> 对象</p>
+<p>然后让他把回调往返还的 <code>new RxJob()</code> 中的 <code>doJob</code> 方法中 的 <code>Callback</code> 往下一个 <code>RxJob</code> 传递</p>
+<pre><code class="language-java">public &lt;R&gt; RxJob&lt;R&gt; flatMap(final Func&lt;T,RxJob&lt;R&gt;&gt; func){
+    final RxJob&lt;T&gt; curJob = this;
+    return new RxJob&lt;R&gt;() {
+        @Override
+        public void doJob(final RxCallback&lt;R&gt; rxCallback) {
+            curJob.doJob(new RxCallback&lt;T&gt;() {
+                @Override
+                public void onNext(T t) {
+                    // 此处是最大的区别,外部函数的转换
+                    RxJob&lt;R&gt; flatMapped = func.call(t);
+                  	// 得到 flatMapped ，然后调用
+                    flatMapped.doJob(new RxCallback&lt;R&gt;() {
+                        @Override
+                        public void onNext(R r) {
+                            // 把需要变换出的类型往下一个任务传递
+                          	// 此处和 map 方法处理一致
+                            rxCallback.onNext(r);
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    rxCallback.onError(e);
+                }
+            });
+        }
+    };
+}
+</code></pre>
+<h3 id="map-和-flatmap-的对比"><code>map</code> 和 <code>flatMap</code> 的对比</h3>
+<p><code>flatMap</code> 和 <code>map</code> 最大的区别就是返还的 <code>RxJob</code> 对象中 <code>curJob.doJob</code> 中回调的区别</p>
+<p><code>flatMap</code> 方法核心部分</p>
+<pre><code class="language-java"> // 此处是最大的区别
+ RxJob&lt;R&gt; flatMapped = func.call(t);
+ flatMapped.doJob(new RxCallback&lt;R&gt;() {
+   @Override
+   public void onNext(R r) {
+   	rxCallback.onNext(r);
+   }
+
+  @Override
+  public void onError(Exception e) {
+       rxCallback.onError(e);
+  }
+});
+</code></pre>
+<p><code>map</code> 方法核心部分</p>
+<pre><code class="language-java">R mapped = func.call(t);
+rxCallback.onNext(mapped);
+</code></pre>
+<p><code>flatMap</code> 在回调完以后，运行的是 <code>flatMapped.doJob()</code></p>
+<p>并且把当前 <code>RxJob</code> 对象 <code>rxCallback</code> 的回调放到了<code>flatMapped.doJob</code> 中的回调用</p>
+<p>从而使得下一个数据 <code>r</code> 是在运行完 <code>flatMapped</code> 任务后生成的。</p>
+<p>代入此处就是 <code>r</code> 就是 <code>mApi.store(photo,callback)</code> 中的 <code>photo</code></p>
+<h3 id="解释为什么-map-函数无法实现-flatmap-的功能">解释为什么 <code>map</code> 函数无法实现 <code>flatMap</code> 的功能？</h3>
+<p><code>flatMap</code> 中的转变函数的具体实现是 <code>T -&gt; RxJob&lt;R&gt;</code> 的转换</p>
+<p>带入当前例子就是 <code>Photo —&gt; RxJob&lt;String&gt;</code></p>
+<p>注意，之前的 <code>map</code> 方法是 <code>List —&gt; Photo</code>  而不是 <code>List&lt;Photo&gt; -&gt; Photo</code></p>
+<p>因为 <code>map</code> 方法的入参是 <code>Func&lt;T,R&gt; func</code> ，而不是 <code>Func&lt;List&lt;T&gt;,R&gt; func</code></p>
+<p>而 <code>flaMap</code> 函数的入参则是 <code>Func&lt;T,RxJob&lt;R&gt;&gt; func</code>,写死了第二个参数类型必须是 <code>RxJob&lt;R&gt;</code> ，然后 <code>RxJob&lt;R&gt;</code> 方法会被执行</p>
+<p>做到了异步中的异步，同样也说明了入参 <code>Func&lt;?,?&gt; func</code> 会决定转换函数的功能，从而影响整个变换的不同</p>
+<p><code>map</code> 和 <code>flatMap</code> 的区别就如下图</p>
+<pre><code>					map
+	  A ------------&gt;  B/[B]		
+    
+												
+					flatMap							
+	 [A]------------&gt; [B]									 
+
+</code></pre>
+<p>​</p>
+<p>其核心在于类型的变换，即 <code>Func&lt;?,?&gt; func</code>也就是函数式编程中的 <code>Functor</code></p>
+<p>不同的 <code>func</code> 就会实现不同的变换， <code>flatMap</code> 就是一个 <code>Monad</code></p>
+<p>当其运用到 <a href="https://github.com/ReactiveX">ReactiveX</a> 上时，其转换核心就是数据流，也就做到了 <code>Observe/Subscribe</code> 的模式，因为在每一次变换后数据始终存在，对应的操作也可触发。不过 <code>RxJava</code> 还有更多其他的东西，不仅仅是这两个变换。但基本上理解这两个变换就能举一反三了，理解其他变换</p>
+<p><code>RxJava</code> 中的 <code>map/flatMap</code> 也是创建对于的 <code>Observable</code> 对象，然后调用对应的函数，然后返回需要的数据</p>
+<p>其中 <code>map</code> 方法中的入参 <code>Function</code>，只会在各种类型中转换</p>
+<p>而 <code>flatMap</code> 中的入参 <code>Function</code> 必然会转换出一个 <code>Observable&lt;R&gt;</code> 类型</p>
+<p>在 <code>RxJava 2</code> 转换出的是一个 <code>ObservableSource&lt;R&gt;</code></p>
+<p>官方解释如下，non-backpressured Observable，可以理解为类似 <code>Observable</code> 类型，此处和 <code>backpressured</code> 的一些概念有关联，不作解释。</p>
+<blockquote>
+<p>Represents a basic, non-backpressured {@link Observable} source base interface</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[【旧】如何实现 RxJava 的链式调用 -- map 方法的实现]]></title>
+        <id>https://flyer88.github.io/post/jiu-ru-he-shi-xian-rxjava-de-lian-shi-diao-yong-map-fang-fa-de-shi-xian-md/</id>
+        <link href="https://flyer88.github.io/post/jiu-ru-he-shi-xian-rxjava-de-lian-shi-diao-yong-map-fang-fa-de-shi-xian-md/">
+        </link>
+        <updated>2020-06-15T10:32:01.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>写于 2017年 05 月 24 日</p>
+</blockquote>
+<pre><code class="language-java">public interface Api{
+    void queryPhoto(String query,QueryCallback QueryCallback);
+    interface QueryCallback{
+        void onQuerySuccess(List&lt;Photo&gt; photoList);
+        void onQueryFailed(Exception e);
+    }
+}
+</code></pre>
+<pre><code class="language-java">public class PhotoUtils{
+    Api mApi;
+    public void handlePhotoSync(){
+        mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+            @Override
+            public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                Photo photo = getBestPhoto(photoList);
+              	String imgUrl = photo.getUrl();
+            }
+
+            @Override
+            public void onQueryFailed(Exception e) {
+				ToastUtils.show(e);
+            }
+        });
+    }
+}
+</code></pre>
+<p><strong>此时假设有一个包裹类，他可以运行 <code>getBestPhoto(photoList)</code> 和 <code>photo.getUrl()</code> 这两行代码，而这两行代码由外部放入</strong></p>
+<p>那么调用就会如下：</p>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  				@Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+  // 如果有这么一个包裹类，代码就可以写成下面这样，则当需要调用的时候，
+  // 代码就会和 RxJava 很类似( java 8 上会变成 Lambda 表达式 )
+  // 从而使得代码具有很清晰的逻辑，异步代码看上去也会变的如同步代码一样。
+queryPhotoJob
+  .map(photoList -&gt; { return getBestPhoto(photoList);})
+  //.map(new Func&lt;List&lt;Photo&gt;,Photo&gt;()
+  //          @Overide
+  //          Photo call(List&lt;Photo&gt; photoList){
+  //		    return getBestPhoto(photoList);
+  //		  })
+  .map(photo -&gt; {return photo.getUrl()})
+  .doJob(new RxCallback&lt;T&gt;() {
+            @Override
+            public void onNext(T t) {
+
+            }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+   });
+</code></pre>
+<p>因此接下来需要考虑如何实现这个包裹的类，使得其调用会像  <code>RxJava</code> 一般。首先需要确定该类需要处理以下几个问题</p>
+<ul>
+<li>该包裹的类有哪些方法及其使用</li>
+<li><code>map</code> 函数如何实现，其调用逻辑</li>
+</ul>
+<h3 id="整体介绍">整体介绍：</h3>
+<p>确定一个包裹类 —&gt; 创建包裹类 <code>new RxJob()</code> —&gt; <code>map</code> 方法实现</p>
+<h3 id="map-方法实现包括"><code>map</code> 方法实现包括 ：</h3>
+<p>入参和出参的基本类型确定 —&gt; 转变函数的确定  —&gt; <code>doJob</code> 调用 —&gt; <code>map</code> 返还值具体介绍 —&gt; <code>func.call()</code> 返还值的传递</p>
+<h3 id="包裹类方法和作用">包裹类方法和作用</h3>
+<p>首先取名，该类叫 <code>RxJob</code></p>
+<p><code>RxJob</code> 类的意义，它被定义成一个任务，类似 <code>AsyncTask</code> ，而运行该任务的方法就是 <code>doJob</code> 有入参 <code>RxCallback</code></p>
+<p>类的定义还有一个泛型 <code>T</code> ，主要决定了 <code>doJob</code> 方法中 <code>RxCallback&lt;T&gt;</code> 中的 <code>T</code> 类型</p>
+<p>该类型会影响很多部分的参数类型，具体需要参考后面的分析。</p>
+<p>代码如下:</p>
+<pre><code class="language-java">public abstract class RxJob&lt;T&gt; {
+    public abstract void doJob(RxCallback&lt;T&gt; rxCallback);
+    public &lt;R&gt; RxJob&lt;T&gt; map(final Func&lt;T,R&gt; func){...}
+}
+</code></pre>
+<p>先忽略 <code>map</code> 方法，现看 <code>doJob(RxCallback&lt;T&gt; rxCallback)</code></p>
+<p><code>doJob(RxCallback&lt;T&gt; rxCallback)</code> 有一个回调，回调接口定义如下：</p>
+<pre><code class="language-java">public interface RxCallback&lt;T&gt; {
+    void onNext(T t);
+    void onError(Exception e);
+}
+</code></pre>
+<p>两个方法，<code>onNext(T t)</code> 和 <code>onError(Exception e)</code> ,一个用来传递内容 <code>T</code>，一个用来处理错误</p>
+<p>也就是说，<code>RxJob</code> 执行的内容最终都是 <code>doJob(RxCallback&lt;T&gt; rxCallback)</code> 方法，这个方法是链接起所有回调的核心</p>
+<p>保证了所有的方法能一个一个根据链式调用一个一个执行</p>
+<h3 id="创建包裹类-new-rxjob">创建包裹类 <code>new RxJob(..)</code></h3>
+<p>直接带入当前的栗子中，代码如下</p>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  	        @Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+</code></pre>
+<p>其中<code>RxJob&lt;T&gt;</code> 中的 <code>T</code> 的值是 <code>List&lt;Photo&gt;</code>，这主要决定于 <code>mApi.queryPhoto()</code> 中 <code>onQuerySuccess(List&lt;Photo&gt; photoList)</code> 中的参数类型，让 <code>rxCallback.onNext(photoList)</code> 能取到对应的类型。从而把拿到的数据内容，借助 <code>RxCallback</code> 回调往外层抛出。</p>
+<p>即，如果我们需要调用 <code>queryPhotoJob</code> ，让他执行对应的操作代码如下</p>
+<pre><code class="language-java">queryPhotoJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;(){
+  	public void onNext(List&lt;Photo&gt; photoList){
+           Photo photo = getBestPhoto(photoList);
+           String imgUrl = photo.getUrl();
+  	}
+  	public void onError(Exception e){...}
+});
+</code></pre>
+<h3 id="核心部分-map-函数如何实现">核心部分 map 函数如何实现</h3>
+<p>首先可以确定的是 map 函数返回的类型肯定是 <code>RxJob</code>，因为 <code>map</code>方法是可以连续调用的，</p>
+<p>其次，可以确定 <code>map</code> 函数的入参是 <code>Func</code>，</p>
+<p>一个匿名内部类（<code>Java 8</code> 中的 <code>Lambda</code> 表达式），在其他某些语言中就是函数对象、函数引用之类的</p>
+<p>由此可以确定 <code>map</code> 方法基本的样子如下代码：</p>
+<pre><code class="language-java">public RxJob map(Func&lt;T,R&gt; func){
+  	...
+    return rxJob;
+};
+</code></pre>
+<p>然后考虑入参 <code>Func&lt;T,R&gt; func</code> 的实现，即这个转变函数该如何实现。</p>
+<h4 id="1-转变函数的确定">1. 转变函数的确定</h4>
+<p>首先可以确定这个匿名内部类会实现一个从 <code>T 类型—&gt; R 类型</code>的转换，</p>
+<p>其次 <code>func</code> 对象是在 map 方法调用的时候，才确定具体的实现内容，因此，它必然是一个接口或者抽象方法，待实现</p>
+<p>然后，考虑到 <code>T 类型—&gt; R 类型</code> 的转换在具体代码编写的时候是可以确定的，由此考虑可以用泛型方法和泛型类就可以实现。</p>
+<p>从而创建 <code>Func&lt;T,R&gt;</code> 接口，该接口有一个 <code>R call(T t)</code> 方法待实现</p>
+<p>看如下代码：</p>
+<pre><code class="language-java">public interface Func&lt;T,R&gt; {
+    /**
+     *
+     * @param t transform 的对象类型
+     * @return 返还的对象类型
+     */
+    R call(T t);
+}
+</code></pre>
+<p>该方法返回的类型，是泛型类 <code>Func&lt;T,R&gt;</code> 中的 <code>R</code>，其入参是泛型类 <code>Func&lt;T,R&gt;</code> 中的 <code>T</code></p>
+<p>即该类的作用就是进行一个从 <code>T —&gt; R</code> 的转换，而具体的转换方法由外部实现。</p>
+<p>应用到上面的例子就是，<code>List —&gt; Photo</code> 的转换，即 <code>R call&lt;T t&gt;</code> 方法 变成了 <code>Photo call&lt;List photoList&gt;</code></p>
+<p>于是乎，代码就变成了如下的样子</p>
+<pre><code class="language-java">RxJob queryPhotoJob = new RxJob(..)...;
+queryPhotoJob
+  .map(new Func&lt;List&lt;Photo&gt;,Photo&gt;()
+            @Overide
+            Photo call(List&lt;Photo&gt; photoList){
+			    return getBestPhoto(photoList);
+  			})
+  // 同理第二个 map 就成了如下，
+  // 入参是上个操作的出参 Photo
+  // 而出参则是 String 类型的
+  .map(new Func&lt;Photo,String&gt;(){
+            @Overide
+            String call(Photo photo){
+                return photo.getUrl()//返还 String 类型
+            }
+          })
+  .doJob(...);
+</code></pre>
+<p>至此，<code>map</code> 函数的入参整体已经介绍完毕。</p>
+<h4 id="2dojob-方法的调用">2.<code>doJob</code> 方法的调用</h4>
+<p>然后考虑里面具体的调用逻辑，首先考虑任务调用，第一个 <code>map</code> 方法在触发的时候，<code>queryPhotoJob</code> 本身已经是一个 <code>RxJob</code> 对象了</p>
+<p>它的实现内容也简单，在创建包裹类时已经有解释了。</p>
+<pre><code class="language-java">queryPhotoJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;(){
+  	public void onNext(List&lt;Photo&gt; photoList){..}
+  	public void onError(Exception e){...}
+});
+</code></pre>
+<p>也就是说，如果我要调用 <code>map</code> 方法触发传入的 <code>func</code> 匿名内部类，就必须先调用 <code>queryPhotoJob.doJob(..)</code></p>
+<p>于是把代码变成</p>
+<pre><code class="language-java">public RxJob map(Func&lt;T,R&gt; func){
+  rxJob.doJob(new RxCallback&lt;T&gt;() {
+      @Override
+      public void onNext(T t) {
+      }
+
+      @Override
+      public void onError(Exception e) {
+      }
+    });
+  return ...;
+};
+</code></pre>
+<p>应用到上述例子中其具体的泛型值变化就成了如下代码</p>
+<pre><code class="language-java">public RxJob map(Func&lt;List&lt;Photo&gt;,R&gt; func){
+  rxJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;() {
+      @Override
+      public void onNext(List&lt;Photo&gt; photoList) {
+      }
+
+      @Override
+      public void onError(Exception e) {
+      }
+    });
+  return ...;
+};
+</code></pre>
+<p>此时需要考虑的就是在哪里调用 <code>func</code> 函数，它是负责把<code>T —&gt; R</code> ，</p>
+<p>因此该部分代码必然是在当前任务执行完后，拿到当前任务的回调值，然后进行转换，即 <code>map</code> 方法会变成如下</p>
+<pre><code class="language-java">public RxJob map(Func&lt;T,R&gt; func){
+  rxJob.doJob(new RxCallback&lt;T&gt;() {
+      @Override
+      public void onNext(T t) {
+        R mapped = func.call(t);
+      }
+
+      @Override
+      public void onError(Exception e) {
+      }
+    });
+  return ...;
+};
+</code></pre>
+<h4 id="3-map-方法返还值">3. <code>map</code> 方法返还值</h4>
+<p>接下来考虑返回值，首先 <code>map</code> 方法返回的是一个 <code>RxJob</code>对象</p>
+<p>其次，因为当前任务已经执行完了，而下一个任务需要当前任务执行后处理的返回值，即<code>func.call(t)</code> 返回的 <code>mapped</code> 值</p>
+<p>如果返回的是原有的 <code>RxJob</code> 那么每次调用 <code>map</code> 方法时执行的代码永远是 <code>this.doJob</code> 因此每次执行的内容都是第一个任务了</p>
+<p>应用到此处就是 <code>queryPhotoJob.doJob(..)</code>。</p>
+<p>因此 <code>map</code> 方法返回的值应该是一个新创建的 <code>RxJob</code> 对象，并且该对象的 <code>doJob</code> 方法会先运行当前任务的 <code>doJob</code> 方法</p>
+<p>代码如下：</p>
+<pre><code class="language-java">public RxJob map(Func&lt;T,R&gt; func){
+  	 RxJob curJob = this;
+      return new RxJob() {
+            @Override
+            public void doJob(final RxCallback rxCallback) {
+                curJob.doJob(new RxCallback&lt;T&gt;() {
+                    @Override
+                    public void onNext(T t) {
+                        R mapped = func.call(t);
+                      	...
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        ...
+                    }
+                });
+            }
+        };
+};
+</code></pre>
+<p>把当前例子的泛型值带入如下：</p>
+<pre><code class="language-java">public RxJob map(Func&lt;List&lt;Photo&gt;,R&gt; func){
+  	 RxJob queryPhotoJob = this;
+     RxJob mapJob = new RxJob() {
+            @Override
+            public void doJob(final RxCallback rxCallback) {
+                queryPhotoJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;() {
+                    @Override
+                    public void onNext(List&lt;Photo&gt; photoList) {
+                        R mapped = func.call(photoList);
+                      	...
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        ...
+                    }
+                });
+            }
+        };
+  return mapJob;
+};
+</code></pre>
+<h4 id="4-funccall-的返还值传递">4. <code>func.call()</code> 的返还值传递</h4>
+<p>考虑如何把 <code>func.call()</code> 调用后的返回的数据往下一个 <code>RxJob</code> 传递</p>
+<p>直接调用下一个 <code>RxJob</code> 中回调的 <code>rxCallback.onNext()</code>方法即可，对于错误也同样调用 <code>rxCallback.onError(e)</code> 即可。</p>
+<pre><code class="language-java">public RxJob map(Func&lt;T,R&gt; func){
+  	 RxJob curJob = this;
+      return new RxJob() {
+            @Override
+            public void doJob(final RxCallback rxCallback) {
+                curJob.doJob(new RxCallback&lt;T&gt;() {
+                    @Override
+                    public void onNext(T t) {
+                        R mapped = func.call(t);
+                      	rxCallback.onNext(t);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        rxCallback.onError(e);
+                    }
+                });
+            }
+        };
+}
+</code></pre>
+<p>代入当前例子：</p>
+<pre><code class="language-java">public RxJob map(Func&lt;List&lt;Photo&gt;,R&gt; func){
+  	 RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = this;
+     RxJob mapJob = new RxJob() {
+            @Override
+            public void doJob(final RxCallback mapJobCallback) {
+                queryPhotoJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;() {
+                    @Override
+                    public void onNext(List&lt;Photo&gt; photoList) {
+                        R mapped = func.call(photoList);
+                      	mapJobCallback.onNext(mapped);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        mapJobCallback.onError(e);
+                    }
+                });
+            }
+        };
+  return mapJob;
+}
+</code></pre>
+<p>最终只需要确定泛型参数类型 <code>R</code>，他的作用是确定下一个<code>RxJob</code> 对象的泛型值</p>
+<p><code>R</code> 由 <code>func.call()</code> 方法 确定，也就是之前说的，在具体的 <code>map</code> 方法被调用时，参数的泛型值是可以确定的</p>
+<p><code>Func</code> 函数负责把 T —&gt; R 转换，因此，最终的 <code>map</code> 方法如下：</p>
+<pre><code class="language-java">public &lt;R&gt; RxJob&lt;R&gt; map(Func&lt;T,R&gt; func){
+      RxJob curJob = this;
+      return new RxJob&lt;R&gt;() {
+            @Override
+            public void doJob(final RxCallback&lt;R&gt; rxCallback) {
+                curJob.doJob(new RxCallback&lt;T&gt;() {
+                    @Override
+                    public void onNext(T t) {
+                        R mapped = func.call(t);
+                        rxCallback.onNext(mapped);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        rxCallback.onError(e);
+                    }
+                });
+            }
+        };
+  }
+</code></pre>
+<p>应用到当前例子，带入泛型值如下</p>
+<pre><code class="language-java">public&lt;Photo&gt; RxJob&lt;Photo&gt; map(Func&lt;List&lt;Photo&gt;,Photo&gt; func){
+  	 RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = this;
+     RxJob&lt;Photo&gt; mapJob = new RxJob&lt;Photo&gt;() {
+            @Override
+            public void doJob(final RxCallback&lt;Photo&gt; mapJobCallback) {
+                queryPhotoJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;() {
+                    @Override
+                    public void onNext(List&lt;Photo&gt; photoList) {
+                        Photo mapped = func.call(photoList);
+                      	mapJobCallback.onNext(mapped);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        mapJobCallback.onError(e);
+                    }
+                });
+            }
+        };
+  return mapJob;
+}
+</code></pre>
+<h3 id="整个任务如何运行">整个任务如何运行</h3>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  				@Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+RxJob&lt;Photo&gt; bestPhotoJob = queryPhotoJob.map(photoList -&gt; { return getBestPhoto(photoList);})
+RxJob&lt;String&gt; urlJob = .map(photo -&gt; {return photo.getUrl();})
+urlJob.doJob(new RxCallback&lt;String&gt;() {
+            @Override
+            public void onNext(String s) {
+				ToastUtils.show(s);
+            }
+
+            @Override
+            public void onError(Exception e) {
+				...
+            }
+   });
+</code></pre>
+<p>解释代码，第一个 <code>map</code> 方法 返还了一个 <code>RxJob&lt;Photo&gt;</code> 对象，第二个 <code>map</code> 返还了一个 <code>RxJob&lt;String&gt;</code> 对象，第三个 <code>doJob</code> 方法触发整个任务</p>
+<p><code>doJob</code> 方法触发的第一个方法是 <code>urlJob</code> 中的 <code>doJob</code> 方法，由于 <code>urlJob</code> 对象是由 <code>map</code> 方法创建的</p>
+<p>因此，在执行 <code>ToastUtils.show(s)</code> 方法之前，会先执行 <code>bestPhotoJob.doJob()</code></p>
+<p>同样，<code>queryPhotoJob.doJob()</code>也会执行在 <code>bestPhotoJob.doJob()</code> 方法之前</p>
+<p>因此整体过程就是 <code>queryPhotoJob.doJob()</code>—&gt; <code>bestPhotoJob.doJob()</code> —&gt; <code>urlJob.doJob()</code></p>
+<p>而这执行过程中，<code>R mapped = func.call(T)</code> 会先被调用，因此单个 <code>RxJob</code> 调用链如下：</p>
+<blockquote>
+<p>在调用每个 <code>RxJob.onNex()</code>情况下(即成功的情况下，没有出错)</p>
+</blockquote>
+<p><code>queryPhotoJob.doJob()</code> : <code>mApi.query</code> —&gt; <code>func.call(t)</code> —&gt; <code>getBestPhoto(photoList)</code></p>
+<p><code>bestPhotoJob.doJob()</code> ： <code>func.call(t)</code> —&gt; <code>photo.getUrl()</code></p>
+<p><code>urlJob.doJob()</code>：  <code>ToastUtil.show()</code></p>
+<p>比较炫酷的写法如下：</p>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  				@Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+queryPhotoJob
+  .map(photoList -&gt; { return getBestPhoto(photoList);})
+  .map(photo -&gt; {return photo.getUrl()})
+  .doJob(...);
+</code></pre>
+<p>=================================</p>
+<p><a href="">异步里面还有异步方法，<code>flatMap</code> 待续</a></p>
+<p>=================================</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[【旧】Android 贝塞尔曲线，QQ 删除小红点类似效果实现]]></title>
         <id>https://flyer88.github.io/post/jiu-android-bei-sai-er-qu-xian-qq-shan-chu-xiao-hong-dian-lei-si-xiao-guo-shi-xian/</id>
@@ -1224,440 +1912,6 @@ static void changeName2(String paramName){
 </li>
 </ul>
 </shape>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[【旧】LayoutInflater 后记--替换系统控件]]></title>
-        <id>https://flyer88.github.io/post/jiu-layoutinflater-hou-ji-ti-huan-xi-tong-kong-jian/</id>
-        <link href="https://flyer88.github.io/post/jiu-layoutinflater-hou-ji-ti-huan-xi-tong-kong-jian/">
-        </link>
-        <updated>2020-06-15T09:42:37.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>于 2016 年 08 月 22 日</p>
-</blockquote>
-<ul>
-<li>首先需要确定，<code>LayoutInflater</code>对于<code>Android</code>自带的<code>view</code>读入的名字是没有全名的，具体创建的时候是通过写上前缀，然后借助反射进行实例化的</li>
-<li>明确，<code>Factory</code>如果可以构建<code>view</code>对象的话，后面的<code>view</code>实例化操作是不会被进行的</li>
-<li>明确<code>Factory</code>是可以被<code>set</code>进去的</li>
-<li>剩下的就是考虑<code>Activity</code>会在何时才会创建<code>view</code>，自然是<code>setContentView</code>，该方法会触发整个<code>xml</code>的<code>inflate</code></li>
-</ul>
-<p>之前记录了自己走通 <code>LayoutInflater</code> 的源码整体流程，一直想搞个好玩的东西，想起之前看到过的<a href="https://github.com/fengjundev/Android-Skin-Loader">换肤方案</a>，决定写个换系统控件的库。</p>
-<p><a href="https://github.com/flyer88/Pichu">项目地址</a>，项目的具体使用，可以看README</p>
-<hr>
-<h4 id="首先需要确定layoutinflater对于android自带的view读入的名字是没有全名的具体创建的时候是通过写上前缀然后借助反射进行实例化的">首先需要确定，<code>LayoutInflater</code>对于<code>Android</code>自带的<code>view</code>读入的名字是没有全名的，具体创建的时候是通过写上前缀，然后借助反射进行实例化的</h4>
-<p>举例：</p>
-<pre><code>   &lt;TextView
-    ...
-    /&gt;
-</code></pre>
-<p>作为xml读入以后，是只有<code>TextView</code>的</p>
-<p>而</p>
-<pre><code>    &lt;dove.flyer.xu.mineView 
-    ....    
-    /&gt;
-</code></pre>
-<p>作为xml读入后，是整个名字存在的，即<code>dove.flyer.xu.mineView</code>，具体细节<a href="http://www.dove.farbox.com/post/android/layoutinflater-hou-ji-ti-huan-xi-tong-kong-jian">前面文章</a>已经叙述了，此处不重复了</p>
-<h4 id="明确factory如果可以构建view对象的话后面的view实例化操作是不会被进行的">明确，<code>Factory</code>如果可以构建<code>view</code>对象的话，后面的<code>view</code>实例化操作是不会被进行的。</h4>
-<p>首先定位到<code>createViewFromTag</code>。</p>
-<p>源码中，以<code>Factory</code>为例子,如果<code>Factory</code>为空的时候，是不会执行里面代码的，如果设置了，则会执行。而执行后，如果<code>view</code>不为空，则下面的<code>view</code>创建都会失效，也就是说，如果<code>Factory</code>创建成功了<code>view</code>，那么后面创建<code>view</code>部分的代码并不会执行。<code>Facory2</code>也同理。</p>
-<p>而<code>Factory</code>和<code>Factory2</code>在一开始就是空的，只需要设置好这个<code>Factory</code>，那具体的<code>view</code>创建就会被它俩其中一个接手。</p>
-<pre><code>View createViewFromTag(View parent, String name, AttributeSet attrs, boolean inheritContext){
-....
-    if (mFactory2 != null) {
-                    view = mFactory2.onCreateView(parent, name, viewContext, attrs);
-    } else if (mFactory != null) {
-        view = mFactory.onCreateView(name, viewContext, attrs);
-    } else {
-        view = null;
-    }
-    if(view == null ...){
-        ...
-    }
-    if(view == null ...){
-        ...
-    }
-....
-}
-</code></pre>
-<h4 id="明确factory是可以被set进去的">明确<code>Factory</code>是可以被<code>set</code>进去的</h4>
-<p>调用<code>getLayoutInflater().setFactory(factory)</code>即可</p>
-<h4 id="剩下的就是考虑activity会在何时才会创建view自然是setcontentview该方法会触发整个xml的inflate">剩下的就是考虑<code>Activity</code>会在何时才会创建<code>view</code>，自然是<code>setContentView</code>，该方法会触发整个<code>xml</code>的<code>inflate</code>，</h4>
-<p>所以剩下的就是在<code>onCreate</code>的时候，在<code>setContentView</code>之前，把自己的<code>Factory</code>给设置进去，把传进来的名字，修改成自己的<code>view</code>就可以了。</p>
-<hr>
-<p>以上三点拼在一起就可以进行系统控件的同意替换，具体<code>Factory</code>重写的细节请参考源码。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[【旧】记 LayoutInflater 源码流程]]></title>
-        <id>https://flyer88.github.io/post/jiu-ji-layoutinflater-yuan-ma-liu-cheng/</id>
-        <link href="https://flyer88.github.io/post/jiu-ji-layoutinflater-yuan-ma-liu-cheng/">
-        </link>
-        <updated>2020-06-15T09:40:36.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>于 2016 年 08 月 19 日</p>
-</blockquote>
-<ul>
-<li>走了一遍 LayoutInflater的流程，特此记录
-<ul>
-<li>
-<ul>
-<li>获取 LayoutInflater --- <code>LayoutInflater.from(context)</code></li>
-<li>调用Inflate -- <code>LayoutInflater.from(context).inflate(R.layout.activity_layout,null,false)</code></li>
-<li><code>inflate(XmlPullParser parser, ViewGroup root, boolean attachToRoot)</code>是整个<code>inflate</code>的核心部分
-<ul>
-<li>首先是看第一部分，父布局<code>temp</code>的实例化</li>
-<li>然后是子布局的实例化</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li></li>
-</ul>
-<h1 id="走了一遍-layoutinflater的流程特此记录">走了一遍 LayoutInflater的流程，特此记录</h1>
-<h3 id="获取-layoutinflater-layoutinflaterfromcontext">获取 LayoutInflater --- <code>LayoutInflater.from(context)</code></h3>
-<p>获取LayoutInflater对象实例</p>
-<pre><code>​```
-    public static LayoutInflater from(Context context) {
-        //获取 layoutInflater，注意这是一个IPC的过程，获取的实例是PhoneLayoutInflater，与LayoutInflater 区别不大，重写了protected View onCreateView(String name, AttributeSet attrs) 函数，具体可以去看源码，位置是frameworks/base/core/java.com.android.internal.policy.impl
-            LayoutInflater LayoutInflater =
-                    (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        //如果为空抛出错误       
-            if (LayoutInflater == null) {
-                throw new AssertionError(&quot;LayoutInflater not found.&quot;);
-            }
-        //返回值
-                    return LayoutInflater;
-    }
-​```
-</code></pre>
-<h3 id="调用inflate-layoutinflaterfromcontextinflaterlayoutactivity_layoutnullfalse">调用Inflate -- <code>LayoutInflater.from(context).inflate(R.layout.activity_layout,null,false)</code></h3>
-<pre><code>​```
- public View inflate(int resource, ViewGroup root, boolean attachToRoot) {
-        //获取resource对象
-        final Resources res = getContext().getResources();
-        ...
-        //把R.layout.activity_layout 放入，获取整个 Xml的Parser
-        final XmlResourceParser parser = res.getLayout(resource);
-        try {
-            // 开始真正的inflate
-            return inflate(parser, root, attachToRoot);
-        } finally {
-            parser.close();
-        }
-    }
-​```
-</code></pre>
-<h3 id="inflatexmlpullparser-parser-viewgroup-root-boolean-attachtoroot是整个inflate的核心部分"><code>inflate(XmlPullParser parser, ViewGroup root, boolean attachToRoot)</code>是整个<code>inflate</code>的核心部分</h3>
-<p>整体流程：</p>
-<p>找到最外层的父级布局 ===》 处理<code>merge</code>节点情况 ===》实例化父级布局 =<mark>》根据父级布局，调用<code>rInflate</code>函数去实例化子级<code>view</code></mark>=&gt; 根据实例化结果，以及外部参数，进行<code>view</code>的添加以及结果的返回</p>
-<pre><code>​```
-    public View inflate(XmlPullParser parser, ViewGroup root, boolean attachToRoot) {
-        //同步进入
-        synchronized (mConstructorArgs) {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, &quot;inflate&quot;);
-            // 解析返回 attrs
-            final AttributeSet attrs = Xml.asAttributeSet(parser);
-            // 
-            Context lastContext = (Context)mConstructorArgs[0];
-            mConstructorArgs[0] = mContext;
-            // 传入的 viewgroup 是 null
-            View result = root;
-            try {
-                // 此处尝试寻找开始和结束节点，即找到整个layout的最外层 view
-                int type;
-                while ((type = parser.next()) != XmlPullParser.START_TAG &amp;&amp;
-                        type != XmlPullParser.END_DOCUMENT) {
-                    // Empty
-                }
-                // 如果 type != 开始节点抛出错误，也就是说没找到开始节点
-                if (type != XmlPullParser.START_TAG) {
-                    throw new InflateException(parser.getPositionDescription()
-                            * &quot;: No start tag found!&quot;);
-                }
-                // 获取当前节点的名字，也就是当前layout的根节点的名字
-                final String name = parser.getName();
-
-                ...
-                //处理 merge 节点
-                if (TAG_MERGE.equals(name)) {
-                    if (root == null || !attachToRoot) {
-                        throw new InflateException(&quot;&lt;merge /&gt; can be used only with a valid &quot;
-                                * &quot;ViewGroup root and attachToRoot=true&quot;);
-                    }
-                    rInflate(parser, root, attrs, false, false);
-                } else {// 不是merge的情况下
-                    // createViewFromTag 该方法是根据前面获取的 tag 的名字，创建具体的view对象
-                    // 此处特殊的地方时，Temp 就是根节点，也就是整个layout的根节点，因为 name 是前面获取的根节点的名字
-                    final View temp = createViewFromTag(root, name, attrs, false);
-                    // 初始化 params
-                    ViewGroup.LayoutParams params = null;
-                    if (root != null) {// root != 空，会初始化出一个 params
-
-                        ...
-                        // 如果提供了root，会根据 root 创建 layout params 
-                        params = root.generateLayoutParams(attrs);
-                        if (!attachToRoot) {
-                            // Set the layout params for temp if we are not
-                            // attaching. (If we are, we use addView, below)
-                            temp.setLayoutParams(params);
-                        }
-                    }
-                    ...
-                    // 此处，会进行所有的 temp 的子 view 的 inflate
-                    rInflate(parser, temp, attrs, true, true);
-
-                    ...
-                    // We are supposed to attach all the views we found (int temp)
-                    // to root. Do that now.
-                    if (root != null &amp;&amp; attachToRoot) {
-                        root.addView(temp, params);
-                    }
-                    // Decide whether to return the root that was passed in or the
-                    // top view found in xml.
-                    if (root == null || !attachToRoot) {
-                        result = temp;
-                    }
-                }
-            } catch (XmlPullParserException e) {
-                ...
-            } catch (IOException e) {
-                ...
-            } finally {
-                // Don't retain static reference on context.
-                mConstructorArgs[0] = lastContext;
-                mConstructorArgs[1] = null;
-            }
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-            return result;
-        }
-    }
-​```
-</code></pre>
-<p>其中整个流程中，核心部分分两点</p>
-<p>1.实例化父级布局，</p>
-<p>2.实例化子级<code>view</code>。</p>
-<p>而对于<code>merge</code>节点的处理情况是将其当做子<code>view</code>进行处理，调用的都是<code>rInflate</code>函数，所以，我们讨论子<code>view</code>实例化的时候可以一起讨论。</p>
-<h4 id="首先是看第一部分父布局temp的实例化">首先是看第一部分，父布局<code>temp</code>的实例化。</h4>
-<p>他是直接调用<code>createViewFromTag</code>，我们进入该函数。这个函数整体的流程是</p>
-<p>处理特殊节点<code>view</code> ===》 对当前<code>view</code>的context进行初始化 ====》 特殊节点<code>blink</code>处理 ===》根据几个工厂对象(默认情况下，工程类都为null)实例化<code>view</code> ===》 工厂类创建失败，<code>view == null</code>，调用<code>onCreateView()</code>或者<code>createView()</code>对<code>view</code>进行实例化</p>
-<pre><code>​```
-     View createViewFromTag(View parent, String name, AttributeSet attrs, boolean inheritContext) {
-        // 特殊处理 `view` 节点
-        if (name.equals(&quot;view&quot;)) {
-            name = attrs.getAttributeValue(null, &quot;class&quot;);
-        }
-        // 设置当前 view 的 context
-        Context viewContext;
-        if (parent != null &amp;&amp; inheritContext) {
-            // 如果父级 view 不为空 并且要求从父级 view 那里获取 context
-            viewContext = parent.getContext();
-        } else {
-            // 否则 当前 view 的 context 等于 LayoutInflater.fromt(context) 中传入的 context
-            viewContext = mContext;
-        }
-        // 如果有主题切换，那么就应用对应的主题
-        final TypedArray ta = viewContext.obtainStyledAttributes(attrs, ATTRS_THEME);
-        final int themeResId = ta.getResourceId(0, 0);
-        if (themeResId != 0) {
-            viewContext = new ContextThemeWrapper(viewContext, themeResId);
-        }
-        ta.recycle();
-        // blink 处理
-        if (name.equals(TAG_1995)) {
-            // Let's party like it's 1995!
-            return new BlinkLayout(viewContext, attrs);
-        }
-        ...
-        try {
-            // 用工厂类创建真正的 view 对象
-            // 默认两个工厂类都为 null
-            // 所以 view 是 null
-            View view;
-            if (mFactory2 != null) {
-                view = mFactory2.onCreateView(parent, name, viewContext, attrs);
-            } else if (mFactory != null) {
-                view = mFactory.onCreateView(name, viewContext, attrs);
-            } else {
-                view = null;
-            }
-            // 在 view 用前面两个工厂类创建为 null 
-            // 同时私有工厂类不为空的情况下，调用私有的工厂类创建 view 对象
-            if (view == null &amp;&amp; mPrivateFactory != null) {
-                view = mPrivateFactory.onCreateView(parent, name, viewContext, attrs);
-            }
-            // 私有工厂创建依旧为 null 时
-            if (view == null) {
-                final Object lastContext = mConstructorArgs[0];
-                mConstructorArgs[0] = viewContext;
-                try {
-                    if (-1 == name.indexOf('.')) {// 如果是 Android 自带 view
-                        view = onCreateView(parent, name, attrs);
-                    } else {// 如果不是 Android 自带 view
-                        view = createView(name, null, attrs);
-                    }
-                } finally {
-                    mConstructorArgs[0] = lastContext;
-                }
-            }
-            ...
-            return view;
-        } catch (InflateException e) {
-            ...
-        } catch (ClassNotFoundException e) {
-            ...
-        } catch (Exception e) {
-            ...
-        }
-    }
-​```
-</code></pre>
-<p>其中这个函数的核心部分则是<code>onCreateView()</code>和<code>createView()</code>，因为默认情况下，几个factory都是null，所以都会进入这两个函数中的一个。</p>
-<pre><code>​```
-    if (-1 == name.indexOf('.')) {// 如果是 Android 自带 view
-        view = onCreateView(parent, name, attrs);
-    } else {// 如果不是 Android 自带 view
-        view = createView(name, null, attrs);
-    }
-​```
-</code></pre>
-<p>两个函数调用条件是，<code>-1 == name.indexOf('.')</code>，而其效果则是，判断是否为<code>Android</code>自带 <code>view</code>，如果是，则调用<code>onCreateView()</code>,否则当做自定义<code>view</code>处理，调用<code>createView()</code></p>
-<p>先看<code>onCreateView</code>，该部分主要是对<code>sClassPrefixList</code>进行迭代，拼凑出整个<code>view</code>的路径，然后调用<code>createView()</code>，注意这个函数，和上面说的处理自定义<code>view</code>的<code>createView()</code>，是同一个函数，所以也就明白，为什么要有上面的判断了</p>
-<pre><code>​```
-    private static final String[] sClassPrefixList = {
-        &quot;android.widget.&quot;,
-        &quot;android.webkit.&quot;,
-        &quot;android.app.&quot;
-    };
-     ....
-     ....
-     @Override protected View onCreateView(String name, AttributeSet attrs) throws ClassNotFoundException {
-        for (String prefix : sClassPrefixList) {
-            try {
-                View view = createView(name, prefix, attrs);
-                if (view != null) {
-                    return view;
-                }
-            } catch (ClassNotFoundException e) {
-                ...
-            }
-        }
-        return super.onCreateView(name, attrs);
-    }
-​```
-</code></pre>
-<p>然后我们看真正的动态创建出<code>view</code>对象的函数<code>createView(String name, String prefix, AttributeSet attrs)</code>，该函数的作用就是，通过反射创建出真正的对象</p>
-<p>其过程也很简单，直接在已经存在的<code>sConstructorMap</code>中找，是不是有这个名字，如果有就开始创建，没有就把前缀拼上去，再创建，然后放入<code>sConstructorMap</code>中</p>
-<pre><code>​```
-public final View createView(String name, String prefix, AttributeSet attrs)
-            throws ClassNotFoundException, InflateException {
-        Constructor&lt;? extends View&gt; constructor = sConstructorMap.get(name);
-        Class&lt;? extends View&gt; clazz = null;
-        try {
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, name);
-            if (constructor == null) {
-                // Class not found in the cache, see if it's real, and try to add it
-                clazz = mContext.getClassLoader().loadClass(
-                        prefix != null ? (prefix + name) : name).asSubclass(View.class);
-
-                if (mFilter != null &amp;&amp; clazz != null) {
-                    boolean allowed = mFilter.onLoadClass(clazz);
-                    if (!allowed) {
-                        failNotAllowed(name, prefix, attrs);
-                    }
-                }
-                constructor = clazz.getConstructor(mConstructorSignature);
-                sConstructorMap.put(name, constructor);
-            } else {
-                // If we have a filter, apply it to cached constructor
-                if (mFilter != null) {
-                    // Have we seen this name before?
-                    Boolean allowedState = mFilterMap.get(name);
-                    if (allowedState == null) {
-                        // New class -- remember whether it is allowed
-                        clazz = mContext.getClassLoader().loadClass(
-                                prefix != null ? (prefix + name) : name).asSubclass(View.class);
-
-                        boolean allowed = clazz != null &amp;&amp; mFilter.onLoadClass(clazz);
-                        mFilterMap.put(name, allowed);
-                        if (!allowed) {
-                            failNotAllowed(name, prefix, attrs);
-                        }
-                    } else if (allowedState.equals(Boolean.FALSE)) {
-                        failNotAllowed(name, prefix, attrs);
-                    }
-                }
-            }
-            Object[] args = mConstructorArgs;
-            args[1] = attrs;
-            constructor.setAccessible(true);
-            final View view = constructor.newInstance(args);
-            if (view instanceof ViewStub) {
-                // Use the same context when inflating ViewStub later.
-                final ViewStub viewStub = (ViewStub) view;
-                viewStub.setLayoutInflater(cloneInContext((Context) args[0]));
-            }
-            return view;
-        } catch (NoSuchMethodException e) {
-            ...
-        } catch (ClassCastException e) {
-            ...
-        } catch (ClassNotFoundException e) {
-            ...
-        } catch (Exception e) {
-            ...
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-        }
-    }
-​```
-</code></pre>
-<h4 id="然后是子布局的实例化">然后是子布局的实例化</h4>
-<p>该部分内容，主要是对当前节点的所有view 进行遍历，然后调用<code>createViewFromTag()</code>(该方法上面已经有解释了)方法创建实例。如果遍历到某一个view，他是有子节点的，则递归调用函数<code>rInflate()</code>对该子节点进行遍历。该部分参考下面的流程图，看起来更加清晰。</p>
-<pre><code>​```
-    void rInflate(XmlPullParser parser, View parent, final AttributeSet attrs,
-            boolean finishInflate, boolean inheritContext) throws XmlPullParserException,
-            IOException {
-        final int depth = parser.getDepth();
-        int type;
-        while (((type = parser.next()) != XmlPullParser.END_TAG ||
-                parser.getDepth() &gt; depth) &amp;&amp; type != XmlPullParser.END_DOCUMENT) {
-            if (type != XmlPullParser.START_TAG) {
-                continue;
-            }
-            final String name = parser.getName();
-
-            if (TAG_REQUEST_FOCUS.equals(name)) {
-                parseRequestFocus(parser, parent);
-            } else if (TAG_TAG.equals(name)) {
-                parseViewTag(parser, parent, attrs);
-            } else if (TAG_INCLUDE.equals(name)) {
-                if (parser.getDepth() == 0) {
-                    throw new InflateException(&quot;&lt;include /&gt; cannot be the root element&quot;);
-                }
-                parseInclude(parser, parent, attrs, inheritContext);
-            } else if (TAG_MERGE.equals(name)) {
-                throw new InflateException(&quot;&lt;merge /&gt; must be the root element&quot;);
-            } else {
-                final View view = createViewFromTag(parent, name, attrs, inheritContext);
-                final ViewGroup viewGroup = (ViewGroup) parent;
-                final ViewGroup.LayoutParams params = viewGroup.generateLayoutParams(attrs);
-                rInflate(parser, view, attrs, true, true);
-                viewGroup.addView(view, params);
-            }
-        }
-        if (finishInflate) parent.onFinishInflate();
-    }
-​```
-</code></pre>
-<h1 id=""></h1>
-<p>以上就是 inflate 整个核心部分。</p>
-<p>对于整体的流程，我画了流程图，如下</p>
-<figure data-type="image" tabindex="1"><img src="https://flyer88.github.io/post-images/1592214109968.png" alt="img" loading="lazy"></figure>
-<blockquote>
-<p>补充，迁移过程中原始图片已丢失</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>

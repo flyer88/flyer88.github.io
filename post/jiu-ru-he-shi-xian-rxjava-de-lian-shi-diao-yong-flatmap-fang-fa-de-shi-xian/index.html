@@ -1,0 +1,423 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>【旧】如何实现 RxJava 的链式调用 -- flatmap 方法的实现 | 键盘敲击者</title>
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592218144429">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-57136418-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-57136418-1');
+    </script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            键盘敲击者
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="menu gt-a-link">
+                            关于我
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    【旧】如何实现 RxJava 的链式调用 -- flatmap 方法的实现
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-06-15 ·
+                    </time>
+                    
+                        <a href="https://flyer88.github.io/tag/android2/" class="post-tags">
+                            # Android 进阶
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/QBqEnb3yY/" class="post-tags">
+                            # 【旧】
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <blockquote>
+<p>写于 2017年 05 月 24 日</p>
+</blockquote>
+<pre><code class="language-java">public interface Api{
+    void queryPhoto(String query,QueryCallback QueryCallback);
+    void store(Photo photo,StoreCallback storeCallback);
+    interface QueryCallback{
+        void onQuerySuccess(List&lt;Photo&gt; photoList);
+        void onQueryFailed(Exception e);
+    }
+    interface StoreCallback{
+        void onCatStored(Uri uri);
+        void onStoredFailed(Exception e);
+    }
+}
+</code></pre>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  				@Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+
+RxJob&lt;List&lt;Photo&gt;&gt; storePhotoJob = new RxJob&lt;Uri&gt;() {
+            @Override
+            public void doJob(RxCallback&lt;Uri&gt; rxCallback) {
+                mApi.store(photo, new Api.StoreCallback() {
+                    @Override
+                    public void onCatStored(Uri uri) {
+                        rxCallback.onNext(uri);
+                    }
+
+                    @Override
+                    public void onStoredFailed(Exception e) {
+			rxCallback.onError(e);
+                    }
+                });
+            }
+        };
+
+
+queryPhotoJob.map(photoList -&gt; { return getBestPhoto(photoList);})
+  	.flatMap(photo -&gt; { return storePhotoJob;} )
+	.map(photo -&gt; {return photo.getUrl();})
+	.doJob(new RxCallback&lt;String&gt;() {
+            @Override
+            public void onNext(String s) {
+		ToastUtils.show(s);
+            }
+
+            @Override
+            public void onError(Exception e) {
+		ToastUtils.show(e);
+            }
+   });
+</code></pre>
+<pre><code class="language-java">public abstract class RxJob&lt;T&gt;{
+	public abstract void doJob(RxCallback&lt;T&gt; rxCallback){}
+  	public RxJob map(){
+        final RxJob&lt;T&gt; curJob = this;
+        return new RxJob&lt;R&gt;() {
+            @Override
+            public void doJob(final RxCallback&lt;R&gt; rxCallback) {
+                curJob.doJob(new RxCallback&lt;T&gt;() {
+                    @Override
+                    public void onNext(T t) {
+                        R mapped = func.call(t);
+                        rxCallback.onNext(mapped);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        rxCallback.onError(e);
+                    }
+                });
+            }
+        };
+    }
+  	public RxJob flatMap(){...};
+}
+</code></pre>
+<h3 id="flatmap-的实现"><code>flatMap</code> 的实现</h3>
+<p>前一篇文章介绍了链式调用的形成以及 <code>map</code> 方法的实现，<code>map</code> 方法实现的是 T -&gt; R 的类型转换</p>
+<blockquote>
+<p><a href="https://gist.github.com/flyer88/5d7129fc2ca9010ff6109a81157fbafa">如何实现 RxJava 的链式调用 -- map 方法的实现</a></p>
+</blockquote>
+<p>但如果 <code>map</code> 方法中需要实现 一个异步方法呢？</p>
+<pre><code class="language-java">queryPhotoJob.map(photoList -&gt; { return getBestPhoto(photoList);})
+		.map(photo -&gt; {mApi.store(photo)} )
+  		.map(uri -&gt; {loadImage(uri)})
+</code></pre>
+<p>注意 <code>mApi.store(photo)</code> 是异步任务，无法直接返还一个<code>uri</code> 类型。</p>
+<p>于是需要用到 <code>flatMap</code> 方法。</p>
+<p><code>flatMap</code> 同样需要用到 <code>R call(T t)</code> 这个转变函数</p>
+<blockquote>
+<p><strong>首先回头考虑，我们最开始的第一个异步方法是如何实现的，也就是 <code>queryPhotoJob</code> 的创建</strong></p>
+<p><strong>执行是在 <code>doJob()</code> 方法中执行了 <code>mApi.queryPhoto()</code> 然后调用 <code>rxCallback.onNext()</code> 继续往下走</strong></p>
+</blockquote>
+<p>代码如下：</p>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  				@Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+</code></pre>
+<p>由此考虑，<code>flatMap</code> 方法中也可以把那个异步方法处理成一个 <code>RxJob</code> 对象</p>
+<p>然后让他把回调往返还的 <code>new RxJob()</code> 中的 <code>doJob</code> 方法中 的 <code>Callback</code> 往下一个 <code>RxJob</code> 传递</p>
+<pre><code class="language-java">public &lt;R&gt; RxJob&lt;R&gt; flatMap(final Func&lt;T,RxJob&lt;R&gt;&gt; func){
+    final RxJob&lt;T&gt; curJob = this;
+    return new RxJob&lt;R&gt;() {
+        @Override
+        public void doJob(final RxCallback&lt;R&gt; rxCallback) {
+            curJob.doJob(new RxCallback&lt;T&gt;() {
+                @Override
+                public void onNext(T t) {
+                    // 此处是最大的区别,外部函数的转换
+                    RxJob&lt;R&gt; flatMapped = func.call(t);
+                  	// 得到 flatMapped ，然后调用
+                    flatMapped.doJob(new RxCallback&lt;R&gt;() {
+                        @Override
+                        public void onNext(R r) {
+                            // 把需要变换出的类型往下一个任务传递
+                          	// 此处和 map 方法处理一致
+                            rxCallback.onNext(r);
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    rxCallback.onError(e);
+                }
+            });
+        }
+    };
+}
+</code></pre>
+<h3 id="map-和-flatmap-的对比"><code>map</code> 和 <code>flatMap</code> 的对比</h3>
+<p><code>flatMap</code> 和 <code>map</code> 最大的区别就是返还的 <code>RxJob</code> 对象中 <code>curJob.doJob</code> 中回调的区别</p>
+<p><code>flatMap</code> 方法核心部分</p>
+<pre><code class="language-java"> // 此处是最大的区别
+ RxJob&lt;R&gt; flatMapped = func.call(t);
+ flatMapped.doJob(new RxCallback&lt;R&gt;() {
+   @Override
+   public void onNext(R r) {
+   	rxCallback.onNext(r);
+   }
+
+  @Override
+  public void onError(Exception e) {
+       rxCallback.onError(e);
+  }
+});
+</code></pre>
+<p><code>map</code> 方法核心部分</p>
+<pre><code class="language-java">R mapped = func.call(t);
+rxCallback.onNext(mapped);
+</code></pre>
+<p><code>flatMap</code> 在回调完以后，运行的是 <code>flatMapped.doJob()</code></p>
+<p>并且把当前 <code>RxJob</code> 对象 <code>rxCallback</code> 的回调放到了<code>flatMapped.doJob</code> 中的回调用</p>
+<p>从而使得下一个数据 <code>r</code> 是在运行完 <code>flatMapped</code> 任务后生成的。</p>
+<p>代入此处就是 <code>r</code> 就是 <code>mApi.store(photo,callback)</code> 中的 <code>photo</code></p>
+<h3 id="解释为什么-map-函数无法实现-flatmap-的功能">解释为什么 <code>map</code> 函数无法实现 <code>flatMap</code> 的功能？</h3>
+<p><code>flatMap</code> 中的转变函数的具体实现是 <code>T -&gt; RxJob&lt;R&gt;</code> 的转换</p>
+<p>带入当前例子就是 <code>Photo —&gt; RxJob&lt;String&gt;</code></p>
+<p>注意，之前的 <code>map</code> 方法是 <code>List —&gt; Photo</code>  而不是 <code>List&lt;Photo&gt; -&gt; Photo</code></p>
+<p>因为 <code>map</code> 方法的入参是 <code>Func&lt;T,R&gt; func</code> ，而不是 <code>Func&lt;List&lt;T&gt;,R&gt; func</code></p>
+<p>而 <code>flaMap</code> 函数的入参则是 <code>Func&lt;T,RxJob&lt;R&gt;&gt; func</code>,写死了第二个参数类型必须是 <code>RxJob&lt;R&gt;</code> ，然后 <code>RxJob&lt;R&gt;</code> 方法会被执行</p>
+<p>做到了异步中的异步，同样也说明了入参 <code>Func&lt;?,?&gt; func</code> 会决定转换函数的功能，从而影响整个变换的不同</p>
+<p><code>map</code> 和 <code>flatMap</code> 的区别就如下图</p>
+<pre><code>					map
+	  A ------------&gt;  B/[B]		
+    
+												
+					flatMap							
+	 [A]------------&gt; [B]									 
+
+</code></pre>
+<p>​</p>
+<p>其核心在于类型的变换，即 <code>Func&lt;?,?&gt; func</code>也就是函数式编程中的 <code>Functor</code></p>
+<p>不同的 <code>func</code> 就会实现不同的变换， <code>flatMap</code> 就是一个 <code>Monad</code></p>
+<p>当其运用到 <a href="https://github.com/ReactiveX">ReactiveX</a> 上时，其转换核心就是数据流，也就做到了 <code>Observe/Subscribe</code> 的模式，因为在每一次变换后数据始终存在，对应的操作也可触发。不过 <code>RxJava</code> 还有更多其他的东西，不仅仅是这两个变换。但基本上理解这两个变换就能举一反三了，理解其他变换</p>
+<p><code>RxJava</code> 中的 <code>map/flatMap</code> 也是创建对于的 <code>Observable</code> 对象，然后调用对应的函数，然后返回需要的数据</p>
+<p>其中 <code>map</code> 方法中的入参 <code>Function</code>，只会在各种类型中转换</p>
+<p>而 <code>flatMap</code> 中的入参 <code>Function</code> 必然会转换出一个 <code>Observable&lt;R&gt;</code> 类型</p>
+<p>在 <code>RxJava 2</code> 转换出的是一个 <code>ObservableSource&lt;R&gt;</code></p>
+<p>官方解释如下，non-backpressured Observable，可以理解为类似 <code>Observable</code> 类型，此处和 <code>backpressured</code> 的一些概念有关联，不作解释。</p>
+<blockquote>
+<p>Represents a basic, non-backpressured {@link Observable} source base interface</p>
+</blockquote>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://flyer88.github.io/post/jiu-ru-he-shi-xian-rxjava-de-lian-shi-diao-yong-map-fang-fa-de-shi-xian-md/" class="post-title gt-a-link">
+                    【旧】如何实现 RxJava 的链式调用 -- map 方法的实现
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '8f894d7af601ea18e6b9',
+    clientSecret: '70f1cea8fb683c4dbf8e1b94f676ae3f3c4311a3',
+    repo: 'flyer88.github.io',
+    owner: 'flyer88',
+    admin: ['flyer88'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">爪哇岛上程序猿 十指弯弯不弄弦 
+斗室方屏十余寸 不知今夕是何年</div>
+    <div class="social-container">
+        
+            
+                <a href="http://github.com/flyer88" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

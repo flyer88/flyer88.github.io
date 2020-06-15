@@ -1,0 +1,655 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>【旧】如何实现 RxJava 的链式调用 -- map 方法的实现 | 键盘敲击者</title>
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592218144429">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-57136418-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-57136418-1');
+    </script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            键盘敲击者
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="menu gt-a-link">
+                            关于我
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    【旧】如何实现 RxJava 的链式调用 -- map 方法的实现
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-06-15 ·
+                    </time>
+                    
+                        <a href="https://flyer88.github.io/tag/android2/" class="post-tags">
+                            # Android 进阶
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/QBqEnb3yY/" class="post-tags">
+                            # 【旧】
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <blockquote>
+<p>写于 2017年 05 月 24 日</p>
+</blockquote>
+<pre><code class="language-java">public interface Api{
+    void queryPhoto(String query,QueryCallback QueryCallback);
+    interface QueryCallback{
+        void onQuerySuccess(List&lt;Photo&gt; photoList);
+        void onQueryFailed(Exception e);
+    }
+}
+</code></pre>
+<pre><code class="language-java">public class PhotoUtils{
+    Api mApi;
+    public void handlePhotoSync(){
+        mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+            @Override
+            public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                Photo photo = getBestPhoto(photoList);
+              	String imgUrl = photo.getUrl();
+            }
+
+            @Override
+            public void onQueryFailed(Exception e) {
+				ToastUtils.show(e);
+            }
+        });
+    }
+}
+</code></pre>
+<p><strong>此时假设有一个包裹类，他可以运行 <code>getBestPhoto(photoList)</code> 和 <code>photo.getUrl()</code> 这两行代码，而这两行代码由外部放入</strong></p>
+<p>那么调用就会如下：</p>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  				@Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+  // 如果有这么一个包裹类，代码就可以写成下面这样，则当需要调用的时候，
+  // 代码就会和 RxJava 很类似( java 8 上会变成 Lambda 表达式 )
+  // 从而使得代码具有很清晰的逻辑，异步代码看上去也会变的如同步代码一样。
+queryPhotoJob
+  .map(photoList -&gt; { return getBestPhoto(photoList);})
+  //.map(new Func&lt;List&lt;Photo&gt;,Photo&gt;()
+  //          @Overide
+  //          Photo call(List&lt;Photo&gt; photoList){
+  //		    return getBestPhoto(photoList);
+  //		  })
+  .map(photo -&gt; {return photo.getUrl()})
+  .doJob(new RxCallback&lt;T&gt;() {
+            @Override
+            public void onNext(T t) {
+
+            }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+   });
+</code></pre>
+<p>因此接下来需要考虑如何实现这个包裹的类，使得其调用会像  <code>RxJava</code> 一般。首先需要确定该类需要处理以下几个问题</p>
+<ul>
+<li>该包裹的类有哪些方法及其使用</li>
+<li><code>map</code> 函数如何实现，其调用逻辑</li>
+</ul>
+<h3 id="整体介绍">整体介绍：</h3>
+<p>确定一个包裹类 —&gt; 创建包裹类 <code>new RxJob()</code> —&gt; <code>map</code> 方法实现</p>
+<h3 id="map-方法实现包括"><code>map</code> 方法实现包括 ：</h3>
+<p>入参和出参的基本类型确定 —&gt; 转变函数的确定  —&gt; <code>doJob</code> 调用 —&gt; <code>map</code> 返还值具体介绍 —&gt; <code>func.call()</code> 返还值的传递</p>
+<h3 id="包裹类方法和作用">包裹类方法和作用</h3>
+<p>首先取名，该类叫 <code>RxJob</code></p>
+<p><code>RxJob</code> 类的意义，它被定义成一个任务，类似 <code>AsyncTask</code> ，而运行该任务的方法就是 <code>doJob</code> 有入参 <code>RxCallback</code></p>
+<p>类的定义还有一个泛型 <code>T</code> ，主要决定了 <code>doJob</code> 方法中 <code>RxCallback&lt;T&gt;</code> 中的 <code>T</code> 类型</p>
+<p>该类型会影响很多部分的参数类型，具体需要参考后面的分析。</p>
+<p>代码如下:</p>
+<pre><code class="language-java">public abstract class RxJob&lt;T&gt; {
+    public abstract void doJob(RxCallback&lt;T&gt; rxCallback);
+    public &lt;R&gt; RxJob&lt;T&gt; map(final Func&lt;T,R&gt; func){...}
+}
+</code></pre>
+<p>先忽略 <code>map</code> 方法，现看 <code>doJob(RxCallback&lt;T&gt; rxCallback)</code></p>
+<p><code>doJob(RxCallback&lt;T&gt; rxCallback)</code> 有一个回调，回调接口定义如下：</p>
+<pre><code class="language-java">public interface RxCallback&lt;T&gt; {
+    void onNext(T t);
+    void onError(Exception e);
+}
+</code></pre>
+<p>两个方法，<code>onNext(T t)</code> 和 <code>onError(Exception e)</code> ,一个用来传递内容 <code>T</code>，一个用来处理错误</p>
+<p>也就是说，<code>RxJob</code> 执行的内容最终都是 <code>doJob(RxCallback&lt;T&gt; rxCallback)</code> 方法，这个方法是链接起所有回调的核心</p>
+<p>保证了所有的方法能一个一个根据链式调用一个一个执行</p>
+<h3 id="创建包裹类-new-rxjob">创建包裹类 <code>new RxJob(..)</code></h3>
+<p>直接带入当前的栗子中，代码如下</p>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  	        @Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+</code></pre>
+<p>其中<code>RxJob&lt;T&gt;</code> 中的 <code>T</code> 的值是 <code>List&lt;Photo&gt;</code>，这主要决定于 <code>mApi.queryPhoto()</code> 中 <code>onQuerySuccess(List&lt;Photo&gt; photoList)</code> 中的参数类型，让 <code>rxCallback.onNext(photoList)</code> 能取到对应的类型。从而把拿到的数据内容，借助 <code>RxCallback</code> 回调往外层抛出。</p>
+<p>即，如果我们需要调用 <code>queryPhotoJob</code> ，让他执行对应的操作代码如下</p>
+<pre><code class="language-java">queryPhotoJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;(){
+  	public void onNext(List&lt;Photo&gt; photoList){
+           Photo photo = getBestPhoto(photoList);
+           String imgUrl = photo.getUrl();
+  	}
+  	public void onError(Exception e){...}
+});
+</code></pre>
+<h3 id="核心部分-map-函数如何实现">核心部分 map 函数如何实现</h3>
+<p>首先可以确定的是 map 函数返回的类型肯定是 <code>RxJob</code>，因为 <code>map</code>方法是可以连续调用的，</p>
+<p>其次，可以确定 <code>map</code> 函数的入参是 <code>Func</code>，</p>
+<p>一个匿名内部类（<code>Java 8</code> 中的 <code>Lambda</code> 表达式），在其他某些语言中就是函数对象、函数引用之类的</p>
+<p>由此可以确定 <code>map</code> 方法基本的样子如下代码：</p>
+<pre><code class="language-java">public RxJob map(Func&lt;T,R&gt; func){
+  	...
+    return rxJob;
+};
+</code></pre>
+<p>然后考虑入参 <code>Func&lt;T,R&gt; func</code> 的实现，即这个转变函数该如何实现。</p>
+<h4 id="1-转变函数的确定">1. 转变函数的确定</h4>
+<p>首先可以确定这个匿名内部类会实现一个从 <code>T 类型—&gt; R 类型</code>的转换，</p>
+<p>其次 <code>func</code> 对象是在 map 方法调用的时候，才确定具体的实现内容，因此，它必然是一个接口或者抽象方法，待实现</p>
+<p>然后，考虑到 <code>T 类型—&gt; R 类型</code> 的转换在具体代码编写的时候是可以确定的，由此考虑可以用泛型方法和泛型类就可以实现。</p>
+<p>从而创建 <code>Func&lt;T,R&gt;</code> 接口，该接口有一个 <code>R call(T t)</code> 方法待实现</p>
+<p>看如下代码：</p>
+<pre><code class="language-java">public interface Func&lt;T,R&gt; {
+    /**
+     *
+     * @param t transform 的对象类型
+     * @return 返还的对象类型
+     */
+    R call(T t);
+}
+</code></pre>
+<p>该方法返回的类型，是泛型类 <code>Func&lt;T,R&gt;</code> 中的 <code>R</code>，其入参是泛型类 <code>Func&lt;T,R&gt;</code> 中的 <code>T</code></p>
+<p>即该类的作用就是进行一个从 <code>T —&gt; R</code> 的转换，而具体的转换方法由外部实现。</p>
+<p>应用到上面的例子就是，<code>List —&gt; Photo</code> 的转换，即 <code>R call&lt;T t&gt;</code> 方法 变成了 <code>Photo call&lt;List photoList&gt;</code></p>
+<p>于是乎，代码就变成了如下的样子</p>
+<pre><code class="language-java">RxJob queryPhotoJob = new RxJob(..)...;
+queryPhotoJob
+  .map(new Func&lt;List&lt;Photo&gt;,Photo&gt;()
+            @Overide
+            Photo call(List&lt;Photo&gt; photoList){
+			    return getBestPhoto(photoList);
+  			})
+  // 同理第二个 map 就成了如下，
+  // 入参是上个操作的出参 Photo
+  // 而出参则是 String 类型的
+  .map(new Func&lt;Photo,String&gt;(){
+            @Overide
+            String call(Photo photo){
+                return photo.getUrl()//返还 String 类型
+            }
+          })
+  .doJob(...);
+</code></pre>
+<p>至此，<code>map</code> 函数的入参整体已经介绍完毕。</p>
+<h4 id="2dojob-方法的调用">2.<code>doJob</code> 方法的调用</h4>
+<p>然后考虑里面具体的调用逻辑，首先考虑任务调用，第一个 <code>map</code> 方法在触发的时候，<code>queryPhotoJob</code> 本身已经是一个 <code>RxJob</code> 对象了</p>
+<p>它的实现内容也简单，在创建包裹类时已经有解释了。</p>
+<pre><code class="language-java">queryPhotoJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;(){
+  	public void onNext(List&lt;Photo&gt; photoList){..}
+  	public void onError(Exception e){...}
+});
+</code></pre>
+<p>也就是说，如果我要调用 <code>map</code> 方法触发传入的 <code>func</code> 匿名内部类，就必须先调用 <code>queryPhotoJob.doJob(..)</code></p>
+<p>于是把代码变成</p>
+<pre><code class="language-java">public RxJob map(Func&lt;T,R&gt; func){
+  rxJob.doJob(new RxCallback&lt;T&gt;() {
+      @Override
+      public void onNext(T t) {
+      }
+
+      @Override
+      public void onError(Exception e) {
+      }
+    });
+  return ...;
+};
+</code></pre>
+<p>应用到上述例子中其具体的泛型值变化就成了如下代码</p>
+<pre><code class="language-java">public RxJob map(Func&lt;List&lt;Photo&gt;,R&gt; func){
+  rxJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;() {
+      @Override
+      public void onNext(List&lt;Photo&gt; photoList) {
+      }
+
+      @Override
+      public void onError(Exception e) {
+      }
+    });
+  return ...;
+};
+</code></pre>
+<p>此时需要考虑的就是在哪里调用 <code>func</code> 函数，它是负责把<code>T —&gt; R</code> ，</p>
+<p>因此该部分代码必然是在当前任务执行完后，拿到当前任务的回调值，然后进行转换，即 <code>map</code> 方法会变成如下</p>
+<pre><code class="language-java">public RxJob map(Func&lt;T,R&gt; func){
+  rxJob.doJob(new RxCallback&lt;T&gt;() {
+      @Override
+      public void onNext(T t) {
+        R mapped = func.call(t);
+      }
+
+      @Override
+      public void onError(Exception e) {
+      }
+    });
+  return ...;
+};
+</code></pre>
+<h4 id="3-map-方法返还值">3. <code>map</code> 方法返还值</h4>
+<p>接下来考虑返回值，首先 <code>map</code> 方法返回的是一个 <code>RxJob</code>对象</p>
+<p>其次，因为当前任务已经执行完了，而下一个任务需要当前任务执行后处理的返回值，即<code>func.call(t)</code> 返回的 <code>mapped</code> 值</p>
+<p>如果返回的是原有的 <code>RxJob</code> 那么每次调用 <code>map</code> 方法时执行的代码永远是 <code>this.doJob</code> 因此每次执行的内容都是第一个任务了</p>
+<p>应用到此处就是 <code>queryPhotoJob.doJob(..)</code>。</p>
+<p>因此 <code>map</code> 方法返回的值应该是一个新创建的 <code>RxJob</code> 对象，并且该对象的 <code>doJob</code> 方法会先运行当前任务的 <code>doJob</code> 方法</p>
+<p>代码如下：</p>
+<pre><code class="language-java">public RxJob map(Func&lt;T,R&gt; func){
+  	 RxJob curJob = this;
+      return new RxJob() {
+            @Override
+            public void doJob(final RxCallback rxCallback) {
+                curJob.doJob(new RxCallback&lt;T&gt;() {
+                    @Override
+                    public void onNext(T t) {
+                        R mapped = func.call(t);
+                      	...
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        ...
+                    }
+                });
+            }
+        };
+};
+</code></pre>
+<p>把当前例子的泛型值带入如下：</p>
+<pre><code class="language-java">public RxJob map(Func&lt;List&lt;Photo&gt;,R&gt; func){
+  	 RxJob queryPhotoJob = this;
+     RxJob mapJob = new RxJob() {
+            @Override
+            public void doJob(final RxCallback rxCallback) {
+                queryPhotoJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;() {
+                    @Override
+                    public void onNext(List&lt;Photo&gt; photoList) {
+                        R mapped = func.call(photoList);
+                      	...
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        ...
+                    }
+                });
+            }
+        };
+  return mapJob;
+};
+</code></pre>
+<h4 id="4-funccall-的返还值传递">4. <code>func.call()</code> 的返还值传递</h4>
+<p>考虑如何把 <code>func.call()</code> 调用后的返回的数据往下一个 <code>RxJob</code> 传递</p>
+<p>直接调用下一个 <code>RxJob</code> 中回调的 <code>rxCallback.onNext()</code>方法即可，对于错误也同样调用 <code>rxCallback.onError(e)</code> 即可。</p>
+<pre><code class="language-java">public RxJob map(Func&lt;T,R&gt; func){
+  	 RxJob curJob = this;
+      return new RxJob() {
+            @Override
+            public void doJob(final RxCallback rxCallback) {
+                curJob.doJob(new RxCallback&lt;T&gt;() {
+                    @Override
+                    public void onNext(T t) {
+                        R mapped = func.call(t);
+                      	rxCallback.onNext(t);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        rxCallback.onError(e);
+                    }
+                });
+            }
+        };
+}
+</code></pre>
+<p>代入当前例子：</p>
+<pre><code class="language-java">public RxJob map(Func&lt;List&lt;Photo&gt;,R&gt; func){
+  	 RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = this;
+     RxJob mapJob = new RxJob() {
+            @Override
+            public void doJob(final RxCallback mapJobCallback) {
+                queryPhotoJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;() {
+                    @Override
+                    public void onNext(List&lt;Photo&gt; photoList) {
+                        R mapped = func.call(photoList);
+                      	mapJobCallback.onNext(mapped);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        mapJobCallback.onError(e);
+                    }
+                });
+            }
+        };
+  return mapJob;
+}
+</code></pre>
+<p>最终只需要确定泛型参数类型 <code>R</code>，他的作用是确定下一个<code>RxJob</code> 对象的泛型值</p>
+<p><code>R</code> 由 <code>func.call()</code> 方法 确定，也就是之前说的，在具体的 <code>map</code> 方法被调用时，参数的泛型值是可以确定的</p>
+<p><code>Func</code> 函数负责把 T —&gt; R 转换，因此，最终的 <code>map</code> 方法如下：</p>
+<pre><code class="language-java">public &lt;R&gt; RxJob&lt;R&gt; map(Func&lt;T,R&gt; func){
+      RxJob curJob = this;
+      return new RxJob&lt;R&gt;() {
+            @Override
+            public void doJob(final RxCallback&lt;R&gt; rxCallback) {
+                curJob.doJob(new RxCallback&lt;T&gt;() {
+                    @Override
+                    public void onNext(T t) {
+                        R mapped = func.call(t);
+                        rxCallback.onNext(mapped);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        rxCallback.onError(e);
+                    }
+                });
+            }
+        };
+  }
+</code></pre>
+<p>应用到当前例子，带入泛型值如下</p>
+<pre><code class="language-java">public&lt;Photo&gt; RxJob&lt;Photo&gt; map(Func&lt;List&lt;Photo&gt;,Photo&gt; func){
+  	 RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = this;
+     RxJob&lt;Photo&gt; mapJob = new RxJob&lt;Photo&gt;() {
+            @Override
+            public void doJob(final RxCallback&lt;Photo&gt; mapJobCallback) {
+                queryPhotoJob.doJob(new RxCallback&lt;List&lt;Photo&gt;&gt;() {
+                    @Override
+                    public void onNext(List&lt;Photo&gt; photoList) {
+                        Photo mapped = func.call(photoList);
+                      	mapJobCallback.onNext(mapped);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        mapJobCallback.onError(e);
+                    }
+                });
+            }
+        };
+  return mapJob;
+}
+</code></pre>
+<h3 id="整个任务如何运行">整个任务如何运行</h3>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  				@Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+RxJob&lt;Photo&gt; bestPhotoJob = queryPhotoJob.map(photoList -&gt; { return getBestPhoto(photoList);})
+RxJob&lt;String&gt; urlJob = .map(photo -&gt; {return photo.getUrl();})
+urlJob.doJob(new RxCallback&lt;String&gt;() {
+            @Override
+            public void onNext(String s) {
+				ToastUtils.show(s);
+            }
+
+            @Override
+            public void onError(Exception e) {
+				...
+            }
+   });
+</code></pre>
+<p>解释代码，第一个 <code>map</code> 方法 返还了一个 <code>RxJob&lt;Photo&gt;</code> 对象，第二个 <code>map</code> 返还了一个 <code>RxJob&lt;String&gt;</code> 对象，第三个 <code>doJob</code> 方法触发整个任务</p>
+<p><code>doJob</code> 方法触发的第一个方法是 <code>urlJob</code> 中的 <code>doJob</code> 方法，由于 <code>urlJob</code> 对象是由 <code>map</code> 方法创建的</p>
+<p>因此，在执行 <code>ToastUtils.show(s)</code> 方法之前，会先执行 <code>bestPhotoJob.doJob()</code></p>
+<p>同样，<code>queryPhotoJob.doJob()</code>也会执行在 <code>bestPhotoJob.doJob()</code> 方法之前</p>
+<p>因此整体过程就是 <code>queryPhotoJob.doJob()</code>—&gt; <code>bestPhotoJob.doJob()</code> —&gt; <code>urlJob.doJob()</code></p>
+<p>而这执行过程中，<code>R mapped = func.call(T)</code> 会先被调用，因此单个 <code>RxJob</code> 调用链如下：</p>
+<blockquote>
+<p>在调用每个 <code>RxJob.onNex()</code>情况下(即成功的情况下，没有出错)</p>
+</blockquote>
+<p><code>queryPhotoJob.doJob()</code> : <code>mApi.query</code> —&gt; <code>func.call(t)</code> —&gt; <code>getBestPhoto(photoList)</code></p>
+<p><code>bestPhotoJob.doJob()</code> ： <code>func.call(t)</code> —&gt; <code>photo.getUrl()</code></p>
+<p><code>urlJob.doJob()</code>：  <code>ToastUtil.show()</code></p>
+<p>比较炫酷的写法如下：</p>
+<pre><code class="language-java">RxJob&lt;List&lt;Photo&gt;&gt; queryPhotoJob = new RxJob&lt;List&lt;Photo&gt;&gt;(){
+  				@Override
+                public void doJob(final RxCallback&lt;List&lt;Photo&gt;&gt; rxCallback) {
+                    mApi.queryPhoto(&quot;flyer&quot;, new Api.QueryCallback() {
+                        @Override
+                        public void onQuerySuccess(List&lt;Photo&gt; photoList) {
+                            rxCallback.onNext(photoList);
+                        }
+                      
+
+                        @Override
+                        public void onQueryFailed(Exception e) {
+                            rxCallback.onError(e);
+                        }
+                    });
+                }
+            };
+};
+queryPhotoJob
+  .map(photoList -&gt; { return getBestPhoto(photoList);})
+  .map(photo -&gt; {return photo.getUrl()})
+  .doJob(...);
+</code></pre>
+<p>=================================</p>
+<p><a href="">异步里面还有异步方法，<code>flatMap</code> 待续</a></p>
+<p>=================================</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://flyer88.github.io/post/jiu-android-bei-sai-er-qu-xian-qq-shan-chu-xiao-hong-dian-lei-si-xiao-guo-shi-xian/" class="post-title gt-a-link">
+                    【旧】Android 贝塞尔曲线，QQ 删除小红点类似效果实现
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '8f894d7af601ea18e6b9',
+    clientSecret: '70f1cea8fb683c4dbf8e1b94f676ae3f3c4311a3',
+    repo: 'flyer88.github.io',
+    owner: 'flyer88',
+    admin: ['flyer88'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">爪哇岛上程序猿 十指弯弯不弄弦 
+斗室方屏十余寸 不知今夕是何年</div>
+    <div class="social-container">
+        
+            
+                <a href="http://github.com/flyer88" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
