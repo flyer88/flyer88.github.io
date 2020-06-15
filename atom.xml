@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://flyer88.github.io</id>
     <title>键盘敲击者</title>
-    <updated>2020-06-15T08:31:03.827Z</updated>
+    <updated>2020-06-15T08:47:35.029Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://flyer88.github.io"/>
     <link rel="self" href="https://flyer88.github.io/atom.xml"/>
@@ -34,7 +34,7 @@
 <p>​			  层序：按层级输出</p>
 </blockquote>
 </blockquote>
-<p>###0x0002. 树的遍历</p>
+<h3 id="0x0002-树的遍历">0x0002. 树的遍历</h3>
 <p><strong>递归和栈</strong> （树的前序，中序，后序遍历）</p>
 <ol>
 <li>
@@ -154,61 +154,6 @@
 </code></pre>
 </li>
 </ol>
-<p><strong>树打印</strong></p>
-<pre><code class="language-java">//输入：			3,2,9,null,null,10,null,null,8,null,4
-//输出： 		///////////////////////
-      		  //         3         //
-      		  //       /  \        //
-      		  //      2     8      //
-      		  //     / \     \     //
-      		  //    9   10    4    //
-      		  /////////////////////// 
-        
-public class BST {
-
-  public static class TreeNode{
-    int data;
-    TreeNode left;
-    TreeNode right;
-    public TreeNode(int data){
-      this.data = data;
-    }
-  }
-  
-  public static TreeNode createBinaryTree(LinkedList&lt;Integer&gt; inpuList){
-    TreeNode treeNode = null;
-    if (inpuList == null || inpuList.isEmpty())  {
-      return null;
-    }
-    Integer data = inpuList.removeFirst();
-    if (data != null) {
-      treeNode = new TreeNode(data);
-      treeNode.left = createBinaryTree(inpuList);
-      treeNode.right = createBinaryTree(inpuList);
-    }
-    return treeNode;
-  }
-  
-  public static void main(String[] args) {
-        
-        ///////////////////////
-        //         3         //
-        //       /  \        //
-        //      2     8      //
-        //     / \     \     //
-        //    9   10    4    //
-        /////////////////////// 
-        
-        LinkedList&lt;Integer&gt; inpuList = new LinkedList&lt;Integer&gt;(Arrays.asList(new Integer[]{
-                3,2,9,null,null,10,null,null,8,null,4
-        }));
-        TreeNode node = createBinaryTree(inpuList);
-  }
-  
-}
-        
-        
-</code></pre>
 ]]></content>
     </entry>
     <entry>
@@ -253,11 +198,11 @@ public class BST {
 <li>
 <p><strong>链表</strong></p>
 <blockquote>
-<pre><code class="language-shell">					  [NodeA|data1|left|right]
-						//										\\
-					//											 \\
-				//													\\
-[NodeB|data2|null|null]			[NodeC|data3|null|null]
+<pre><code class="language-shell">					         [NodeA|data1|left|right]
+						//									\\
+					//											\\
+				//												   \\
+[NodeB|data2|null|null]			            [NodeC|data3|null|null]
 </code></pre>
 </blockquote>
 </li>
@@ -268,8 +213,8 @@ public class BST {
 <pre><code class="language-shell">				 【1】
 				//	 \\
 			【2】	  【3】
-			//	\\    \\
-		【4】 【5】  【6】
+			//	\\         \\
+		【4】 【5】   【6】
 			\\
 			【8】
 			
@@ -439,8 +384,8 @@ key:地理 value:6
 hash code:721616
 </code></pre>
 <ol>
-<li>
-<p>**内存状态 ** (解决哈希碰撞)</p>
+<li><strong>内存状态</strong> （解决哈希碰撞）</li>
+</ol>
 <pre><code class="language-shell">&gt;table: HashMap$Node[16]@17
 	&gt; 0: HashMap$Node@31 &quot;政治&quot;:&quot;5&quot;
 		1: null
@@ -461,12 +406,13 @@ hash code:721616
 &gt;table[10].next: HashMap$Node@22 &quot;化学&quot;:&quot;8&quot;
  table[10].hash: 828410
 </code></pre>
-</li>
+<ol start="2">
 <li>
-<p><strong>扰动函数计算过程</strong></p>
+<p><strong>扰动函数计算过程</strong>（让高位和低位同时影响最终的 <code>hashCode</code>）</p>
 <blockquote>
-<p>让高位和低位同时影响最终的 hashCode， <code>(h = key.hashCode()) ^ (h &gt;&gt;&gt; 16)</code></p>
-<pre><code class="language-shell">key.hashCode() = 682768(化学)
+<p>公式： <code>(h = key.hashCode()) ^ (h &gt;&gt;&gt; 16)</code></p>
+</blockquote>
+<pre><code class="language-java">key.hashCode() = 682768(化学)
 hashCode = 682768 ^ (682768 &gt;&gt;&gt; 16) = 682778
 	
 二进制状态下转换过程
@@ -476,23 +422,23 @@ hashCode = 682768 ^ (682768 &gt;&gt;&gt; 16) = 682778
 补齐 0 后 ==&gt;
 
 0000 0000 0000 1010 0110 1011 0001 0000
- &gt;&gt;&gt; 16 （高位移至低位）
-=	0000 0000 0000 0000 0000 0000 0000 1010
+&gt;&gt;&gt; 16 （高位移至低位）
+=	
+0000 0000 0000 0000 0000 0000 0000 1010
 
 
 0000 0000 0000 1010 0110 1011 0001 0000 
 ^ （高低位作异或运算）
 0000 0000 0000 0000 0000 0000 0000 1010
-
-= 0000 0000 0000 1010 0110 1011 0001 1010
+= 
+0000 0000 0000 1010 0110 1011 0001 1010
 
 补充:异或运算取决于两个值，与和或运算只取决于单个值
 </code></pre>
 <blockquote>
 <p>补充：</p>
 <p><a href="https://www.javacodegeeks.com/2015/09/an-introduction-to-optimising-a-hashing-strategy.html">关于位移jdk1.7 和 1.8 中单次和多次的区别</a></p>
-<p>[知乎的简单解释](JDK 源码中 HashMap 的 hash 方法原理是什么？ - 胖君的回答 - 知乎 https://www.zhihu.com/question/20733617/answer/111577937)</p>
-</blockquote>
+<p><a href="https://www.zhihu.com/question/20733617/answer/111577937">知乎的简单解释</a></p>
 </blockquote>
 </li>
 <li>
@@ -500,13 +446,15 @@ hashCode = 682768 ^ (682768 &gt;&gt;&gt; 16) = 682778
 <blockquote>
 <p>获取在数组中的位置: <code>tab[i = (n - 1) &amp; hash]</code> ==&gt;  <code>tab[10]</code></p>
 <p>n 是 HashMap 的长度，2^m ， 上述情景中 m = 4，n 为 16（数组长度），n = 0B10000</p>
-<p>计算过程如下：</p>
-<pre><code class="language-shell">	      0000 0000 0000 0000 0000 0000 0001 0000     - 1
-=&gt;		  0000 0000 0000 0000 0000 0000 0000 1111 		= 15
-	 &amp;    0000 0000 0000 1010 0110 1011 0001 1010    （682778，扰动函数得到的 hashCode)
-=&gt; 	    0000 0000 0000 0000 0000 0000 0000 1100 		= 10
-</code></pre>
 </blockquote>
+<pre><code>     0000 0000 0000 0000 0000 0000 0001 0000     - 1
+=&gt;		 
+       0000 0000 0000 0000 0000 0000 0000 1111 		= 15
+	 &amp;    
+       0000 0000 0000 1010 0110 1011 0001 1010    （682778，扰动函数得到的 hashCode)
+=&gt; 	    
+       0000 0000 0000 0000 0000 0000 0000 1100 		= 10
+</code></pre>
 </li>
 <li>
 <p>数组中已经有值，插入链表末端：<code>p.next = newNode(hash, key, value, null);</code></p>
@@ -558,12 +506,10 @@ hashCode = 682768 ^ (682768 &gt;&gt;&gt; 16) = 682778
 </table>
 </li>
 <li>
-<p>栈（FILO）</p>
-<p>先进后出，导航条，递归调用</p>
+<p>栈（FILO）：先进后出，导航条，递归调用</p>
 </li>
 <li>
-<p>队列 （FIFO）</p>
-<p>Android main Looper 消息队列，爬虫队列</p>
+<p>队列 （FIFO）：Android main Looper 消息队列，爬虫队列</p>
 </li>
 </ol>
 <h3 id="基本实现">基本实现</h3>
@@ -655,7 +601,6 @@ public class Queue&lt;T&gt;{
 </code></pre>
 </li>
 </ol>
-<h1 id="2">2.</h1>
 ]]></content>
     </entry>
     <entry>

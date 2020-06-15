@@ -4,7 +4,7 @@
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>算法基础⑤（树的遍历） | 键盘敲击者</title>
-<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592209862347">
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592210836045">
 <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -117,7 +117,7 @@
 <p>​			  层序：按层级输出</p>
 </blockquote>
 </blockquote>
-<p>###0x0002. 树的遍历</p>
+<h3 id="0x0002-树的遍历">0x0002. 树的遍历</h3>
 <p><strong>递归和栈</strong> （树的前序，中序，后序遍历）</p>
 <ol>
 <li>
@@ -237,61 +237,6 @@
 </code></pre>
 </li>
 </ol>
-<p><strong>树打印</strong></p>
-<pre><code class="language-java">//输入：			3,2,9,null,null,10,null,null,8,null,4
-//输出： 		///////////////////////
-      		  //         3         //
-      		  //       /  \        //
-      		  //      2     8      //
-      		  //     / \     \     //
-      		  //    9   10    4    //
-      		  /////////////////////// 
-        
-public class BST {
-
-  public static class TreeNode{
-    int data;
-    TreeNode left;
-    TreeNode right;
-    public TreeNode(int data){
-      this.data = data;
-    }
-  }
-  
-  public static TreeNode createBinaryTree(LinkedList&lt;Integer&gt; inpuList){
-    TreeNode treeNode = null;
-    if (inpuList == null || inpuList.isEmpty())  {
-      return null;
-    }
-    Integer data = inpuList.removeFirst();
-    if (data != null) {
-      treeNode = new TreeNode(data);
-      treeNode.left = createBinaryTree(inpuList);
-      treeNode.right = createBinaryTree(inpuList);
-    }
-    return treeNode;
-  }
-  
-  public static void main(String[] args) {
-        
-        ///////////////////////
-        //         3         //
-        //       /  \        //
-        //      2     8      //
-        //     / \     \     //
-        //    9   10    4    //
-        /////////////////////// 
-        
-        LinkedList&lt;Integer&gt; inpuList = new LinkedList&lt;Integer&gt;(Arrays.asList(new Integer[]{
-                3,2,9,null,null,10,null,null,8,null,4
-        }));
-        TreeNode node = createBinaryTree(inpuList);
-  }
-  
-}
-        
-        
-</code></pre>
 
                 </div>
             </article>
