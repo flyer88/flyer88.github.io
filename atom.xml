@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://flyer88.github.io</id>
     <title>键盘敲击者</title>
-    <updated>2020-06-15T10:49:25.853Z</updated>
+    <updated>2020-06-15T15:56:06.876Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://flyer88.github.io"/>
     <link rel="self" href="https://flyer88.github.io/atom.xml"/>
@@ -11,6 +11,214 @@
     <logo>https://flyer88.github.io/images/avatar.png</logo>
     <icon>https://flyer88.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, 键盘敲击者</rights>
+    <entry>
+        <title type="html"><![CDATA[内存泄露分析定位]]></title>
+        <id>https://flyer88.github.io/post/nei-cun-xie-lu-fen-xi-ding-wei/</id>
+        <link href="https://flyer88.github.io/post/nei-cun-xie-lu-fen-xi-ding-wei/">
+        </link>
+        <updated>2020-06-15T15:43:54.000Z</updated>
+        <content type="html"><![CDATA[<ul>
+<li><strong>内存泄露根本原因</strong></li>
+<li><strong>内存泄露常见情况</strong></li>
+<li><strong>内存泄露定位方案</strong></li>
+<li><strong>最近碰到的示例</strong></li>
+<li><strong>常见内存泄露解决方案</strong></li>
+</ul>
+<blockquote>
+<p>该章节需配合 <code>Java GC</code> 机制 一起看</p>
+</blockquote>
+<h3 id="0x0001-内存泄露根本原因">0x0001. 内存泄露根本原因</h3>
+<ol>
+<li>
+<p><strong><code>GCRoot</code> 对象长期持有其他已经无用的对象（本该被回收，却未被回收）</strong>。通俗的说就是 <strong>生命周期较长的对象（如 static 类）持有生命周期较短的对象的引用（某个 Activity）</strong></p>
+</li>
+<li>
+<p><code>GCRoot</code> 对象包括</p>
+<ol>
+<li>
+<p>方法区静态属性 ，常量（多数伴随整个虚拟机的生命周期）</p>
+</li>
+<li>
+<p>栈帧中本地变量表中的引用对象 （即当前线程正在运行的代码持有的对象）</p>
+</li>
+<li>
+<p>JNI 本地方法引用的对象 （native 区引用的对象）</p>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="0x0002-内存泄露常见情况">0x0002. 内存泄露常见情况</h3>
+<ol>
+<li>
+<p>静态对象</p>
+<ul>
+<li>
+<p><code>static activity</code></p>
+</li>
+<li>
+<p><code>static view</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>activity/fragment</code> 销毁，结束耗时任务(异步网络请求)</p>
+</li>
+<li>
+<p><code>inner class</code> 存在异步等情况</p>
+</li>
+<li>
+<p><code>SingleInstance</code> 持有局部生命周期 <code>Activity</code></p>
+</li>
+<li>
+<p>资源类 <code>cursor</code> 没有关闭</p>
+</li>
+</ol>
+<blockquote>
+<p>补充，<code>lamda</code> 表达式是匿名内部类</p>
+</blockquote>
+<h3 id="0x0003-内存泄露定位方案">0x0003. 内存泄露定位方案</h3>
+<ol>
+<li>
+<p>静态分析</p>
+<p>跑 <code>Lint</code>，注意看 <code>Warning</code> ，会针对 <code>handler</code> 等，进行提示</p>
+</li>
+<li>
+<p>动态分析</p>
+<ul>
+<li><code>leakCanary</code></li>
+<li><code>adb shell dumpsys meminfo [PackageName]</code></li>
+<li><code>Android Profiler</code> (见下方内存泄露实例详解)</li>
+</ul>
+<p>以上三者，根据个人经验可以结合起来使用</p>
+<ol>
+<li><code>leakCanary</code> 可以用于快速定位内存泄露问题</li>
+<li>当面对 <code>leakCanary</code> 无法直接确定内存泄露的时，可以用 <code>adb shell dumpsys</code> 进行辅助确认泄露 <code>activity</code></li>
+<li>根据前两者确定的 <code>activity</code> 配合 <code>Android Profiler</code> <code>GC</code> 后进行分析，查看没有回收的对象的引用链，即可定位内存泄漏位置</li>
+</ol>
+</li>
+</ol>
+<h3 id="0x0004-最近碰到的示例">0x0004.  最近碰到的示例</h3>
+<p>​	背景介绍： 一个商品详情页，有内存泄露 。</p>
+<ol>
+<li>
+<p><code>LeakCanary</code>  报错截图，发现是一个 <code>UI</code> 消息队列上的一条消息泄露了，无法直接定位具体代码。<br>
+<img src="https://flyer88.github.io/post-images/1592235944966.png" alt="img" loading="lazy"></p>
+</li>
+<li>
+<p>此时，利用 <code>adb shell dumpsys meminfo</code>，然后多次进出 <code>SpuDetailActivity</code> ，验证确认是 <code>SpuDetailActivity</code> 存在泄露。</p>
+</li>
+</ol>
+<pre><code class="language-shell">➜ adb shell dumpsys meminfo com.leixun.taofen8.haoda
+Applications Memory Usage (in Kilobytes):
+Uptime: 693212294 Realtime: 787382396
+
+** MEMINFO in pid 14754 [com.leixun.taofen8.haoda] **
+                   Pss  Private  Private  SwapPss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------
+  Native Heap    74230    74108        0      230    98688    86999    11688
+  Dalvik Heap     6442     5952        0       25    11519     5760     5759
+ Dalvik Other     2683     2680        0        4
+        Stack       84       84        0        0
+       Ashmem        2        0        0        0
+      Gfx dev    28316    28316        0        0
+    Other dev       28        0       28        0
+     .so mmap    15415      280     7720        7
+    .jar mmap     3762        0     1844        0
+    .apk mmap      432        0      132        0
+    .ttf mmap      107        0       48        0
+    .dex mmap    19419    19344       32        0
+    .oat mmap      621        0        4        0
+    .art mmap     4696     4108        0        9
+   Other mmap     5421      476     3348        0
+      Unknown     2842     2808        0        6
+        TOTAL   164781   138156    13156      281   110207    92759    17447
+
+ App Summary
+                       Pss(KB)
+                        ------
+           Java Heap:    10060
+         Native Heap:    74108
+                Code:    29404
+               Stack:       84
+            Graphics:    28316
+       Private Other:     9340
+              System:    13469
+
+               TOTAL:   164781       TOTAL SWAP PSS:      281
+
+ Objects
+               Views:      341         ViewRootImpl:        2
+         AppContexts:        7           Activities:        2
+              Assets:       18        AssetManagers:        0
+       Local Binders:       25        Proxy Binders:       37
+       Parcel memory:       11         Parcel count:       48
+    Death Recipients:        2      OpenSSL Sockets:       13
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+ 
+ Asset Allocations
+      : 162K
+</code></pre>
+<ol start="3">
+<li>
+<p>由于个人经验丰富，直接借助 <code>LeakCanary</code> 和 <code>adb shell dumpsys meminfo</code> 配合几次试错，定位到问题</p>
+<blockquote>
+<p>整个推导流程：</p>
+<p><code>UI</code> -&gt; <code>Handler</code> -&gt; <code>MutableLiveData</code> -&gt; <code>MutableLiveData.observe()</code></p>
+<p><code>UI</code> 消息发送，自己代码中没有 <code>handler</code> 之类的，用了只有 <code>MutableLiveData</code> 来更新 <code>View</code>，快速定位两个 <code>LiveData Observe</code> 的代码，配合 <code>adb shell dumpsys meminfo</code> 直接验证注释掉几个方法，看 <code>Activity</code> 数量，快速定位出问题出在 <code>spuDetailBinding.hdPtrList.refreshComplete()</code>， 该第三方库调用错误时会出现内存泄露。</p>
+</blockquote>
+<pre><code class="language-java">...       
+  viewModel.loadSuccess.observe(this, aBoolean -&gt; {
+      	if (aBoolean) {
+      		adapter.submitList(viewModel.itemViewModels);
+      	}
+      	hideProgressDialog();
+      	spuDetailBinding.hdPtrList.refreshComplete();
+   });
+   viewModel.loadRelatedSuccess.observe(this, aBoolean -&gt; {
+       adapter.submitList(viewModel.itemViewModels);
+   });
+ ...
+</code></pre>
+</li>
+<li>
+<p><code>Android Profiler</code> 内存进行举例性分析，定位问题所在</p>
+</li>
+</ol>
+<blockquote>
+<p>使用 <code>profiler</code> 的时候，最好把 <code>leakCanary</code> 去掉，影响手动 <code>GC</code>，而且还会引起卡顿</p>
+<p>不熟练 <code>profiler</code>，可以配合 <a href="https://developer.android.com/studio/profile/memory-profiler">Android Profiler 官方使用指南</a>食用</p>
+</blockquote>
+<ol>
+<li>
+<p><strong>连接 <code>profiler</code></strong><br>
+<img src="https://flyer88.github.io/post-images/1592235971126.png" alt="😀" loading="lazy"><br>
+​</p>
+</li>
+<li>
+<p><strong>手动触发<code>GC</code></strong><br>
+<img src="https://flyer88.github.io/post-images/1592235992860.png" alt="😁" loading="lazy"></p>
+</li>
+<li>
+<p><strong>选中内存区域，找到泄露的 <code>Activity</code></strong><br>
+<img src="https://flyer88.github.io/post-images/1592236015842.png" alt="😂" loading="lazy"></p>
+</li>
+<li>
+<p>根据之前 <code>LeakCanary</code> 报错，直接定位 <code>MessageQueue</code> 持有的对象<br>
+<img src="https://flyer88.github.io/post-images/1592236028325.png" alt="🤣" loading="lazy"></p>
+</li>
+</ol>
+<h3 id="0x0005-常见内存泄露解决方案">0x0005. 常见内存泄露解决方案</h3>
+<ol>
+<li><code>WeakReference</code> 进行包裹</li>
+<li>用谷歌官方提供的生命周期组件，类似 <code>MutableLiveData</code> 之类的</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[【旧】如何实现 RxJava 的链式调用 -- flatmap 方法的实现]]></title>
         <id>https://flyer88.github.io/post/jiu-ru-he-shi-xian-rxjava-de-lian-shi-diao-yong-flatmap-fang-fa-de-shi-xian/</id>
@@ -1869,49 +2077,6 @@ static void changeName2(String paramName){
 <p>大功告成，特此记录</p>
 </li>
 </ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[【旧】Error inflating class 错误解决合集]]></title>
-        <id>https://flyer88.github.io/post/jiu-error-inflating-class-cuo-wu-jie-jue-he-ji/</id>
-        <link href="https://flyer88.github.io/post/jiu-error-inflating-class-cuo-wu-jie-jue-he-ji/">
-        </link>
-        <updated>2020-06-15T09:43:12.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>写于 2015 年 12 月 21 日</p>
-</blockquote>
-<p>错误信息:</p>
-<p><code>Binary XML file line #xxx: Error inflating class...</code></p>
-<ul>
-<li>
-<p>引用类名问题：在<code>Hello</code>包下自定义了一个<code>MineView</code>，将他用于布局文件中，完整报名来进行引用。<br>
-即<code>Hello.MineView</code></p>
-</li>
-<li>
-<p>构造函数问题：自定义一个View，必须派生实现基类View的三个构造函数<br>
-<code>View(Context context)</code></p>
-<p><code>View(Context context, AttributeSet attrs)</code></p>
-<p><code>View(Context context, AttributeSet attrs, int defStyle)</code></p>
-<p>从文档上的介绍来看，第二个和第三个构造函数对于<code>XML</code>这种引用方式是必须实现的，这三个构造函数应该是在不同的应用场合来实例化一个<code>View</code>对象。</p>
-</li>
-<li>
-<p>编译的中间文件没有清理干净：第三种就是你在原生系统代码的编译环境下编译APK之后，修改了<code>XML</code>，出现标题所述现象,clean build 即可。</p>
-</li>
-<li>
-<p>找不到资源文件：找不到<code>drawable</code>的资源文件，把<code>drawable</code>的<code>hdpi</code>等文件夹的图片资源都拷贝一份到<code>drawble</code>下，问题解决。(网上查询出，默认情况下，编译时 <code>drawable</code> 会选用<code>mdip</code>的，具体没去研究,验证过)。</p>
-</li>
-<li>
-<p><code>attr color</code> 引用 报错，https://code.google.com/p/android/issues/detail?id=26251<br>
-<code>Android</code> 的 <code>bug</code>，<code>color</code> 无法被引用到<code>drawable</code>中，只能一个主题一个 <code>drawable</code>，5.0以上修复此<code>bug</code>，<code>?attr/white</code> 是无法被引用的，只能 `@color/white<br>
-即</p>
-<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; android:shape=&quot;rectangle&quot;&gt;
-&lt;corners android:radius=&quot;2dp&quot; /&gt;
-&lt;solid android:color=&quot;?attr/white&quot;/&gt;`
-</code></pre>
-</li>
-</ul>
-</shape>
 ]]></content>
     </entry>
 </feed>
