@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://flyer88.github.io</id>
     <title>键盘敲击者</title>
-    <updated>2020-06-12T06:10:10.683Z</updated>
+    <updated>2020-06-15T08:26:47.758Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://flyer88.github.io"/>
     <link rel="self" href="https://flyer88.github.io/atom.xml"/>
@@ -11,6 +11,884 @@
     <logo>https://flyer88.github.io/images/avatar.png</logo>
     <icon>https://flyer88.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, 键盘敲击者</rights>
+    <entry>
+        <title type="html"><![CDATA[算法基础⑤（树的遍历）]]></title>
+        <id>https://flyer88.github.io/post/suan-fa-ji-chu-shu-de-bian-li/</id>
+        <link href="https://flyer88.github.io/post/suan-fa-ji-chu-shu-de-bian-li/">
+        </link>
+        <updated>2020-06-15T08:25:23.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="0x0001树的遍历-简介">0x0001.树的遍历 简介</h3>
+<blockquote>
+<ol>
+<li>
+<p>深度遍历的运行过程是先进后出(<code>FILO</code>)的，用的是栈和递归</p>
+<p>树的前序，中序，后序遍历</p>
+</li>
+<li>
+<p>广度遍历的运行过程是先进先出(<code>FIFO</code>)的，用的是队列</p>
+<p>树的层序遍历</p>
+</li>
+</ol>
+<blockquote>
+<p>补充：顺序（根据根）：根左右，中序左根右，后序左右根</p>
+<p>​			  层序：按层级输出</p>
+</blockquote>
+</blockquote>
+<p>###0x0002. 树的遍历</p>
+<p><strong>递归和栈</strong> （树的前序，中序，后序遍历）</p>
+<ol>
+<li>
+<p>递归实现</p>
+<pre><code class="language-java">public class BST {
+  ...
+	public static void preOrder(TreeNode treeNode){
+        if (treeNode == null) return;
+        System.out.print(treeNode.data + &quot; &quot;);
+        preOrder(treeNode.left);
+        preOrder(treeNode.right);
+    }
+
+    public static void inOrder(TreeNode treeNode){
+        if (treeNode == null) return;
+        inOrder(treeNode.left);
+        System.out.print(treeNode.data + &quot; &quot;);
+        inOrder(treeNode.right);
+    }
+
+    public static void postOrder(TreeNode treeNode){
+        if (treeNode == null) return;
+        postOrder(treeNode.left);
+        postOrder(treeNode.right);
+        System.out.print(treeNode.data + &quot; &quot;);
+    }
+}
+</code></pre>
+</li>
+<li>
+<p>栈实现</p>
+<pre><code class="language-java">public class BST {
+  	...
+    public static void stackPreOrder(TreeNode treeNode) {
+        if (treeNode == null ) return;
+        Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+        stack.push(treeNode);
+        TreeNode curNode = stack.pop();
+        while (!stack.empty() || curNode != null){
+            if (curNode != null) {
+                System.out.print(curNode.data + &quot; &quot;);
+                stack.push(curNode);
+                curNode = curNode.left;
+            } else {
+                curNode = stack.pop();
+                curNode = curNode.right;
+            }
+        }
+    }
+  
+  public static void stackInOrder(TreeNode treeNode) {
+        if (treeNode == null ) return;
+        Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+        TreeNode curNode = treeNode;
+        while (!stack.empty() || curNode != null){
+            if (curNode!= null){
+              	// 入栈
+                stack.push(curNode);
+                curNode = curNode.left;
+            } else {
+               // 回溯
+                curNode = stack.pop();
+                System.out.print(curNode.data + &quot; &quot;);
+                curNode = curNode.right;
+            }
+           
+        }
+    }
+  
+  public static void stackPostOrder(TreeNode treeNode) {
+        if (treeNode == null ) return;
+        Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
+        TreeNode curNode = treeNode;
+        TreeNode last = null;
+        while (!stack.empty() || curNode != null){
+            if (curNode != null) {
+                stack.push(curNode);
+                curNode = curNode.left;
+            } else {
+              	// 用 peek，而非 pop
+                TreeNode temp = stack.peek();
+                //是否变到右子树
+                if (temp.right != null &amp;&amp; temp.right != last) {
+                    curNode = temp.right;
+                } else {
+                    System.out.print(temp.data + &quot; &quot;);
+                    last = temp;
+                    stack.pop();
+                }
+            }
+        }
+    }
+}
+</code></pre>
+</li>
+</ol>
+<p><strong>队列</strong>（树的层序遍历）</p>
+<ol>
+<li>
+<p>具体实现</p>
+<pre><code class="language-java">public class BST {
+  	...	
+		public static void levelOrder(TreeNode treeNode) {
+        if (treeNode == null) return;
+        Queue&lt;TreeNode&gt; queue = new LinkedList&lt;TreeNode&gt;();
+        queue.offer(treeNode);
+        while(!queue.isEmpty()){
+            TreeNode cur = queue.poll();
+          	// 打印当前节点
+            System.out.print(&quot; &quot; + cur.data);
+	          // 按顺序入队列即可
+            if(cur.left != null) queue.offer(cur.left);
+            if(cur.right != null) queue.offer(cur.right);
+        }
+    }
+}
+</code></pre>
+</li>
+</ol>
+<p><strong>树打印</strong></p>
+<pre><code class="language-java">//输入：			3,2,9,null,null,10,null,null,8,null,4
+//输出： 		///////////////////////
+      		  //         3         //
+      		  //       /  \        //
+      		  //      2     8      //
+      		  //     / \     \     //
+      		  //    9   10    4    //
+      		  /////////////////////// 
+        
+public class BST {
+
+  public static class TreeNode{
+    int data;
+    TreeNode left;
+    TreeNode right;
+    public TreeNode(int data){
+      this.data = data;
+    }
+  }
+  
+  public static TreeNode createBinaryTree(LinkedList&lt;Integer&gt; inpuList){
+    TreeNode treeNode = null;
+    if (inpuList == null || inpuList.isEmpty())  {
+      return null;
+    }
+    Integer data = inpuList.removeFirst();
+    if (data != null) {
+      treeNode = new TreeNode(data);
+      treeNode.left = createBinaryTree(inpuList);
+      treeNode.right = createBinaryTree(inpuList);
+    }
+    return treeNode;
+  }
+  
+  public static void main(String[] args) {
+        
+        ///////////////////////
+        //         3         //
+        //       /  \        //
+        //      2     8      //
+        //     / \     \     //
+        //    9   10    4    //
+        /////////////////////// 
+        
+        LinkedList&lt;Integer&gt; inpuList = new LinkedList&lt;Integer&gt;(Arrays.asList(new Integer[]{
+                3,2,9,null,null,10,null,null,8,null,4
+        }));
+        TreeNode node = createBinaryTree(inpuList);
+  }
+  
+}
+        
+        
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[算法基础④（树的概念和存储）]]></title>
+        <id>https://flyer88.github.io/post/suan-fa-ji-chu-si-shu-de-gai-nian-he-cun-chu/</id>
+        <link href="https://flyer88.github.io/post/suan-fa-ji-chu-si-shu-de-gai-nian-he-cun-chu/">
+        </link>
+        <updated>2020-06-15T08:24:47.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="ox0001-基本概念">OX0001 基本概念</h3>
+<ol>
+<li>
+<p>树</p>
+<blockquote>
+<p>n(n &gt;= 0) 个节点 的有限集。当 n=0 时，称为空树，在任意一个非空树种有如下特点：</p>
+<ol>
+<li>有且仅有一个特定的称为根的节点。</li>
+<li>当 n &gt; 1 时，其余节点分为 m (m &gt; 0) 个互不相交的有限集，每个集合本身又是一个树，并称为根的子树</li>
+</ol>
+</blockquote>
+</li>
+<li>
+<p>二叉树</p>
+<blockquote>
+<p>每个节点只有两个孩子的树</p>
+</blockquote>
+</li>
+<li>
+<p>满二插树</p>
+<blockquote>
+<p>一个二叉树的所有非叶子节点都存在左右孩子，并且所有的叶子节点都在同一个层级</p>
+</blockquote>
+</li>
+<li>
+<p>完全二叉树</p>
+<blockquote>
+<p>对一个有 n 个节点的二叉树，按层级顺序编号，所有节点的编号为 1到 n，如果这个数的所有节点和同样深度的满二叉树的编号为从1到n的节点位置相同，则这个二叉树为完全二叉树</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="ox0002-存储方式">OX0002. 存储方式</h3>
+<ol>
+<li>
+<p><strong>链表</strong></p>
+<blockquote>
+<pre><code class="language-shell">					  [NodeA|data1|left|right]
+						//										\\
+					//											 \\
+				//													\\
+[NodeB|data2|null|null]			[NodeC|data3|null|null]
+</code></pre>
+</blockquote>
+</li>
+<li>
+<p><strong>数组 - 层序存储 (主要用于完全二叉树，否则会大量浪费空间)</strong></p>
+<blockquote>
+<p>父节点下标为parent，则做孩子的下标为 2* parent + 1，有孩子为 2*parent + 2</p>
+<pre><code class="language-shell">				 【1】
+				//	 \\
+			【2】	  【3】
+			//	\\    \\
+		【4】 【5】  【6】
+			\\
+			【8】
+			
+[1][2][3][4][5][null][6][null][8]
+ 0  1  2  3  4   5    6   7    8
+
+</code></pre>
+</blockquote>
+</li>
+</ol>
+<h3 id="ox0003-bst-二叉查找树二叉排序树">OX0003. <code>BST</code> 二叉查找树/二叉排序树</h3>
+<ol>
+<li>左子树不为空，左子树的值均小于根</li>
+<li>右子树不为空，右子树的值均大于根</li>
+<li>左右子树也是 <code>BST</code></li>
+<li>时间复杂度: <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(logn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[算法基础③（哈希表简介及部分源码分析）]]></title>
+        <id>https://flyer88.github.io/post/suan-fa-ji-chu-san-ha-xi-biao-gai-nian/</id>
+        <link href="https://flyer88.github.io/post/suan-fa-ji-chu-san-ha-xi-biao-gai-nian/">
+        </link>
+        <updated>2020-06-15T08:23:53.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="0x0001-简介">0x0001. 简介</h3>
+<ol>
+<li>
+<p>基本概念</p>
+<blockquote>
+<ol>
+<li>
+<p>由两部分组成，数组 + 链表（红黑树，根据链表大小决定是否用）</p>
+</li>
+<li>
+<p>链表实现：查找时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mn>1</mn><mo>)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>  -- <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></p>
+</li>
+</ol>
+<p>红黑树实现：查找时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mn>1</mn><mo>)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>  -- <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(logn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></p>
+</blockquote>
+</li>
+<li>
+<p>关键难点</p>
+<blockquote>
+<ol>
+<li><code>LoadFactor(负载因子) * Capacity(当前长度) &gt; size</code>  ==&gt; 动态扩容</li>
+<li>解决<code>hash</code> 碰撞，链表+红黑树</li>
+<li>扰动函数，使得概率分部平均</li>
+</ol>
+</blockquote>
+</li>
+</ol>
+<h3 id="0x0002-put-函数源码解析">0x0002. <code>put</code> 函数源码解析</h3>
+<pre><code class="language-java">		public V put(K key, V value) {
+        return putVal(hash(key), key, value, false, true);
+    }
+
+    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                   boolean evict) {
+        Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, i;
+      	// 为空处理，直接动态扩容（逻辑较为复杂，单独分析）
+        if ((tab = table) == null || (n = tab.length) == 0)
+            n = (tab = resize()).length;
+      	// 数组对应位置内容为空，直接放入
+        if ((p = tab[i = (n - 1) &amp; hash]) == null)
+            tab[i] = newNode(hash, key, value, null);
+        else {
+            Node&lt;K,V&gt; e; K k;
+          	// 数组的第一个位置
+            if (p.hash == hash &amp;&amp;
+                ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))
+                e = p;
+            else if (p instanceof TreeNode)
+            // 红黑树处理
+                e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);
+            else {
+              	// 链表处理，无限循环，找到要覆盖的节点 e，break 出局
+                for (int binCount = 0; ; ++binCount) {
+                   // e 指向下一个节点
+                    if ((e = p.next) == null) {
+                      	// 尾部插入
+                        p.next = newNode(hash, key, value, null);
+                      	// 如果链表超过 8 个，转换成红黑树
+                        if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                            treeifyBin(tab, hash);
+                        break;
+                    }
+                  	// 找到对应位置，key 相同，结束循环
+                    if (e.hash == hash &amp;&amp;
+                        ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))
+                        break;
+                    // 链表迭代指向下一个
+                    p = e;
+                }
+            }
+          	// e 不为空，覆盖 e, 返回原值
+            if (e != null) { // existing mapping for key
+                V oldValue = e.value;
+                if (!onlyIfAbsent || oldValue == null)
+                    e.value = value;
+              	// 空
+                afterNodeAccess(e);
+                return oldValue;
+            }
+        }
+        // ？？
+        ++modCount;
+        //更新size，并判断是否需要扩容。
+        if (++size &gt; threshold)
+            resize();
+      	//空
+        afterNodeInsertion(evict);
+        return null;
+    }
+
+
+		// hash 计算，扰动函数
+ 		static final int hash(Object key) {
+        int h;
+        return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);
+    }
+</code></pre>
+<h3 id="0x0003-put时内存状态和运算过程">0x0003. <code>put</code>时内存状态和运算过程</h3>
+<p><code>TestHashMap.java</code></p>
+<pre><code class="language-java">public class TestHashMap {
+    public static void main(String[] args) {
+        HashMap&lt;String, Integer&gt; programLanguage = new HashMap&lt;&gt;();
+        programLanguage.put(&quot;语文&quot;, 1);
+        programLanguage.put(&quot;数学&quot;, 2);
+        programLanguage.put(&quot;英语&quot;, 3);
+        programLanguage.put(&quot;历史&quot;, 4);
+        programLanguage.put(&quot;政治&quot;, 5);
+        programLanguage.put(&quot;地理&quot;, 6);
+        programLanguage.put(&quot;生物&quot;, 7);
+        programLanguage.put(&quot;化学&quot;, 8);
+
+        for (Entry&lt;String, Integer&gt; entry : programLanguage.entrySet()) {
+            System.out.println(&quot;key:&quot; + entry.getKey() + &quot; value:&quot;+ entry.getValue());
+            System.out.println(&quot;hash code:&quot; + entry.hashCode() +  &quot;\n&quot;);
+        }
+    }
+}
+</code></pre>
+<p><code>输出结果</code></p>
+<pre><code>key:政治 value:5
+hash code:831321
+
+key:生物 value:7
+hash code:958765
+
+key:历史 value:4
+hash code:684328
+
+key:数学 value:2
+hash code:828404
+
+key:化学 value:8
+hash code:682776
+
+key:语文 value:1
+hash code:1136443
+
+key:英语 value:3
+hash code:1074975
+
+key:地理 value:6
+hash code:721616
+</code></pre>
+<ol>
+<li>
+<p>**内存状态 ** (解决哈希碰撞)</p>
+<pre><code class="language-shell">&gt;table: HashMap$Node[16]@17
+	&gt; 0: HashMap$Node@31 &quot;政治&quot;:&quot;5&quot;
+		1: null
+		2: null
+		3: null
+		4: HashMap$Node@32 &quot;生物&quot;:&quot;7&quot;
+		5: null
+		6: HashMap$Node@33 &quot;历史&quot;:&quot;4&quot;
+		7: null
+		8: null
+		9: null
+		10: HashMap$Node@19 &quot;数学&quot;:&quot;2&quot;
+		11: HashMap$Node@34 &quot;语文&quot;:&quot;1&quot;
+		12: HashMap$Node@35 &quot;英语&quot;:&quot;3&quot;
+		13: HashMap$Node@36 &quot;地理&quot;:&quot;6&quot;
+		14: null
+		15: null
+&gt;table[10].next: HashMap$Node@22 &quot;化学&quot;:&quot;8&quot;
+ table[10].hash: 828410
+</code></pre>
+</li>
+<li>
+<p><strong>扰动函数计算过程</strong></p>
+<blockquote>
+<p>让高位和低位同时影响最终的 hashCode， <code>(h = key.hashCode()) ^ (h &gt;&gt;&gt; 16)</code></p>
+<pre><code class="language-shell">key.hashCode() = 682768(化学)
+hashCode = 682768 ^ (682768 &gt;&gt;&gt; 16) = 682778
+	
+二进制状态下转换过程
+
+682768 = 1010 0110 1011 0001 0000
+
+补齐 0 后 ==&gt;
+
+0000 0000 0000 1010 0110 1011 0001 0000
+ &gt;&gt;&gt; 16 （高位移至低位）
+=	0000 0000 0000 0000 0000 0000 0000 1010
+
+
+0000 0000 0000 1010 0110 1011 0001 0000 
+^ （高低位作异或运算）
+0000 0000 0000 0000 0000 0000 0000 1010
+
+= 0000 0000 0000 1010 0110 1011 0001 1010
+
+补充:异或运算取决于两个值，与和或运算只取决于单个值
+</code></pre>
+<blockquote>
+<p>补充：</p>
+<p><a href="https://www.javacodegeeks.com/2015/09/an-introduction-to-optimising-a-hashing-strategy.html">关于位移jdk1.7 和 1.8 中单次和多次的区别</a></p>
+<p>[知乎的简单解释](JDK 源码中 HashMap 的 hash 方法原理是什么？ - 胖君的回答 - 知乎 https://www.zhihu.com/question/20733617/answer/111577937)</p>
+</blockquote>
+</blockquote>
+</li>
+<li>
+<p><strong>取模</strong></p>
+<blockquote>
+<p>获取在数组中的位置: <code>tab[i = (n - 1) &amp; hash]</code> ==&gt;  <code>tab[10]</code></p>
+<p>n 是 HashMap 的长度，2^m ， 上述情景中 m = 4，n 为 16（数组长度），n = 0B10000</p>
+<p>计算过程如下：</p>
+<pre><code class="language-shell">	      0000 0000 0000 0000 0000 0000 0001 0000     - 1
+=&gt;		  0000 0000 0000 0000 0000 0000 0000 1111 		= 15
+	 &amp;    0000 0000 0000 1010 0110 1011 0001 1010    （682778，扰动函数得到的 hashCode)
+=&gt; 	    0000 0000 0000 0000 0000 0000 0000 1100 		= 10
+</code></pre>
+</blockquote>
+</li>
+<li>
+<p>数组中已经有值，插入链表末端：<code>p.next = newNode(hash, key, value, null);</code></p>
+</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[算法基础② （栈和队列基础）]]></title>
+        <id>https://flyer88.github.io/post/suan-fa-ji-chu-er-zhan-he-dui-lie-ji-chu/</id>
+        <link href="https://flyer88.github.io/post/suan-fa-ji-chu-er-zhan-he-dui-lie-ji-chu/">
+        </link>
+        <updated>2020-06-15T08:21:51.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="简介">简介</h3>
+<ol>
+<li>
+<p>物理结构和逻辑结构区别</p>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>线性结构</th>
+<th>非线性结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>逻辑结构</td>
+<td>表，队列，栈</td>
+<td>树，图</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>顺序存储结构</th>
+<th>链式存储结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>物理结构</td>
+<td>数组</td>
+<td>链表</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+</li>
+<li>
+<p>栈（FILO）</p>
+<p>先进后出，导航条，递归调用</p>
+</li>
+<li>
+<p>队列 （FIFO）</p>
+<p>Android main Looper 消息队列，爬虫队列</p>
+</li>
+</ol>
+<h3 id="基本实现">基本实现</h3>
+<ol>
+<li>
+<p>栈</p>
+<pre><code class="language-java">// 双向链表实现
+public class Stack&lt;T&gt;{
+  int height;
+  Node&lt;T&gt; head,tail;
+  
+  public void push(T item){
+    Node&lt;T&gt; tempNode = new Node&lt;T&gt;(item);
+    if (height == 0) {
+      head = tempNode;
+      tail = head;
+    } else {
+	    tail.next = tempNode;
+      tail = tempNode;
+    }  
+    height = height + 1;
+  }
+  
+  public T pop(){
+    if (height == 0) {
+			return null;
+    } else if (height == 1){
+      result = head;
+    	tail = null;
+      head = null;
+      height = 0;
+      return result;
+    } else {
+			tail = tail.pre;
+      result = tail.next;
+      tail.next = null;
+      height = height - 1;
+	    return result;
+    }
+  }
+  
+  public T peek(){
+    
+  }
+}
+</code></pre>
+</li>
+<li>
+<p>队列</p>
+<pre><code class="language-java">// 数组实现
+public class Queue&lt;T&gt;{
+  
+  int size;
+  Object[] queue;
+  final static capacity = 10;
+  
+  public Queue() {
+    queue = new Object[capacity];
+    size = capacity;
+  }
+  
+  public void enqueue(T t){
+    if (size &gt;= queue.length) {
+      // 动态扩容
+      int[] newArray = new int[2 * capacity]{};
+	    System.copyArray(queue,newArray);
+  	  queue = newArray;
+	    size = queue.length;
+    }
+		queue[size] = t;
+  }
+
+  public T poll(){
+    if (size == 0) {
+      throw new Exception(&quot;队列为空&quot;);
+    }
+		T t = queue[size -1];
+   	queue[size-1] = null;
+    return t;
+  }
+
+  public T peek(){
+    if (size == 0) {
+      throw new Exception(&quot;队列为空&quot;);
+    }
+		return queue[size - 1];
+  }
+}
+</code></pre>
+</li>
+</ol>
+<h1 id="2">2.</h1>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[算法基础① （基础概念、数组和链表基础）]]></title>
+        <id>https://flyer88.github.io/post/suan-fa-ji-chu-yi/</id>
+        <link href="https://flyer88.github.io/post/suan-fa-ji-chu-yi/">
+        </link>
+        <updated>2020-06-15T08:18:31.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="1-基础概念">1. 基础概念</h1>
+<ol>
+<li>
+<p>算法类型</p>
+<ul>
+<li>计算</li>
+<li>查找</li>
+<li>排序</li>
+<li>最优决策</li>
+</ul>
+</li>
+<li>
+<p>数据结构</p>
+<ul>
+<li>
+<p>线性结构</p>
+<blockquote>
+<p>数组，链表，栈，队列，哈希表</p>
+</blockquote>
+</li>
+<li>
+<p>树</p>
+<blockquote>
+<p>二叉树，多插树</p>
+</blockquote>
+</li>
+<li>
+<p>图</p>
+<blockquote>
+<p>有向图，无向图，环</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>
+<p>复杂度</p>
+<ul>
+<li>
+<p>时间复杂度</p>
+<blockquote>
+<ol>
+<li>运行时间是常数量级，则用常数 1 表示</li>
+<li>只保留时间函数中的最高阶项</li>
+<li>如果最高阶项存在，省去最高阶项的系数</li>
+</ol>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>T</mi><mo>(</mo><mi>n</mi><mo>)</mo><mo>=</mo><mi>O</mi><mo>(</mo><mi>f</mi><mo>(</mo><mi>n</mi><mo>)</mo><mo>)</mo></mrow><annotation encoding="application/x-tex">T(n) = O(f(n))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mclose">)</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>f</mi><mo>(</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">f(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span> 是算法所消耗的时间函数</p>
+<p>$T(n) = 2 $  =&gt;  $ O(1)$</p>
+<p>$ T(n) =  5logn $   =&gt;   $ O(logn)$</p>
+<p>$ T(n) = 3n $   =&gt;   <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></p>
+<p>$T(n) =  0.5n^2 + 0.5n  $   =&gt;  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><msup><mi>n</mi><mn>2</mn></msup><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></p>
+<p>$ O(1)&lt;O(logn)&lt; O(n)&lt;O(n^2) $</p>
+<p>其他:  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(nlogn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><msup><mi>n</mi><mn>3</mn></msup><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n^3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>m</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(mn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">m</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>  $O(2^n) $ <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mo>!</mo><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n!)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">!</span><span class="mclose">)</span></span></span></span></p>
+</blockquote>
+</li>
+<li>
+<p>空间复杂度</p>
+<blockquote>
+<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>S</mi><mo>(</mo><mi>n</mi><mo>)</mo><mo>=</mo><mi>O</mi><mo>(</mo><mi>f</mi><mo>(</mo><mi>n</mi><mo>)</mo><mo>)</mo></mrow><annotation encoding="application/x-tex">S(n) = O(f(n))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mclose">)</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>f</mi><mo>(</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">f(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>是算法所消耗的存储空间函数</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="2-数组和链表基础">2. 数组和链表基础</h1>
+<h3 id="数组">数组</h3>
+<ol>
+<li>
+<p>物理连续</p>
+</li>
+<li>
+<p>基本操作</p>
+<ul>
+<li>
+<p>查询更新</p>
+<pre><code class="language-java">int[] array = new int[]{1,2,3,4};
+System.out.println(array[1]);// 查
+array[0] = 0;// 改
+</code></pre>
+</li>
+<li>
+<p>删除</p>
+<pre><code class="language-java">int[] array = new int[]{1,2,3,4};
+
+int deletePosition = 2;
+if(deletePosition &gt;= array.length){
+	throw new Exception(&quot;删除数字超过数组长度！&quot;);
+}
+for(int i = deletePosition;i&lt;array.size-1;i++){
+	array[i]  = array[i+1];
+}
+
+</code></pre>
+</li>
+<li>
+<p>增加</p>
+<pre><code class="language-java">int s = 3;
+final static int capacity = 5
+int[] array;
+int size;
+
+public MyArray(){
+	array = new Array[capacity];
+  size = array.length;
+}
+
+
+public void insert(int index,int value) {
+  if (index &gt;= size) {
+    int[] newArray = new int[2 * capacity]{};
+    System.copyArray(array,newArray);
+    array = newArray;
+    size = array.length;
+    insert(index,value);// 递归调用，可以自动扩容多次
+  } else {
+    for(int i = size-1;i&gt;index:i--){
+      array[i] = array[i-1];
+    }
+    array[index] = value;
+  }
+}
+
+// array = new Array{1,2,3,4,5}
+// insert(2,20)
+  [1,2,3,4,5] 
+	-&gt; [1,2,3,4,5,null,null,null,null,null]
+  -&gt; [1,2,3,4,5,5,null,null,null,null]
+  -&gt; [1,2,3,4,4,5,null,null,null,null]
+  -&gt; [1,2,3,3,4,5,null,null,null,null]
+  -&gt; [1,2,2,3,4,5,null,null,null,null]
+  -&gt;
+  -&gt; [1,2,20,3,4,5,null,null,null,null]
+  
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="链表">链表</h3>
+<ol>
+<li>
+<p>非物理连续，逻辑连续</p>
+</li>
+<li>
+<p>基本操作</p>
+<ul>
+<li>
+<p>查找/更新</p>
+<pre><code class="language-java">int targetIndex = 10;
+int targetValue = 233;
+int i = 0;
+Node curNode;
+// 查找
+while(!curNode.next
+     	&amp;&amp; i &lt; targetIndex) {
+  curNode = curNode.next
+	i = i + 1;
+}
+// 更新
+curNode.value = targetValue;
+</code></pre>
+</li>
+<li>
+<p>增加/删除</p>
+<pre><code class="language-java">int targetIndex = 10;
+int size = 20;
+Node insertNode;
+Node head,tail;
+
+
+// 增加
+if (size == 0) {
+  head = insertNode;
+  tail = insertNode;
+  size = size + 1;
+} else if (targetIndex  == 0) {
+  insertNode.next = head;
+  head = insertNode;
+  size = size + 1;
+} else if (targetIndex == size) {
+  tail.next = insetNode;
+	tail = insertNode;
+  size = size + 1;
+} else if (targetIndex &gt; 0 &amp;&amp; targetIndex &lt; size ){
+  Node preNode = get(targetIndex -1);
+  Node nextNode = preNode.next;
+  preNode.next =  insertNode;
+  insertNode.next = nextNode;
+  size = size + 1;
+} else {
+  throw new Exception(&quot;超过链表长度&quot;);  
+}
+
+// 删除
+
+if (size == 0) {
+  throw new Exception(&quot;链表为空&quot;);
+} else if (targetIndex  == 0) {
+  Node newHead = head;
+  head = head.next;
+  newHead.next = null;
+  size = size - 1;
+} else if (targetIndex == size) {
+  tail = get(size -1);
+  tail.next = null;
+  size = size - 1;
+} else if (targetIndex &gt; 0 &amp;&amp; targetIndex &lt; size ){
+  Node preNode = get(targetIndex -1);
+  Node curNode = preNode.next;
+  preNode.next = curNode.next;
+  curNode.next = null;
+  size = size - 1;
+} else {
+  throw new Exception(&quot;超过链表长度&quot;);  
+}
+
+
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[repo 管理 git 仓库]]></title>
         <id>https://flyer88.github.io/post/repo-guan-li-git-cang-ku/</id>

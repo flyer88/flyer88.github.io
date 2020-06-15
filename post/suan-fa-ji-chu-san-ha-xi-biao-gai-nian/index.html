@@ -1,0 +1,374 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>算法基础③（哈希表简介及部分源码分析） | 键盘敲击者</title>
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592209604912">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            键盘敲击者
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    算法基础③（哈希表简介及部分源码分析）
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-06-15 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h3 id="0x0001-简介">0x0001. 简介</h3>
+<ol>
+<li>
+<p>基本概念</p>
+<blockquote>
+<ol>
+<li>
+<p>由两部分组成，数组 + 链表（红黑树，根据链表大小决定是否用）</p>
+</li>
+<li>
+<p>链表实现：查找时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mn>1</mn><mo>)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>  -- <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></p>
+</li>
+</ol>
+<p>红黑树实现：查找时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mn>1</mn><mo>)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>  -- <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(logn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></p>
+</blockquote>
+</li>
+<li>
+<p>关键难点</p>
+<blockquote>
+<ol>
+<li><code>LoadFactor(负载因子) * Capacity(当前长度) &gt; size</code>  ==&gt; 动态扩容</li>
+<li>解决<code>hash</code> 碰撞，链表+红黑树</li>
+<li>扰动函数，使得概率分部平均</li>
+</ol>
+</blockquote>
+</li>
+</ol>
+<h3 id="0x0002-put-函数源码解析">0x0002. <code>put</code> 函数源码解析</h3>
+<pre><code class="language-java">		public V put(K key, V value) {
+        return putVal(hash(key), key, value, false, true);
+    }
+
+    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                   boolean evict) {
+        Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, i;
+      	// 为空处理，直接动态扩容（逻辑较为复杂，单独分析）
+        if ((tab = table) == null || (n = tab.length) == 0)
+            n = (tab = resize()).length;
+      	// 数组对应位置内容为空，直接放入
+        if ((p = tab[i = (n - 1) &amp; hash]) == null)
+            tab[i] = newNode(hash, key, value, null);
+        else {
+            Node&lt;K,V&gt; e; K k;
+          	// 数组的第一个位置
+            if (p.hash == hash &amp;&amp;
+                ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))
+                e = p;
+            else if (p instanceof TreeNode)
+            // 红黑树处理
+                e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);
+            else {
+              	// 链表处理，无限循环，找到要覆盖的节点 e，break 出局
+                for (int binCount = 0; ; ++binCount) {
+                   // e 指向下一个节点
+                    if ((e = p.next) == null) {
+                      	// 尾部插入
+                        p.next = newNode(hash, key, value, null);
+                      	// 如果链表超过 8 个，转换成红黑树
+                        if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                            treeifyBin(tab, hash);
+                        break;
+                    }
+                  	// 找到对应位置，key 相同，结束循环
+                    if (e.hash == hash &amp;&amp;
+                        ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))
+                        break;
+                    // 链表迭代指向下一个
+                    p = e;
+                }
+            }
+          	// e 不为空，覆盖 e, 返回原值
+            if (e != null) { // existing mapping for key
+                V oldValue = e.value;
+                if (!onlyIfAbsent || oldValue == null)
+                    e.value = value;
+              	// 空
+                afterNodeAccess(e);
+                return oldValue;
+            }
+        }
+        // ？？
+        ++modCount;
+        //更新size，并判断是否需要扩容。
+        if (++size &gt; threshold)
+            resize();
+      	//空
+        afterNodeInsertion(evict);
+        return null;
+    }
+
+
+		// hash 计算，扰动函数
+ 		static final int hash(Object key) {
+        int h;
+        return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);
+    }
+</code></pre>
+<h3 id="0x0003-put时内存状态和运算过程">0x0003. <code>put</code>时内存状态和运算过程</h3>
+<p><code>TestHashMap.java</code></p>
+<pre><code class="language-java">public class TestHashMap {
+    public static void main(String[] args) {
+        HashMap&lt;String, Integer&gt; programLanguage = new HashMap&lt;&gt;();
+        programLanguage.put(&quot;语文&quot;, 1);
+        programLanguage.put(&quot;数学&quot;, 2);
+        programLanguage.put(&quot;英语&quot;, 3);
+        programLanguage.put(&quot;历史&quot;, 4);
+        programLanguage.put(&quot;政治&quot;, 5);
+        programLanguage.put(&quot;地理&quot;, 6);
+        programLanguage.put(&quot;生物&quot;, 7);
+        programLanguage.put(&quot;化学&quot;, 8);
+
+        for (Entry&lt;String, Integer&gt; entry : programLanguage.entrySet()) {
+            System.out.println(&quot;key:&quot; + entry.getKey() + &quot; value:&quot;+ entry.getValue());
+            System.out.println(&quot;hash code:&quot; + entry.hashCode() +  &quot;\n&quot;);
+        }
+    }
+}
+</code></pre>
+<p><code>输出结果</code></p>
+<pre><code>key:政治 value:5
+hash code:831321
+
+key:生物 value:7
+hash code:958765
+
+key:历史 value:4
+hash code:684328
+
+key:数学 value:2
+hash code:828404
+
+key:化学 value:8
+hash code:682776
+
+key:语文 value:1
+hash code:1136443
+
+key:英语 value:3
+hash code:1074975
+
+key:地理 value:6
+hash code:721616
+</code></pre>
+<ol>
+<li>
+<p>**内存状态 ** (解决哈希碰撞)</p>
+<pre><code class="language-shell">&gt;table: HashMap$Node[16]@17
+	&gt; 0: HashMap$Node@31 &quot;政治&quot;:&quot;5&quot;
+		1: null
+		2: null
+		3: null
+		4: HashMap$Node@32 &quot;生物&quot;:&quot;7&quot;
+		5: null
+		6: HashMap$Node@33 &quot;历史&quot;:&quot;4&quot;
+		7: null
+		8: null
+		9: null
+		10: HashMap$Node@19 &quot;数学&quot;:&quot;2&quot;
+		11: HashMap$Node@34 &quot;语文&quot;:&quot;1&quot;
+		12: HashMap$Node@35 &quot;英语&quot;:&quot;3&quot;
+		13: HashMap$Node@36 &quot;地理&quot;:&quot;6&quot;
+		14: null
+		15: null
+&gt;table[10].next: HashMap$Node@22 &quot;化学&quot;:&quot;8&quot;
+ table[10].hash: 828410
+</code></pre>
+</li>
+<li>
+<p><strong>扰动函数计算过程</strong></p>
+<blockquote>
+<p>让高位和低位同时影响最终的 hashCode， <code>(h = key.hashCode()) ^ (h &gt;&gt;&gt; 16)</code></p>
+<pre><code class="language-shell">key.hashCode() = 682768(化学)
+hashCode = 682768 ^ (682768 &gt;&gt;&gt; 16) = 682778
+	
+二进制状态下转换过程
+
+682768 = 1010 0110 1011 0001 0000
+
+补齐 0 后 ==&gt;
+
+0000 0000 0000 1010 0110 1011 0001 0000
+ &gt;&gt;&gt; 16 （高位移至低位）
+=	0000 0000 0000 0000 0000 0000 0000 1010
+
+
+0000 0000 0000 1010 0110 1011 0001 0000 
+^ （高低位作异或运算）
+0000 0000 0000 0000 0000 0000 0000 1010
+
+= 0000 0000 0000 1010 0110 1011 0001 1010
+
+补充:异或运算取决于两个值，与和或运算只取决于单个值
+</code></pre>
+<blockquote>
+<p>补充：</p>
+<p><a href="https://www.javacodegeeks.com/2015/09/an-introduction-to-optimising-a-hashing-strategy.html">关于位移jdk1.7 和 1.8 中单次和多次的区别</a></p>
+<p>[知乎的简单解释](JDK 源码中 HashMap 的 hash 方法原理是什么？ - 胖君的回答 - 知乎 https://www.zhihu.com/question/20733617/answer/111577937)</p>
+</blockquote>
+</blockquote>
+</li>
+<li>
+<p><strong>取模</strong></p>
+<blockquote>
+<p>获取在数组中的位置: <code>tab[i = (n - 1) &amp; hash]</code> ==&gt;  <code>tab[10]</code></p>
+<p>n 是 HashMap 的长度，2^m ， 上述情景中 m = 4，n 为 16（数组长度），n = 0B10000</p>
+<p>计算过程如下：</p>
+<pre><code class="language-shell">	      0000 0000 0000 0000 0000 0000 0001 0000     - 1
+=&gt;		  0000 0000 0000 0000 0000 0000 0000 1111 		= 15
+	 &amp;    0000 0000 0000 1010 0110 1011 0001 1010    （682778，扰动函数得到的 hashCode)
+=&gt; 	    0000 0000 0000 0000 0000 0000 0000 1100 		= 10
+</code></pre>
+</blockquote>
+</li>
+<li>
+<p>数组中已经有值，插入链表末端：<code>p.next = newNode(hash, key, value, null);</code></p>
+</li>
+</ol>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://flyer88.github.io/post/suan-fa-ji-chu-er-zhan-he-dui-lie-ji-chu/" class="post-title gt-a-link">
+                    算法基础② （栈和队列基础）
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">爪哇岛上程序猿 十指弯弯不弄弦 
+斗室方屏十余寸 不知今夕是何年</div>
+    <div class="social-container">
+        
+            
+                <a href="http://github.com/flyer88" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

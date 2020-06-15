@@ -3,7 +3,7 @@
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>键盘敲击者</title>
+<title>算法基础② （栈和队列基础） | 键盘敲击者</title>
 <link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592209604912">
 <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
@@ -30,11 +30,11 @@
 
 
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 </head>
 <body>
 <div class="main gt-bg-theme-color-first">
-    <div class="main-content">
-        <nav class="navbar navbar-expand-lg">
+    <nav class="navbar navbar-expand-lg">
     <div class="navbar-brand">
         <img class="user-avatar" src="/images/avatar.png" alt="头像">
         <div class="site-name gt-c-content-color-first">
@@ -83,98 +83,176 @@
         </div>
     </div>
 </nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    算法基础② （栈和队列基础）
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-06-15 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h3 id="简介">简介</h3>
+<ol>
+<li>
+<p>物理结构和逻辑结构区别</p>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>线性结构</th>
+<th>非线性结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>逻辑结构</td>
+<td>表，队列，栈</td>
+<td>树，图</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>顺序存储结构</th>
+<th>链式存储结构</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>物理结构</td>
+<td>数组</td>
+<td>链表</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+</li>
+<li>
+<p>栈（FILO）</p>
+<p>先进后出，导航条，递归调用</p>
+</li>
+<li>
+<p>队列 （FIFO）</p>
+<p>Android main Looper 消息队列，爬虫队列</p>
+</li>
+</ol>
+<h3 id="基本实现">基本实现</h3>
+<ol>
+<li>
+<p>栈</p>
+<pre><code class="language-java">// 双向链表实现
+public class Stack&lt;T&gt;{
+  int height;
+  Node&lt;T&gt; head,tail;
+  
+  public void push(T item){
+    Node&lt;T&gt; tempNode = new Node&lt;T&gt;(item);
+    if (height == 0) {
+      head = tempNode;
+      tail = head;
+    } else {
+	    tail.next = tempNode;
+      tail = tempNode;
+    }  
+    height = height + 1;
+  }
+  
+  public T pop(){
+    if (height == 0) {
+			return null;
+    } else if (height == 1){
+      result = head;
+    	tail = null;
+      head = null;
+      height = 0;
+      return result;
+    } else {
+			tail = tail.pre;
+      result = tail.next;
+      tail.next = null;
+      height = height - 1;
+	    return result;
+    }
+  }
+  
+  public T peek(){
+    
+  }
+}
+</code></pre>
+</li>
+<li>
+<p>队列</p>
+<pre><code class="language-java">// 数组实现
+public class Queue&lt;T&gt;{
+  
+  int size;
+  Object[] queue;
+  final static capacity = 10;
+  
+  public Queue() {
+    queue = new Object[capacity];
+    size = capacity;
+  }
+  
+  public void enqueue(T t){
+    if (size &gt;= queue.length) {
+      // 动态扩容
+      int[] newArray = new int[2 * capacity]{};
+	    System.copyArray(queue,newArray);
+  	  queue = newArray;
+	    size = queue.length;
+    }
+		queue[size] = t;
+  }
+
+  public T poll(){
+    if (size == 0) {
+      throw new Exception(&quot;队列为空&quot;);
+    }
+		T t = queue[size -1];
+   	queue[size-1] = null;
+    return t;
+  }
+
+  public T peek(){
+    if (size == 0) {
+      throw new Exception(&quot;队列为空&quot;);
+    }
+		return queue[size - 1];
+  }
+}
+</code></pre>
+</li>
+</ol>
+<h1 id="2">2.</h1>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://flyer88.github.io/post/suan-fa-ji-chu-yi/" class="post-title gt-a-link">
+                    算法基础① （基础概念、数组和链表基础）
+                </a>
+            </div>
+        
 
         
 
-<div class="archives-container">
-    
-        <h2 class="year gt-c-cotent-color-first">2020</h2>
         
-            
-                <article class="post">
-                    <a href="https://flyer88.github.io/post/suan-fa-ji-chu-shu-de-bian-li/">
-                        <div class="post-title gt-c-content-color-first">
-                            <small><b>2020-06-15&nbsp;&nbsp;·&nbsp;&nbsp;</b></small>
-                            算法基础⑤（树的遍历）
-                        </div>
-                    </a>
-                </article>
-            
-        
-            
-                <article class="post">
-                    <a href="https://flyer88.github.io/post/suan-fa-ji-chu-si-shu-de-gai-nian-he-cun-chu/">
-                        <div class="post-title gt-c-content-color-first">
-                            <small><b>2020-06-15&nbsp;&nbsp;·&nbsp;&nbsp;</b></small>
-                            算法基础④（树的概念和存储）
-                        </div>
-                    </a>
-                </article>
-            
-        
-            
-                <article class="post">
-                    <a href="https://flyer88.github.io/post/suan-fa-ji-chu-san-ha-xi-biao-gai-nian/">
-                        <div class="post-title gt-c-content-color-first">
-                            <small><b>2020-06-15&nbsp;&nbsp;·&nbsp;&nbsp;</b></small>
-                            算法基础③（哈希表简介及部分源码分析）
-                        </div>
-                    </a>
-                </article>
-            
-        
-            
-                <article class="post">
-                    <a href="https://flyer88.github.io/post/suan-fa-ji-chu-er-zhan-he-dui-lie-ji-chu/">
-                        <div class="post-title gt-c-content-color-first">
-                            <small><b>2020-06-15&nbsp;&nbsp;·&nbsp;&nbsp;</b></small>
-                            算法基础② （栈和队列基础）
-                        </div>
-                    </a>
-                </article>
-            
-        
-            
-                <article class="post">
-                    <a href="https://flyer88.github.io/post/suan-fa-ji-chu-yi/">
-                        <div class="post-title gt-c-content-color-first">
-                            <small><b>2020-06-15&nbsp;&nbsp;·&nbsp;&nbsp;</b></small>
-                            算法基础① （基础概念、数组和链表基础）
-                        </div>
-                    </a>
-                </article>
-            
-        
-            
-                <article class="post">
-                    <a href="https://flyer88.github.io/post/repo-guan-li-git-cang-ku/">
-                        <div class="post-title gt-c-content-color-first">
-                            <small><b>2020-06-11&nbsp;&nbsp;·&nbsp;&nbsp;</b></small>
-                            repo 管理 git 仓库
-                        </div>
-                    </a>
-                </article>
-            
-        
-            
-                <article class="post">
-                    <a href="https://flyer88.github.io/post/ge-ren-jian-li/">
-                        <div class="post-title gt-c-content-color-first">
-                            <small><b>2020-06-11&nbsp;&nbsp;·&nbsp;&nbsp;</b></small>
-                            个人简历
-                        </div>
-                    </a>
-                </article>
-            
-        
-    
-</div>
 
-        <div class="pagination-container">
-    
-    
-</div>
-
+        
 
         <div class="site-footer gt-c-content-color-first">
     <div class="slogan gt-c-content-color-first">爪哇岛上程序猿 十指弯弯不弄弦 
