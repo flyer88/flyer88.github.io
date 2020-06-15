@@ -3,7 +3,7 @@
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>算法基础④（树的概念和存储） | 键盘敲击者</title>
+<title>【旧】Android 贝塞尔曲线，QQ 删除小红点类似效果实现 | 键盘敲击者</title>
 <link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592215234590">
 <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
@@ -99,89 +99,66 @@
         <div class="post-detail gt-bg-theme-color-second">
             <article class="gt-post-content">
                 <h2 class="post-title">
-                    算法基础④（树的概念和存储）
+                    【旧】Android 贝塞尔曲线，QQ 删除小红点类似效果实现
                 </h2>
                 <div class="post-info">
                     <time class="post-time gt-c-content-color-first">
                         · 2020-06-15 ·
                     </time>
                     
-                        <a href="https://flyer88.github.io/tag/algorithm/" class="post-tags">
-                            # 算法
+                        <a href="https://flyer88.github.io/tag/QBqEnb3yY/" class="post-tags">
+                            # 【旧】
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/android1/" class="post-tags">
+                            # Android 基础
                         </a>
                     
                 </div>
                 <div class="post-content">
-                    <h3 id="ox0001-基本概念">OX0001 基本概念</h3>
-<ol>
-<li>
-<p>树</p>
-<blockquote>
-<p>n(n &gt;= 0) 个节点 的有限集。当 n=0 时，称为空树，在任意一个非空树种有如下特点：</p>
-<ol>
-<li>有且仅有一个特定的称为根的节点。</li>
-<li>当 n &gt; 1 时，其余节点分为 m (m &gt; 0) 个互不相交的有限集，每个集合本身又是一个树，并称为根的子树</li>
-</ol>
+                    <blockquote>
+<p>写于 2015 年 11 月 16 日</p>
 </blockquote>
-</li>
-<li>
-<p>二叉树</p>
-<blockquote>
-<p>每个节点只有两个孩子的树</p>
-</blockquote>
-</li>
-<li>
-<p>满二插树</p>
-<blockquote>
-<p>一个二叉树的所有非叶子节点都存在左右孩子，并且所有的叶子节点都在同一个层级</p>
-</blockquote>
-</li>
-<li>
-<p>完全二叉树</p>
-<blockquote>
-<p>对一个有 n 个节点的二叉树，按层级顺序编号，所有节点的编号为 1到 n，如果这个数的所有节点和同样深度的满二叉树的编号为从1到n的节点位置相同，则这个二叉树为完全二叉树</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="ox0002-存储方式">OX0002. 存储方式</h3>
-<ol>
-<li>
-<p><strong>链表</strong></p>
-<blockquote>
-<pre><code class="language-shell">					         [NodeA|data1|left|right]
-						//									\\
-					//											\\
-				//												   \\
-[NodeB|data2|null|null]			            [NodeC|data3|null|null]
+<p>具体的实现</p>
+<ul>
+<li>首先偏移量</li>
+<li>然后是计算贝塞尔曲线</li>
+<li>接下来就是计算控制点o,p<br>
+看到 QQ 拖动删除小红点的动画效果，就想着做个类似的效果，没找到Android 版的教程，于是就自己撸了一个，代码地址：https://github.com/flyer88/JellyCircle/tree/master/circleindicator ，该栗子的实现在circleIndicator包中，app包下是另一个demo，还没写好。</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="https://flyer88.github.io/post-images/1592214669097.gif" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://flyer88.github.io/post-images/1592214679012.gif" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://flyer88.github.io/post-images/1592214687544.gif" alt="img" loading="lazy"></figure>
+<p>注意：为实现上面链接中所示的动画，首先确定，两个圆随着偏移量的改变，半径大小出现了变化，同时贝塞尔曲线有所变化，那剩下的问题就是如何改变两个圆的半径大小，圆的位置，同时计算和绘制贝塞尔曲线</p>
+<h1 id="接下来看具体的实现">接下来看具体的实现</h1>
+<h3 id="首先偏移量">首先偏移量</h3>
+<p>我此处给的值比较简单，直接通过<code>SeekBar</code>来获取偏移量</p>
+<p>获取偏移量后，需要改变的数据有，半径大小，以及第二个圆的位置，以及贝塞尔曲线的重新绘制</p>
+<p>具体代码如下：</p>
+<pre><code>    mEndCircle.setX(dpToPx(mDefaultFirstX + mMaxDistance * offset,getResources()));//修改第二个圆的位置
+    mEndCircle.setRadius(dpToPx(mDefaultMinRadius,getResources()) + offset * dpToPx(mDefaultMaxRadius - mDefaultMinRadius,getResources()));//第二个圆半径变大
+    mStartCircle.setRadius(dpToPx(mDefaultMaxRadius,getResources()) - offset * dpToPx(mDefaultMaxRadius - mDefaultMinRadius,getResources()));//第一个圆半径变小
+    mCanDrawBezier = calculatePoint(mStartCircle, mEndCircle);//计算贝塞尔曲线
+    invalidate();//刷新，触发onDraw()，重新绘制
 </code></pre>
-</blockquote>
-</li>
-<li>
-<p><strong>数组 - 层序存储 (主要用于完全二叉树，否则会大量浪费空间)</strong></p>
-<blockquote>
-<p>父节点下标为parent，则做孩子的下标为 2* parent + 1，有孩子为 2*parent + 2</p>
-<pre><code class="language-shell">				 【1】
-				//	 \\
-			【2】	  【3】
-			//	\\         \\
-		【4】 【5】   【6】
-			\\
-			【8】
-			
-[1][2][3][4][5][null][6][null][8]
- 0  1  2  3  4   5    6   7    8
-
+<h3 id="然后是计算贝塞尔曲线">然后是计算贝塞尔曲线</h3>
+<p>看下图，基本上可以确定出有两条曲线，我没有画两条曲线，而是一条<code>mBezierPath</code>搞定</p>
+<p>A-&gt;B-&gt;C-&gt;D-&gt;A（关于控制点哦o,p后面会有计算分析，基本按照上图中所写就可以计算出o,p两点的位置）</p>
+<figure data-type="image" tabindex="4"><img src="https://flyer88.github.io/post-images/1592214698011.jpg" alt="img" loading="lazy"></figure>
+<p>其中，A点是开始点，直接 <code>moveTo()</code> 即可，然后用<code>lineTo()</code>到B点,再调用系统自带的贝塞尔曲线方法<code>quadTo(ponitP.x,pointP.y)</code>计算即可，然后就是一样的<code>lineTo()</code>到D点，<code>quadTo(pointO.x,pointP.y)</code>;</p>
+<p>关于<code>quadTo(x1,y1,x2,y2)</code>的使用，可以去百度一下，简单说一下，就是前面两个是控制点，后面两个是到达的点</p>
+<p>这样<code>mBezierPath</code>基本就画好了，然后画起始圆和结束圆就可以了（当然，如果考虑到overdraw的话，起始可以用clipRect clipReject去掉重复的半圆，此处偷懒，直接画了两个圆，没有去掉重复绘制，或者直接画一个半圆，当然半圆的效果和圆是不一样的）</p>
+<p>以下是构建出<code>mBezierPath</code>的代码</p>
+<pre><code>    mBezierPath.reset();
+    mBezierPath.moveTo(mStartA.getX(), mStartA.getY());
+    mBezierPath.lineTo(mStartB.getX(), mStartB.getY());
+    mBezierPath.quadTo(mControlPointP.getX(), mControlPointP.getY(), mEndC.getX(), mEndC.getY());
+    mBezierPath.lineTo(mEndD.getX(), mEndD.getY());
+    mBezierPath.quadTo(mControlPointO.getX(), mControlPointO.getY(), mStartA.getX(), mStartA.getY());
 </code></pre>
-</blockquote>
-</li>
-</ol>
-<h3 id="ox0003-bst-二叉查找树二叉排序树">OX0003. <code>BST</code> 二叉查找树/二叉排序树</h3>
-<ol>
-<li>左子树不为空，左子树的值均小于根</li>
-<li>右子树不为空，右子树的值均大于根</li>
-<li>左右子树也是 <code>BST</code></li>
-<li>时间复杂度: <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(logn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></li>
-</ol>
+<h3 id="接下来就是计算控制点op">接下来就是计算控制点o,p</h3>
+<p>以图二简单的为例子，这种方式比较极端，计算比较容易，两个控制点p,o和H点重合，直接(R1(x,y)+R2(x,y))/2 = H(x,y)</p>
+<p>图一也不麻烦，根据图一标注θ也可以算出o,p两点的x,y,具体实现可以看github代码</p>
 
                 </div>
             </article>
@@ -190,8 +167,8 @@
         
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://flyer88.github.io/post/suan-fa-ji-chu-san-ha-xi-biao-gai-nian/" class="post-title gt-a-link">
-                    算法基础③（哈希表简介及部分源码分析）
+                <a href="https://flyer88.github.io/post/jiu-android-dai-ma-hun-yao-er/" class="post-title gt-a-link">
+                    【旧】Android 代码混淆(二)
                 </a>
             </div>
         

@@ -1,0 +1,415 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>【旧】Android 代码混淆(二) | 键盘敲击者</title>
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592215234590">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-57136418-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-57136418-1');
+    </script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            键盘敲击者
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="menu gt-a-link">
+                            关于我
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    【旧】Android 代码混淆(二)
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-06-15 ·
+                    </time>
+                    
+                        <a href="https://flyer88.github.io/tag/android2/" class="post-tags">
+                            # Android 进阶
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/QBqEnb3yY/" class="post-tags">
+                            # 【旧】
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/tools/" class="post-tags">
+                            # 开发工具
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <blockquote>
+<p>写于 2016 年 08 月 13 日</p>
+</blockquote>
+<ul>
+<li>基本操作及整体的流程</li>
+<li>注意事项
+<ul>
+<li>warning 处</li>
+<li>多个 module 的混淆</li>
+<li>反射的处理</li>
+<li>JavaScript 的处理</li>
+<li>常用系统和第三方库的混淆规则</li>
+<li>@keep 注解来避开混淆</li>
+</ul>
+</li>
+</ul>
+<p>Android 代码混淆(一) 中已经记录并走了混淆的整个流程，用命令行进行混淆的操作，并验证了三个过程，这篇文章会记录一下在 <code>Android Studio</code> 下混淆的操作，以及具体需要的注意的一些事项。</p>
+<h4 id="基本操作及整体的流程">基本操作及整体的流程</h4>
+<p>1.修改<code>build.gradle</code>脚本</p>
+<pre><code>    buildTypes {
+            release {
+                minifyEnabled true//开启混淆
+                proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'//配置内容
+            }
+            debug {
+                minifyEnabled true//开启混淆
+                proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'//配置内容
+            }
+        }
+</code></pre>
+<p>2.修改proguard-rules.pro文件，写入基础的几个混淆规则，避开<code>Android</code>自带的一些类</p>
+<pre><code>    # 四大组件及基本类
+    -keep public class * extends android.app.Activity
+    -keep public class * extends android.app.Application
+    -keep public class * extends android.app.Service
+    -keep public class * extends android.content.BroadcastReceiver
+    -keep public class * extends android.content.ContentProvider
+    -keep public class * extends android.app.backup.BackupAgentHelper
+    -keep public class * extends android.preference.Preference
+    -keep public class com.android.vending.licensing.ILicensingService
+    -keep public class * extends android.app.Fragment
+    -keep public class * extends android.support.v4.**
+    -keep public class * extends android.support.annotation.**
+    -keep public class * extends android.support.v7.**
+    -keep public class android.app.Notification
+    -keep public class android.webkit.**
+    #保护WebView对HTML页面的API不被混淆
+    -keep class **.Webview2JsInterface {*; }
+    -keep public class * extends android.app.Dialog
+    -keep public class * extends android.view
+
+    # 所有枚举类型不要混淆
+    -keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+    }
+
+    # 保持 native 方法不被混淆
+    -keepclasseswithmembernames class * {
+    native &lt;methods&gt;;
+    }
+
+    #保持R文件不被混淆，否则，你的反射是获取不到资源id的
+    -keep class **.R*{*;}
+
+    # parcelable 不被混淆
+    -keep class * implements android.os.Parcelable {
+    public static finalandroid.os.ParcelableCreator *;
+    }
+
+    #保持实现&quot;Serializable&quot;接口的类不被混淆
+    -keepnames class * implements java.io.Serializable
+
+    #保护实现接口Serializable的类中，指定规则的类成员不被混淆
+    -keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    !static !transient &lt;fields&gt;;
+    !private &lt;methods&gt;;
+    !private &lt;methods&gt;;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+    }
+</code></pre>
+<p>3.直接跑一个debug版的进行测试，把打包好的APK修改成.zip文件，解压，取出文件中dex包。</p>
+<figure data-type="image" tabindex="1"><img src="https://flyer88.github.io/post-images/1592214577248.jpg" alt="img" loading="lazy"></figure>
+<p>把解压获取的<code>dex</code>文件，通过 <a href="https://github.com/pxb1988/dex2jar">dex2jar工具</a> (一个把<code>dex</code>包转换成<code>jar</code>包的工具)，把<code>dex</code>转换成<code>jar</code>包。其具体使用不在此详细讲。</p>
+<p>下图中我没有把d2j-dex2jar配置进环境变量，所以进入对应目录跑的脚本。</p>
+<figure data-type="image" tabindex="2"><img src="https://flyer88.github.io/post-images/1592214586829.jpg" alt="img" loading="lazy"></figure>
+<p>运行完后可以看到，当前目录下多了一个<code>classes-dex2jar.jar</code>的文件</p>
+<figure data-type="image" tabindex="3"><img src="https://flyer88.github.io/post-images/1592214601165.jpg" alt="img" loading="lazy"></figure>
+<p>接下来就是和前一篇文章一样，直接用<code>Intelij</code>导入，看class文件，包内类名字已有变化，部分类已被移除，同时部分类也被改成final类型。具体就不上图了。主要看下面的注意事项。</p>
+<h4 id="注意事项">注意事项</h4>
+<p>上述流程在如果是项目一开始就进行混淆，大部分情况下是能够成功混淆，并且不会出现很大问题，只需要在项目进行过程中注意，新加的第三方类库，反射代码。但是，如果你面对的是一个沉积已久，并且项目庞大，而又从未写过混淆的项目，那你可能会在混淆开启时，面临几千个混淆时的<code>warning</code>和<code>note</code>，最终无法编译通过。这中间主要是大量第三方库的报错。下面记录一下我在处理这种情况时，遇到的问题以及解决方案</p>
+<h5 id="warning-处理">warning 处理</h5>
+<p>写了个<a href="https://github.com/flyer88/Some_Python_For_Android">脚本</a>,，过滤出大部分错误，生成proguard文件，然后继续处理剩下的个别遗留问题</p>
+<p>写几个典型的例子：</p>
+<p>1.情况一:</p>
+<pre><code>    Note: xxxxxx calls 'Class.getEnclosingMethod'
+    #这种情况就是调用了反射，找到xxxxx对应调用的类，并且设为入口点 
+</code></pre>
+<p>2.情况二:</p>
+<pre><code>    Warning: AAAAAAA: can't find superclass or interface BBBBBBB
+    Warning: AAAAAAA: can't find referenced class BBBBBBB 
+    #这两种种情况就是找不到BBBBBB了，直接把BBBBB设为入口点，同时给AAAAA打上-dontwarn既可以,如下
+    -keep class BBBBBB
+    -dontwarn AAAAAA
+</code></pre>
+<p>3.情况三:</p>
+<pre><code>    Note:AAAAA accesses a declared field BBBBB dynamically 
+        Maybe this is program field 'CCCCC'
+        Maybe .....
+    #这种情况下，需要处理CCCC,把它设为入口点，同样设置对AAAAA设置-dontwarn
+    -keep class CCCCC
+    #不一定是-keep，也有可能其他的，例如 -keepattribute 更为合适
+    -dontwarn AAAAA
+</code></pre>
+<h5 id="多个-module-的混淆">多个 module 的混淆</h5>
+<p>有时候会碰到多个<code>module</code>混淆的情况,多数情况下，为了清晰处理会给每个<code>module</code>都写上对应的混淆规则，同时需要修改<code>build.gradle</code>的配置，而不是之前的写法，具体可以参考<a href="http://stackoverflow.com/questions/30820915/android-studio-proguard-handling-in-multi-library-projects">so上的解释</a></p>
+<p>这种方案，需要<code>module</code>之间的依赖清晰，最底层的<code>module</code>会被最先混淆，然后一步一步倒推上去，知道主<code>module</code>,多为<code>app module</code>。</p>
+<pre><code>    buildTypes {
+        release {
+            consumerProguardFiles 'proguard-project.txt'
+        }
+    }
+</code></pre>
+<p>然而，我碰到的情况则是，多个<code>module</code>中有相同的包名，这时候视图去每个<code>module</code>自顾自混淆的情况下是不可能。因为同包名的情况下，混淆器是无法一个一个<code>module</code>的进行混淆。</p>
+<p>所以最终的解决方案是，面对这种项目，还是在主<code>module</code>中进行混淆吧。</p>
+<h5 id="反射的处理">反射的处理</h5>
+<p>反射举个例子：</p>
+<pre><code>    Class&lt;?&gt; a = Class.forName(&quot;com.dove.xu.a&quot;);
+    -keep class com.dove.xu.a{*;}    
+</code></pre>
+<p>不过，此处在考虑到自己代码的同时，需要注意第三方类库。类似的<code>json</code>处理库，<code>retrofit</code>等都是有反射代码的。</p>
+<h5 id="javascript-的处理">JavaScript 的处理</h5>
+<p>处理方案和上面的反射类似</p>
+<p>keep 掉需要调用 java 代码方法，或者类即可</p>
+<p>举个栗子：</p>
+<pre><code>    public class  WebInterface{
+        WebInterface(){
+        }    
+
+        @JavascriptInterface
+        public void callBackAndroid(){
+            Toast.make....
+        }
+    }
+</code></pre>
+<p>混淆规则只需要加上</p>
+<pre><code>    -keep class com.dove.xu.WebInterface{*;}
+</code></pre>
+<h5 id="常用系统和第三方库的混淆规则">常用系统和第三方库的混淆规则</h5>
+<p>下面这个github库收藏了大量第三方库的混淆规则，可以去看一下</p>
+<p><a href="https://github.com/krschultz/android-proguard-snippets">snippets</a></p>
+<p>基本的系统混淆规则，在一开始则整体流程中也已记录，就不重复了。</p>
+<p>最后，需要注意的是网上也会有大量现成的第三方类库的混淆规则。但是在抄的时候也需要注意，不同的版本混淆规则不一定相同，所以一定要注意，在拷贝完以后，看一下规则，是否符合自己的版本，包名是否正确。</p>
+<p>举个自己碰到的例子：</p>
+<p><a href="https://github.com/JakeWharton/butterknife/blob/master/butterknife/proguard-rules.txt">Butterknife 8.2.1 混淆规则,摘自官方github</a></p>
+<pre><code>    # Retain generated class which implement ViewBinder.
+    -keep public class * implements butterknife.internal.ViewBinder { public &lt;init&gt;(); }
+
+    # Prevent obfuscation of types which use ButterKnife annotations since the simple name
+    # is used to reflectively look up the generated ViewBinder.
+    -keep class butterknife.*
+    -keepclasseswithmembernames class * { @butterknife.* &lt;methods&gt;; }
+    -keepclasseswithmembernames class * { @butterknife.* &lt;fields&gt;; }
+</code></pre>
+<p><a href="https://github.com/chalup/proguard-please-repo/blob/master/com.jakewharton/butterknife/5.1.2/proguard.cfg">Butterknife 5.1.2 混淆规则，摘自官方github</a></p>
+<pre><code>    -dontwarn butterknife.internal.**
+    -keep class **$$ViewInjector { *; }
+    -keepnames class * { @butterknife.InjectView *;}
+</code></pre>
+<p>注:此处因学长提到<code>@</code>的问题，后来查看官方文档，如下:</p>
+<p>The @ specifications can be used to restrict classes and class members to the ones that are annotated with the specified annotation types. An annotationtype is specified just like a classname.</p>
+<p>上面大概的意思就是说，@符号可以用来标记注解类，用法和一般类一样</p>
+<p>即，</p>
+<pre><code>-keepnames class * { @butterknife.InjectView *;}
+</code></pre>
+<p>此处的意思是，避开所有类中，有<code>butterknife.InjectView</code>注解的任何变量，方法等，其中<code>butterknife</code>是指包名，即<code>InjectView</code>的完整引用，参考下图：</p>
+<figure data-type="image" tabindex="4"><img src="https://flyer88.github.io/post-images/1592214617147.jpg" alt="img" loading="lazy"></figure>
+<h5 id="keep-注解来避开混淆">@keep 注解来避开混淆</h5>
+<pre><code>//防止混淆类
+@Keep
+public class Person {}
+
+//防止混淆变量
+@Keep
+public String name;
+
+//防止混淆方法
+@Keep
+public int getAge(){}
+</code></pre>
+<p>需要手动开启注解避开混淆</p>
+<pre><code>#http://tools.android.com/tech-docs/support-    annotations
+-dontskipnonpubliclibraryclassmembers
+-printconfiguration
+-keep,allowobfuscation @interface         android.support.annotation.Keep
+
+-keep @android.support.annotation.Keep class *
+-keepclassmembers class * {
+    @android.support.annotation.Keep *;
+}
+</code></pre>
+<hr>
+<p>以上就是我在Android混淆时，学到的知识以及碰到的问题。特此记录</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://flyer88.github.io/post/jiu-android-dai-ma-hun-yao-yi/" class="post-title gt-a-link">
+                    【旧】Android 代码混淆(一)
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '8f894d7af601ea18e6b9',
+    clientSecret: '70f1cea8fb683c4dbf8e1b94f676ae3f3c4311a3',
+    repo: 'flyer88.github.io',
+    owner: 'flyer88',
+    admin: ['flyer88'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">爪哇岛上程序猿 十指弯弯不弄弦 
+斗室方屏十余寸 不知今夕是何年</div>
+    <div class="social-container">
+        
+            
+                <a href="http://github.com/flyer88" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

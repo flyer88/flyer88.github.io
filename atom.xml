@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://flyer88.github.io</id>
     <title>键盘敲击者</title>
-    <updated>2020-06-15T08:55:04.215Z</updated>
+    <updated>2020-06-15T10:01:03.508Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://flyer88.github.io"/>
     <link rel="self" href="https://flyer88.github.io/atom.xml"/>
@@ -12,1159 +12,1652 @@
     <icon>https://flyer88.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, 键盘敲击者</rights>
     <entry>
-        <title type="html"><![CDATA[算法基础⑤（树的遍历）]]></title>
-        <id>https://flyer88.github.io/post/suan-fa-ji-chu-shu-de-bian-li/</id>
-        <link href="https://flyer88.github.io/post/suan-fa-ji-chu-shu-de-bian-li/">
+        <title type="html"><![CDATA[【旧】Android 贝塞尔曲线，QQ 删除小红点类似效果实现]]></title>
+        <id>https://flyer88.github.io/post/jiu-android-bei-sai-er-qu-xian-qq-shan-chu-xiao-hong-dian-lei-si-xiao-guo-shi-xian/</id>
+        <link href="https://flyer88.github.io/post/jiu-android-bei-sai-er-qu-xian-qq-shan-chu-xiao-hong-dian-lei-si-xiao-guo-shi-xian/">
         </link>
-        <updated>2020-06-15T08:25:23.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="0x0001树的遍历-简介">0x0001.树的遍历 简介</h3>
-<blockquote>
-<ol>
-<li>
-<p>深度遍历的运行过程是先进后出(<code>FILO</code>)的，用的是栈和递归</p>
-<p>树的前序，中序，后序遍历</p>
-</li>
-<li>
-<p>广度遍历的运行过程是先进先出(<code>FIFO</code>)的，用的是队列</p>
-<p>树的层序遍历</p>
-</li>
-</ol>
-<blockquote>
-<p>补充：顺序（根据根）：根左右，中序左根右，后序左右根</p>
-<p>​			  层序：按层级输出</p>
+        <updated>2020-06-15T09:50:35.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>写于 2015 年 11 月 16 日</p>
 </blockquote>
+<p>具体的实现</p>
+<ul>
+<li>首先偏移量</li>
+<li>然后是计算贝塞尔曲线</li>
+<li>接下来就是计算控制点o,p<br>
+看到 QQ 拖动删除小红点的动画效果，就想着做个类似的效果，没找到Android 版的教程，于是就自己撸了一个，代码地址：https://github.com/flyer88/JellyCircle/tree/master/circleindicator ，该栗子的实现在circleIndicator包中，app包下是另一个demo，还没写好。</li>
+</ul>
+<figure data-type="image" tabindex="1"><img src="https://flyer88.github.io/post-images/1592214669097.gif" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="2"><img src="https://flyer88.github.io/post-images/1592214679012.gif" alt="img" loading="lazy"></figure>
+<figure data-type="image" tabindex="3"><img src="https://flyer88.github.io/post-images/1592214687544.gif" alt="img" loading="lazy"></figure>
+<p>注意：为实现上面链接中所示的动画，首先确定，两个圆随着偏移量的改变，半径大小出现了变化，同时贝塞尔曲线有所变化，那剩下的问题就是如何改变两个圆的半径大小，圆的位置，同时计算和绘制贝塞尔曲线</p>
+<h1 id="接下来看具体的实现">接下来看具体的实现</h1>
+<h3 id="首先偏移量">首先偏移量</h3>
+<p>我此处给的值比较简单，直接通过<code>SeekBar</code>来获取偏移量</p>
+<p>获取偏移量后，需要改变的数据有，半径大小，以及第二个圆的位置，以及贝塞尔曲线的重新绘制</p>
+<p>具体代码如下：</p>
+<pre><code>    mEndCircle.setX(dpToPx(mDefaultFirstX + mMaxDistance * offset,getResources()));//修改第二个圆的位置
+    mEndCircle.setRadius(dpToPx(mDefaultMinRadius,getResources()) + offset * dpToPx(mDefaultMaxRadius - mDefaultMinRadius,getResources()));//第二个圆半径变大
+    mStartCircle.setRadius(dpToPx(mDefaultMaxRadius,getResources()) - offset * dpToPx(mDefaultMaxRadius - mDefaultMinRadius,getResources()));//第一个圆半径变小
+    mCanDrawBezier = calculatePoint(mStartCircle, mEndCircle);//计算贝塞尔曲线
+    invalidate();//刷新，触发onDraw()，重新绘制
+</code></pre>
+<h3 id="然后是计算贝塞尔曲线">然后是计算贝塞尔曲线</h3>
+<p>看下图，基本上可以确定出有两条曲线，我没有画两条曲线，而是一条<code>mBezierPath</code>搞定</p>
+<p>A-&gt;B-&gt;C-&gt;D-&gt;A（关于控制点哦o,p后面会有计算分析，基本按照上图中所写就可以计算出o,p两点的位置）</p>
+<figure data-type="image" tabindex="4"><img src="https://flyer88.github.io/post-images/1592214698011.jpg" alt="img" loading="lazy"></figure>
+<p>其中，A点是开始点，直接 <code>moveTo()</code> 即可，然后用<code>lineTo()</code>到B点,再调用系统自带的贝塞尔曲线方法<code>quadTo(ponitP.x,pointP.y)</code>计算即可，然后就是一样的<code>lineTo()</code>到D点，<code>quadTo(pointO.x,pointP.y)</code>;</p>
+<p>关于<code>quadTo(x1,y1,x2,y2)</code>的使用，可以去百度一下，简单说一下，就是前面两个是控制点，后面两个是到达的点</p>
+<p>这样<code>mBezierPath</code>基本就画好了，然后画起始圆和结束圆就可以了（当然，如果考虑到overdraw的话，起始可以用clipRect clipReject去掉重复的半圆，此处偷懒，直接画了两个圆，没有去掉重复绘制，或者直接画一个半圆，当然半圆的效果和圆是不一样的）</p>
+<p>以下是构建出<code>mBezierPath</code>的代码</p>
+<pre><code>    mBezierPath.reset();
+    mBezierPath.moveTo(mStartA.getX(), mStartA.getY());
+    mBezierPath.lineTo(mStartB.getX(), mStartB.getY());
+    mBezierPath.quadTo(mControlPointP.getX(), mControlPointP.getY(), mEndC.getX(), mEndC.getY());
+    mBezierPath.lineTo(mEndD.getX(), mEndD.getY());
+    mBezierPath.quadTo(mControlPointO.getX(), mControlPointO.getY(), mStartA.getX(), mStartA.getY());
+</code></pre>
+<h3 id="接下来就是计算控制点op">接下来就是计算控制点o,p</h3>
+<p>以图二简单的为例子，这种方式比较极端，计算比较容易，两个控制点p,o和H点重合，直接(R1(x,y)+R2(x,y))/2 = H(x,y)</p>
+<p>图一也不麻烦，根据图一标注θ也可以算出o,p两点的x,y,具体实现可以看github代码</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[【旧】Android 代码混淆(二)]]></title>
+        <id>https://flyer88.github.io/post/jiu-android-dai-ma-hun-yao-er/</id>
+        <link href="https://flyer88.github.io/post/jiu-android-dai-ma-hun-yao-er/">
+        </link>
+        <updated>2020-06-15T09:48:50.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>写于 2016 年 08 月 13 日</p>
 </blockquote>
-<h3 id="0x0002-树的遍历">0x0002. 树的遍历</h3>
-<p><strong>递归和栈</strong> （树的前序，中序，后序遍历）</p>
-<ol>
-<li>
-<p>递归实现</p>
-<pre><code class="language-java">public class BST {
-  ...
-	public static void preOrder(TreeNode treeNode){
-        if (treeNode == null) return;
-        System.out.print(treeNode.data + &quot; &quot;);
-        preOrder(treeNode.left);
-        preOrder(treeNode.right);
+<ul>
+<li>基本操作及整体的流程</li>
+<li>注意事项
+<ul>
+<li>warning 处</li>
+<li>多个 module 的混淆</li>
+<li>反射的处理</li>
+<li>JavaScript 的处理</li>
+<li>常用系统和第三方库的混淆规则</li>
+<li>@keep 注解来避开混淆</li>
+</ul>
+</li>
+</ul>
+<p>Android 代码混淆(一) 中已经记录并走了混淆的整个流程，用命令行进行混淆的操作，并验证了三个过程，这篇文章会记录一下在 <code>Android Studio</code> 下混淆的操作，以及具体需要的注意的一些事项。</p>
+<h4 id="基本操作及整体的流程">基本操作及整体的流程</h4>
+<p>1.修改<code>build.gradle</code>脚本</p>
+<pre><code>    buildTypes {
+            release {
+                minifyEnabled true//开启混淆
+                proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'//配置内容
+            }
+            debug {
+                minifyEnabled true//开启混淆
+                proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'//配置内容
+            }
+        }
+</code></pre>
+<p>2.修改proguard-rules.pro文件，写入基础的几个混淆规则，避开<code>Android</code>自带的一些类</p>
+<pre><code>    # 四大组件及基本类
+    -keep public class * extends android.app.Activity
+    -keep public class * extends android.app.Application
+    -keep public class * extends android.app.Service
+    -keep public class * extends android.content.BroadcastReceiver
+    -keep public class * extends android.content.ContentProvider
+    -keep public class * extends android.app.backup.BackupAgentHelper
+    -keep public class * extends android.preference.Preference
+    -keep public class com.android.vending.licensing.ILicensingService
+    -keep public class * extends android.app.Fragment
+    -keep public class * extends android.support.v4.**
+    -keep public class * extends android.support.annotation.**
+    -keep public class * extends android.support.v7.**
+    -keep public class android.app.Notification
+    -keep public class android.webkit.**
+    #保护WebView对HTML页面的API不被混淆
+    -keep class **.Webview2JsInterface {*; }
+    -keep public class * extends android.app.Dialog
+    -keep public class * extends android.view
+
+    # 所有枚举类型不要混淆
+    -keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
     }
 
-    public static void inOrder(TreeNode treeNode){
-        if (treeNode == null) return;
-        inOrder(treeNode.left);
-        System.out.print(treeNode.data + &quot; &quot;);
-        inOrder(treeNode.right);
+    # 保持 native 方法不被混淆
+    -keepclasseswithmembernames class * {
+    native &lt;methods&gt;;
     }
 
-    public static void postOrder(TreeNode treeNode){
-        if (treeNode == null) return;
-        postOrder(treeNode.left);
-        postOrder(treeNode.right);
-        System.out.print(treeNode.data + &quot; &quot;);
+    #保持R文件不被混淆，否则，你的反射是获取不到资源id的
+    -keep class **.R*{*;}
+
+    # parcelable 不被混淆
+    -keep class * implements android.os.Parcelable {
+    public static finalandroid.os.ParcelableCreator *;
     }
+
+    #保持实现&quot;Serializable&quot;接口的类不被混淆
+    -keepnames class * implements java.io.Serializable
+
+    #保护实现接口Serializable的类中，指定规则的类成员不被混淆
+    -keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    !static !transient &lt;fields&gt;;
+    !private &lt;methods&gt;;
+    !private &lt;methods&gt;;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+    }
+</code></pre>
+<p>3.直接跑一个debug版的进行测试，把打包好的APK修改成.zip文件，解压，取出文件中dex包。</p>
+<figure data-type="image" tabindex="1"><img src="https://flyer88.github.io/post-images/1592214577248.jpg" alt="img" loading="lazy"></figure>
+<p>把解压获取的<code>dex</code>文件，通过 <a href="https://github.com/pxb1988/dex2jar">dex2jar工具</a> (一个把<code>dex</code>包转换成<code>jar</code>包的工具)，把<code>dex</code>转换成<code>jar</code>包。其具体使用不在此详细讲。</p>
+<p>下图中我没有把d2j-dex2jar配置进环境变量，所以进入对应目录跑的脚本。</p>
+<figure data-type="image" tabindex="2"><img src="https://flyer88.github.io/post-images/1592214586829.jpg" alt="img" loading="lazy"></figure>
+<p>运行完后可以看到，当前目录下多了一个<code>classes-dex2jar.jar</code>的文件</p>
+<figure data-type="image" tabindex="3"><img src="https://flyer88.github.io/post-images/1592214601165.jpg" alt="img" loading="lazy"></figure>
+<p>接下来就是和前一篇文章一样，直接用<code>Intelij</code>导入，看class文件，包内类名字已有变化，部分类已被移除，同时部分类也被改成final类型。具体就不上图了。主要看下面的注意事项。</p>
+<h4 id="注意事项">注意事项</h4>
+<p>上述流程在如果是项目一开始就进行混淆，大部分情况下是能够成功混淆，并且不会出现很大问题，只需要在项目进行过程中注意，新加的第三方类库，反射代码。但是，如果你面对的是一个沉积已久，并且项目庞大，而又从未写过混淆的项目，那你可能会在混淆开启时，面临几千个混淆时的<code>warning</code>和<code>note</code>，最终无法编译通过。这中间主要是大量第三方库的报错。下面记录一下我在处理这种情况时，遇到的问题以及解决方案</p>
+<h5 id="warning-处理">warning 处理</h5>
+<p>写了个<a href="https://github.com/flyer88/Some_Python_For_Android">脚本</a>,，过滤出大部分错误，生成proguard文件，然后继续处理剩下的个别遗留问题</p>
+<p>写几个典型的例子：</p>
+<p>1.情况一:</p>
+<pre><code>    Note: xxxxxx calls 'Class.getEnclosingMethod'
+    #这种情况就是调用了反射，找到xxxxx对应调用的类，并且设为入口点 
+</code></pre>
+<p>2.情况二:</p>
+<pre><code>    Warning: AAAAAAA: can't find superclass or interface BBBBBBB
+    Warning: AAAAAAA: can't find referenced class BBBBBBB 
+    #这两种种情况就是找不到BBBBBB了，直接把BBBBB设为入口点，同时给AAAAA打上-dontwarn既可以,如下
+    -keep class BBBBBB
+    -dontwarn AAAAAA
+</code></pre>
+<p>3.情况三:</p>
+<pre><code>    Note:AAAAA accesses a declared field BBBBB dynamically 
+        Maybe this is program field 'CCCCC'
+        Maybe .....
+    #这种情况下，需要处理CCCC,把它设为入口点，同样设置对AAAAA设置-dontwarn
+    -keep class CCCCC
+    #不一定是-keep，也有可能其他的，例如 -keepattribute 更为合适
+    -dontwarn AAAAA
+</code></pre>
+<h5 id="多个-module-的混淆">多个 module 的混淆</h5>
+<p>有时候会碰到多个<code>module</code>混淆的情况,多数情况下，为了清晰处理会给每个<code>module</code>都写上对应的混淆规则，同时需要修改<code>build.gradle</code>的配置，而不是之前的写法，具体可以参考<a href="http://stackoverflow.com/questions/30820915/android-studio-proguard-handling-in-multi-library-projects">so上的解释</a></p>
+<p>这种方案，需要<code>module</code>之间的依赖清晰，最底层的<code>module</code>会被最先混淆，然后一步一步倒推上去，知道主<code>module</code>,多为<code>app module</code>。</p>
+<pre><code>    buildTypes {
+        release {
+            consumerProguardFiles 'proguard-project.txt'
+        }
+    }
+</code></pre>
+<p>然而，我碰到的情况则是，多个<code>module</code>中有相同的包名，这时候视图去每个<code>module</code>自顾自混淆的情况下是不可能。因为同包名的情况下，混淆器是无法一个一个<code>module</code>的进行混淆。</p>
+<p>所以最终的解决方案是，面对这种项目，还是在主<code>module</code>中进行混淆吧。</p>
+<h5 id="反射的处理">反射的处理</h5>
+<p>反射举个例子：</p>
+<pre><code>    Class&lt;?&gt; a = Class.forName(&quot;com.dove.xu.a&quot;);
+    -keep class com.dove.xu.a{*;}    
+</code></pre>
+<p>不过，此处在考虑到自己代码的同时，需要注意第三方类库。类似的<code>json</code>处理库，<code>retrofit</code>等都是有反射代码的。</p>
+<h5 id="javascript-的处理">JavaScript 的处理</h5>
+<p>处理方案和上面的反射类似</p>
+<p>keep 掉需要调用 java 代码方法，或者类即可</p>
+<p>举个栗子：</p>
+<pre><code>    public class  WebInterface{
+        WebInterface(){
+        }    
+
+        @JavascriptInterface
+        public void callBackAndroid(){
+            Toast.make....
+        }
+    }
+</code></pre>
+<p>混淆规则只需要加上</p>
+<pre><code>    -keep class com.dove.xu.WebInterface{*;}
+</code></pre>
+<h5 id="常用系统和第三方库的混淆规则">常用系统和第三方库的混淆规则</h5>
+<p>下面这个github库收藏了大量第三方库的混淆规则，可以去看一下</p>
+<p><a href="https://github.com/krschultz/android-proguard-snippets">snippets</a></p>
+<p>基本的系统混淆规则，在一开始则整体流程中也已记录，就不重复了。</p>
+<p>最后，需要注意的是网上也会有大量现成的第三方类库的混淆规则。但是在抄的时候也需要注意，不同的版本混淆规则不一定相同，所以一定要注意，在拷贝完以后，看一下规则，是否符合自己的版本，包名是否正确。</p>
+<p>举个自己碰到的例子：</p>
+<p><a href="https://github.com/JakeWharton/butterknife/blob/master/butterknife/proguard-rules.txt">Butterknife 8.2.1 混淆规则,摘自官方github</a></p>
+<pre><code>    # Retain generated class which implement ViewBinder.
+    -keep public class * implements butterknife.internal.ViewBinder { public &lt;init&gt;(); }
+
+    # Prevent obfuscation of types which use ButterKnife annotations since the simple name
+    # is used to reflectively look up the generated ViewBinder.
+    -keep class butterknife.*
+    -keepclasseswithmembernames class * { @butterknife.* &lt;methods&gt;; }
+    -keepclasseswithmembernames class * { @butterknife.* &lt;fields&gt;; }
+</code></pre>
+<p><a href="https://github.com/chalup/proguard-please-repo/blob/master/com.jakewharton/butterknife/5.1.2/proguard.cfg">Butterknife 5.1.2 混淆规则，摘自官方github</a></p>
+<pre><code>    -dontwarn butterknife.internal.**
+    -keep class **$$ViewInjector { *; }
+    -keepnames class * { @butterknife.InjectView *;}
+</code></pre>
+<p>注:此处因学长提到<code>@</code>的问题，后来查看官方文档，如下:</p>
+<p>The @ specifications can be used to restrict classes and class members to the ones that are annotated with the specified annotation types. An annotationtype is specified just like a classname.</p>
+<p>上面大概的意思就是说，@符号可以用来标记注解类，用法和一般类一样</p>
+<p>即，</p>
+<pre><code>-keepnames class * { @butterknife.InjectView *;}
+</code></pre>
+<p>此处的意思是，避开所有类中，有<code>butterknife.InjectView</code>注解的任何变量，方法等，其中<code>butterknife</code>是指包名，即<code>InjectView</code>的完整引用，参考下图：</p>
+<figure data-type="image" tabindex="4"><img src="https://flyer88.github.io/post-images/1592214617147.jpg" alt="img" loading="lazy"></figure>
+<h5 id="keep-注解来避开混淆">@keep 注解来避开混淆</h5>
+<pre><code>//防止混淆类
+@Keep
+public class Person {}
+
+//防止混淆变量
+@Keep
+public String name;
+
+//防止混淆方法
+@Keep
+public int getAge(){}
+</code></pre>
+<p>需要手动开启注解避开混淆</p>
+<pre><code>#http://tools.android.com/tech-docs/support-    annotations
+-dontskipnonpubliclibraryclassmembers
+-printconfiguration
+-keep,allowobfuscation @interface         android.support.annotation.Keep
+
+-keep @android.support.annotation.Keep class *
+-keepclassmembers class * {
+    @android.support.annotation.Keep *;
 }
 </code></pre>
-</li>
+<hr>
+<p>以上就是我在Android混淆时，学到的知识以及碰到的问题。特此记录</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[【旧】Android 代码混淆(一)]]></title>
+        <id>https://flyer88.github.io/post/jiu-android-dai-ma-hun-yao-yi/</id>
+        <link href="https://flyer88.github.io/post/jiu-android-dai-ma-hun-yao-yi/">
+        </link>
+        <updated>2020-06-15T09:46:17.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>写于 2016 年 08 月 13 日</p>
+</blockquote>
+<ul>
+<li>介绍
+<ul>
 <li>
-<p>栈实现</p>
-<pre><code class="language-java">public class BST {
-  	...
-    public static void stackPreOrder(TreeNode treeNode) {
-        if (treeNode == null ) return;
-        Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
-        stack.push(treeNode);
-        TreeNode curNode = stack.pop();
-        while (!stack.empty() || curNode != null){
-            if (curNode != null) {
-                System.out.print(curNode.data + &quot; &quot;);
-                stack.push(curNode);
-                curNode = curNode.left;
-            } else {
-                curNode = stack.pop();
-                curNode = curNode.right;
-            }
+<ul>
+<li>反射(该部分内容具体处理和理解，会在下一文章中进行具体的记录)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>具体的使用
+<ul>
+<li>
+<ul>
+<li>Obfuse 步骤验证</li>
+<li>Optimize 步骤验证</li>
+<li>Shrink 步骤验证</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>本文对照 <a href="http://proguard.sourceforge.net/">Proguard 的文档</a>进行翻译同时加上个人的理解，如果有与原文不同，请以原文为主。</p>
+<hr>
+<h2 id="介绍">介绍</h2>
+<p>混淆器(ProGuard)会对 Java class 文件进行 shrinker(压缩)，optimizer(优化)，obfuscator(混淆)以及preverifier(校验)。shrinker(压缩)这一步会找到并移除没用到的类，变量，方法，属性。optimization(优化)这一步，会分析并且优化方法的字节码。obfuscation(混淆)则会对 class，fields，methods替换成一些短的无意义的名字。第一步会把代码量变小，运行更加有效率，同时更加难以被逆向。在 Java Micro Edition 和 Java 6或者更高版本中，最后一步的检验过程，会向class文件中添加一些预校验的信息。</p>
+<p>上述的每个步骤，都是可以选择的(可以进行也可以不进行)。例如，ProGuard 可以只进行preverify，从而更高效的运行。</p>
+<figure data-type="image" tabindex="1"><img src="https://flyer88.github.io/post-images/1592214415502.jpg" alt="img" loading="lazy"></figure>
+<ul>
+<li>首先，ProGuard(混淆器) 读入输入的 jars (也可以是 aars, wars, ears, zips, apks, 或者目录)。随后，开始进行 shrinker(压缩)，optimizer(优化)，obfuscator(混淆)以及preverifier(校验)。你可以选择性的让ProGuard(混淆器)进行多种类型的优化操作。ProGuard(混淆器)会把修改过的结果写入一个或者多个输出的 jars (也可以是 aars, wars, ears, zips, apks, 或者目录)中。</li>
+<li>混淆器需要明确输入文件(Input jars)是jars包(也可以是 aars, wars, ears, zips, apks, 或者目录)。这些 libraries 本质上是你将会用来编译的代码。混淆器为了能够正确进行整个过程，会重新构建类之间的依赖。而依赖包(Library jars) 往往是不会被改变的，但你依旧需要把它们放在最终的App的环境中。 #### Entry points(入口点)</li>
+<li>在压缩步骤(shrinker)，混淆器会从这些点(入口点)进入，并且递归寻找决定哪些类和哪些类成员会被使用。所有的其他类和类成员都会被抛弃掉</li>
+<li>在优化步骤(optimizer)，混淆器会进一步优化代码。在这些优化过程中，那些不是入口点的类和方法会变成private static或者final，不被用到的参数会被移除，一些方法会变成内敛方法</li>
+<li>在混淆这一步(obfuscator)，混淆器会重新命名那些不是入口点的类和类的成员。在这整个过程中，那些成为入口点的地方，依旧会为他们保留原来的名字</li>
+<li>预验证阶段(preverifier)是唯一一个不需要知道入口点的阶段</li>
+</ul>
+<h4 id="反射该部分内容具体处理和理解会在下一文章中进行具体的记录">反射(该部分内容具体处理和理解，会在下一文章中进行具体的记录)</h4>
+<ul>
+<li>对于反射和introspection 进行代码的自动处理时，都会存在一些特殊的问题。在混淆器进行处理时，代码中类和类成员都是被动态创建或者被动态调用的(通过对应类的名字，或者成员名字)，这些地方都必须被定义成入口点。例如，<code>Class.forName()</code>这个构造器会在运行时指向任何的类。又比如，类的名字可能会从配置文件中读入，这通常很难去计算出是那些类需要被保留(通过原始的名字)。因此，你必须得在混淆器的配置中，通过简单相同的操作<code>-keep</code>来指定他们。 然而，混淆器已经能够帮你发现并处理以下的情况： <code>Class.forName(&quot;SomeClass&quot;)</code> <code>SomeClass.class</code> <code>SomeClass.class.getField(&quot;someField&quot;)</code> <code>SomeClass.class.getDeclaredField(&quot;someField&quot;)</code> <code>SomeClass.class.getMethod(&quot;someMethod&quot;, new Class[] {})</code> <code>SomeClass.class.getMethod(&quot;someMethod&quot;, new Class[] { A.class })</code> <code>SomeClass.class.getMethod(&quot;someMethod&quot;, new Class[] { A.class, B.class })</code> <code>SomeClass.class.getDeclaredMethod(&quot;someMethod&quot;, new Class[] {})</code> <code>SomeClass.class.getDeclaredMethod(&quot;someMethod&quot;, new Class[] { A.class })</code> <code>SomeClass.class.getDeclaredMethod(&quot;someMethod&quot;, new Class[] { A.class, B.class })</code> <code>AtomicIntegerFieldUpdater.newUpdater(SomeClass.class, &quot;someField&quot;)</code> <code>AtomicLongFieldUpdater.newUpdater(SomeClass.class, &quot;someField&quot;)</code> <code>AtomicReferenceFieldUpdater.newUpdater(SomeClass.class, SomeType.class, &quot;someField&quot;)</code></li>
+<li>类和类成员的名字会不一样，但是构造方法必然是相同的，由此，混淆器能够认出他们。被引用的类和类的成员在压缩(shrinking)阶段会被保留，同时，string 类型的参数也会在混淆时(obfuscation)被准确的修改。</li>
+<li>除此之外，混淆器会提供一些建议：是否保留一些出现的类和类成员。举例，混淆器会标记<code>(SomeClass)Class.forName(variable).newInstance()</code>这样的构造器。因为这些方法可能会指向其他类，这些可能是类，也可能是接口，或者是继承自这些接口或者类的类。你需要在配置中做相应的处理。</li>
+<li>为了能够得到正确的混淆结果，你应该对进行混淆的代码多少有所熟悉。当面临大量反射代码时，混淆代码需要进行大量的试验，并处理错误，特别是对于内部代码没有足够的信息的情况下</li>
+</ul>
+<hr>
+<p>以上是对<a href="http://proguard.sourceforge.net/">官方文档首页</a>的翻译内容</p>
+<h2 id="具体的使用">具体的使用</h2>
+<p>该部分不是翻译内容，是根据<a href="http://proguard.sourceforge.net/manual/usage.html">ProGuard 的使用方法</a>和<a href="http://proguard.sourceforge.net/">文档首页</a>，对上述三个步骤的具体验证。</p>
+<p>由于大部分情况下，Android 的混淆只需要考虑 Obfuse 这个步骤，因为很多第三方依赖包的混淆规则会把 shrink 和 optimize 去掉（比如友盟）。所以先验证这一步。</p>
+<h4 id="obfuse-步骤验证">Obfuse 步骤验证</h4>
+<p>这个步骤，如上所说，主要是对类，方法进行名字的修改，也是 Android 混淆中最重要的部分。为了验证这个过程，我做了下面的demo操作</p>
+<ul>
+<li>首先写了3个类：</li>
+</ul>
+<pre><code>    package com.dove.home;
+
+    class HelloWorld {
+        public HelloWorld(){
+            System.out.println(&quot;Hello World&quot;);
         }
     }
-  
-  public static void stackInOrder(TreeNode treeNode) {
-        if (treeNode == null ) return;
-        Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
-        TreeNode curNode = treeNode;
-        while (!stack.empty() || curNode != null){
-            if (curNode!= null){
-              	// 入栈
-                stack.push(curNode);
-                curNode = curNode.left;
-            } else {
-               // 回溯
-                curNode = stack.pop();
-                System.out.print(curNode.data + &quot; &quot;);
-                curNode = curNode.right;
-            }
-           
+    package com.dove.home;
+
+    class HelloWorld2 {
+        public HelloWorld2(){
+            System.out.println(&quot;Hello World2&quot;);
         }
     }
-  
-  public static void stackPostOrder(TreeNode treeNode) {
-        if (treeNode == null ) return;
-        Stack&lt;TreeNode&gt; stack = new Stack&lt;TreeNode&gt;();
-        TreeNode curNode = treeNode;
-        TreeNode last = null;
-        while (!stack.empty() || curNode != null){
-            if (curNode != null) {
-                stack.push(curNode);
-                curNode = curNode.left;
-            } else {
-              	// 用 peek，而非 pop
-                TreeNode temp = stack.peek();
-                //是否变到右子树
-                if (temp.right != null &amp;&amp; temp.right != last) {
-                    curNode = temp.right;
-                } else {
-                    System.out.print(temp.data + &quot; &quot;);
-                    last = temp;
-                    stack.pop();
-                }
-            }
+    package com.dove.home;
+
+    class Main {
+        public static void main(String[] args) {
+            HelloWorld helloWorld = new HelloWorld();
         }
+    }
+</code></pre>
+<ul>
+<li>然后编译,打包</li>
+</ul>
+<pre><code>    javac com/dove/home/Main.java
+    javac com/dove/home/HelloWorld2.java
+    javac com/dove/home/HelloWorld.java
+    //注意在进行下面步骤的时候，我把 com/dove/home 下的 java源码删了
+    jar -cvf main_source.jar com
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://flyer88.github.io/post-images/1592214446516.jpg" alt="img" loading="lazy"></figure>
+<ul>
+<li>然后使用混淆器，混淆器其具体使用方法，主要是调用 proguard.jar 包，然后配置 proguard.pro 文件进行具体的参数设置。</li>
+</ul>
+<pre><code>java -jar proguard.jar @proguard.pro
+</code></pre>
+<p>下面是我 proguard.pro 文件内容</p>
+<pre><code># 源码文件
+-injars main_source.jar
+# 混淆后输出文件
+-outjars main_source_out.jar
+# java 核心 jar 不能混淆
+-libraryjars &lt;java.home&gt;/lib/rt.jar
+-libraryjars &lt;java.home&gt;/lib/jce.jar
+# 全部不混淆，即三个class文件都会保持原样
+-keep class com.dove.home.Main{*;}
+-keep class com.dove.home.HelloWorld{*;}
+-keep class com.dove.home.HelloWorld2{*;}
+</code></pre>
+<blockquote>
+<p>注意：然后修改 proguard.pro 文件，内容如下,生成另一个混淆后的包</p>
+</blockquote>
+<pre><code>-injars main_source.jar
+# 注意输出包的名字改了
+-outjars main_source_proguard_out.jar
+-libraryjars &lt;java.home&gt;/lib/rt.jar
+-libraryjars &lt;java.home&gt;/lib/jce.jar
+-keep class com.dove.home.Main{*;}
+# 删除了HelloWorld的 keep
+-keep class com.dove.home.HelloWorld2{*;}
+</code></pre>
+<p>最后对代码逆向，进行验证，最快的方式是把生成的 jar 包，当做第三方依赖包直接导入Intellij 中(有decode的功能)，如下图，三个包的区别</p>
+<figure data-type="image" tabindex="3"><img src="https://flyer88.github.io/post-images/1592214471667.jpg" alt="img" loading="lazy"></figure>
+<p>最初是的源码包和保留<code>HelloWorld</code>,<code>HelloWorld2</code>以及<code>Main</code>入口点的包是一样的，不同的是最后没有保留<code>HelloWorld</code>入口点的包，它的<code>HelloWorld</code>变成了<code>a</code>，而<code>Main</code>和<code>HelloWorld2</code>都正常没有被修改</p>
+<h4 id="optimize-步骤验证">Optimize 步骤验证</h4>
+<p>同样，修改 proguard.pro 文件</p>
+<pre><code>-injars main_source.jar
+# 输出包名改了，方便对比
+-outjars main_source_proguard_not_optimize_out.jar
+-libraryjars &lt;java.home&gt;/lib/rt.jar
+-libraryjars &lt;java.home&gt;/lib/jce.jar
+# 加上不进行优化的限制
+-dontoptimize
+-keep class com.dove.home.Main{*;}
+-keep class com.dove.home.HelloWorld2{*;}
+</code></pre>
+<p>同上，导入IntelliJ，对比上一步中混淆后的 jar 包，发现名字没啥变化，但内容不一样了</p>
+<figure data-type="image" tabindex="4"><img src="https://flyer88.github.io/post-images/1592214485831.jpg" alt="img" loading="lazy"></figure>
+<p>首先是没有添加 <code>-dontoptimize</code></p>
+<pre><code>package com.dove.home;
+
+final class a {
+    public a() {
+        System.out.println(&quot;Hello World&quot;);
     }
 }
 </code></pre>
-</li>
-</ol>
-<p><strong>队列</strong>（树的层序遍历）</p>
+<p>然后是添加了 <code>-dontoptimize</code></p>
+<pre><code>package com.dove.home;
+
+class a {
+    public a() {
+        System.out.println(&quot;Hello World&quot;);
+    }
+}
+</code></pre>
+<p>如上述译文中所说，optimize 会进行代码优化，不是入口点的代码，会变成<code>final</code>，<code>private</code>等等</p>
+<h4 id="shrink-步骤验证">Shrink 步骤验证</h4>
+<p>修改 proguard.pro 文件，进行压缩，同时不对 HelloWorld，HelloWorld2进行入口点的保留</p>
+<pre><code>-injars main_source.jar
+-outjars main_source_proguard_shrink_out.jar
+-libraryjars &lt;java.home&gt;/lib/rt.jar
+-libraryjars &lt;java.home&gt;/lib/jce.jar
+
+-keep class com.dove.home.Main{*;}
+# 注意对比之前，删除了HelloWorld和HelloWorld2的 keep
+</code></pre>
+<p>修改 proguard.pro 文件，不进行压缩，同样不对 HelloWorld，HelloWorld2进行入口点的保留</p>
+<pre><code>-injars main_source.jar
+-outjars main_source_proguard_not_shrink_out.jar
+-libraryjars &lt;java.home&gt;/lib/rt.jar
+-libraryjars &lt;java.home&gt;/lib/jce.jar
+# 添加不进行压缩
+-dontshrink
+-keep class com.dove.home.Main{*;}
+</code></pre>
+<p>其结果对比</p>
+<p>添加了 <code>-dontshrink</code>标志</p>
+<figure data-type="image" tabindex="5"><img src="https://flyer88.github.io/post-images/1592214500132.jpg" alt="img" loading="lazy"></figure>
+<p>未添加 <code>-dontshrink</code>标志</p>
+<figure data-type="image" tabindex="6"><img src="https://flyer88.github.io/post-images/1592214511632.jpg" alt="img" loading="lazy"></figure>
+<p>由此验证，shrink阶段，Proguard(混淆器)会把无用类文件等删除，一些被动态获取的类就需要注意了，需要进行<code>-keep</code>操作</p>
+<hr>
+<p>以上就是对混淆整个过程的验证</p>
+<p>对于 Android 混淆，一些需要注意的东西，会在下一篇文章中记录</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[【旧】记录一些蛋疼的bug(二)]]></title>
+        <id>https://flyer88.github.io/post/jiu-ji-lu-yi-xie-dan-teng-de-buger/</id>
+        <link href="https://flyer88.github.io/post/jiu-ji-lu-yi-xie-dan-teng-de-buger/">
+        </link>
+        <updated>2020-06-15T09:45:36.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>写于 2016 年 07 月 15 日</p>
+</blockquote>
+<p>1.<code>int</code> -2^32 到 2^32，<code>long</code> -2^63 到 2^63-1，这种问题大部分在时间戳碰到，需注意</p>
+<pre><code class="language-java">public static void main(String[] args) {
+    int time = 1470022057;//注意是int类型
+    System.out.println(formatLongToDate(time));//传入的是int，参数是long不会超出int长度
+    System.out.println(format(new Date(time * 1000),&quot;MM月dd日 HH:mm&quot;));//传入的是int，秒级时间戳，位数刚好和int类型的位数相同，所以会爆，所以转换会出错
+} 
+public static String formatLongToDate(long time){
+    SimpleDateFormat sdf = new SimpleDateFormat(&quot;MM月dd日 HH:mm&quot;);
+    Date date= new Date(time * 1000);
+    String result = sdf.format(date);
+    return result;
+}
+public static String format(Date date, String regex) {
+    DateFormat df = new SimpleDateFormat(regex);
+    return df.format(date);
+}
+</code></pre>
+<p>上述运行结果</p>
+<pre><code>08月01日 11:27
+01月14日 13:34
+</code></pre>
 <ol>
-<li>
-<p>具体实现</p>
-<pre><code class="language-java">public class BST {
-  	...	
-		public static void levelOrder(TreeNode treeNode) {
-        if (treeNode == null) return;
-        Queue&lt;TreeNode&gt; queue = new LinkedList&lt;TreeNode&gt;();
-        queue.offer(treeNode);
-        while(!queue.isEmpty()){
-            TreeNode cur = queue.poll();
-          	// 打印当前节点
-            System.out.print(&quot; &quot; + cur.data);
-	          // 按顺序入队列即可
-            if(cur.left != null) queue.offer(cur.left);
-            if(cur.right != null) queue.offer(cur.right);
-        }
-    }
-}
-</code></pre>
-</li>
+<li>关于<code>targetSdkVersion</code>(<a href="http://gold.xitu.io/entry/5690e33460b20f9aeaa3f085/view">几个code的区别</a>)降级问题，降级会带来很多未知问题。用户安装了<code>targetSdkVersion</code>是<code>23</code>版本的<code>app</code>，而下一个版本把<code>targetSdkVersion</code>改为了<code>22</code>，首先，第一个问题就是会导致用户无法安装，需要卸载后重装。初次之外，降级也会导致对一些<code>API</code>调用不正常。</li>
+<li>同时修改了多个<code>module</code>的<code>gradle</code>文件，出现了以下问题<code>Error:Timeout waiting to lock cp_proj class cache for</code>删除报错的cache文件夹即可</li>
 </ol>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[算法基础④（树的概念和存储）]]></title>
-        <id>https://flyer88.github.io/post/suan-fa-ji-chu-si-shu-de-gai-nian-he-cun-chu/</id>
-        <link href="https://flyer88.github.io/post/suan-fa-ji-chu-si-shu-de-gai-nian-he-cun-chu/">
+        <title type="html"><![CDATA[【旧】记录一些蛋疼的bug(一)]]></title>
+        <id>https://flyer88.github.io/post/jiu-ji-lu-yi-xie-dan-teng-de-bugyi/</id>
+        <link href="https://flyer88.github.io/post/jiu-ji-lu-yi-xie-dan-teng-de-bugyi/">
         </link>
-        <updated>2020-06-15T08:24:47.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="ox0001-基本概念">OX0001 基本概念</h3>
+        <updated>2020-06-15T09:45:03.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>写于 2015年 12 月 21 日</p>
+</blockquote>
 <ol>
 <li>
-<p>树</p>
-<blockquote>
-<p>n(n &gt;= 0) 个节点 的有限集。当 n=0 时，称为空树，在任意一个非空树种有如下特点：</p>
-<ol>
-<li>有且仅有一个特定的称为根的节点。</li>
-<li>当 n &gt; 1 时，其余节点分为 m (m &gt; 0) 个互不相交的有限集，每个集合本身又是一个树，并称为根的子树</li>
-</ol>
-</blockquote>
+<p>主题适配时，drawable 错误 ...... Caused by: android.content.res.Resources$NotFoundException: File res/drawable/menu_shape.xml from drawable resource ID #0x7f020179 ...... Caused by: java.lang.UnsupportedOperationException: Can't convert to color: type=0x2</p>
+<p>drawable 中 对 attr color 进行引用导致报错</p>
+<p>具体看 https://code.google.com/p/android/issues/detail?id=26251</p>
+<p>Android 系统 的 bug，color 无法被引用到drawable中，只能一个主题一个drawable，5.0以上修复此bug</p>
 </li>
 <li>
-<p>二叉树</p>
-<blockquote>
-<p>每个节点只有两个孩子的树</p>
-</blockquote>
-</li>
-<li>
-<p>满二插树</p>
-<blockquote>
-<p>一个二叉树的所有非叶子节点都存在左右孩子，并且所有的叶子节点都在同一个层级</p>
-</blockquote>
-</li>
-<li>
-<p>完全二叉树</p>
-<blockquote>
-<p>对一个有 n 个节点的二叉树，按层级顺序编号，所有节点的编号为 1到 n，如果这个数的所有节点和同样深度的满二叉树的编号为从1到n的节点位置相同，则这个二叉树为完全二叉树</p>
-</blockquote>
+<p>相册问题</p>
+<p>不同版本下，系统相册的位置是不同的，建议创建一个自己的文件夹，具体操作，通过<code>Environement.get..</code>来获取系统环境下的sd卡目录，然后创建文件夹</p>
 </li>
 </ol>
-<h3 id="ox0002-存储方式">OX0002. 存储方式</h3>
-<ol>
-<li>
-<p><strong>链表</strong></p>
-<blockquote>
-<pre><code class="language-shell">					         [NodeA|data1|left|right]
-						//									\\
-					//											\\
-				//												   \\
-[NodeB|data2|null|null]			            [NodeC|data3|null|null]
+<pre><code>Intent intent = newIntent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);//系统拍照
+intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);//画质
+intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);//保存到uri
+Environment.getExternalStorageDirectory();//获取uri时，用这个方法，不然容易不同版本不问题
 </code></pre>
-</blockquote>
+<ol start="3">
+<li>XwalkView（14）截图问题</li>
+</ol>
+<p>http://stackoverflow.com/questions/29483028/how-can-i-capture-the-whole-view-into-a-bitmap-when-using-crosswalk-to-display-w</p>
+<p>http://www.cnblogs.com/ct2011/p/4100132.html</p>
+<p>注意：</p>
+<ul>
+<li>
+<p><code>XWalkPreferences.setValue(XWalkPreferences.ANIMATABLE_XWALK_VIEW, true)</code>需要在load之前就设置,在<code>activity</code> 的<code>onCreate()</code>设置，<code>onDestroy()</code> 中去除</p>
 </li>
 <li>
-<p><strong>数组 - 层序存储 (主要用于完全二叉树，否则会大量浪费空间)</strong></p>
-<blockquote>
-<p>父节点下标为parent，则做孩子的下标为 2* parent + 1，有孩子为 2*parent + 2</p>
-<pre><code class="language-shell">				 【1】
-				//	 \\
-			【2】	  【3】
-			//	\\         \\
-		【4】 【5】   【6】
-			\\
-			【8】
-			
-[1][2][3][4][5][null][6][null][8]
- 0  1  2  3  4   5    6   7    8
-
-</code></pre>
-</blockquote>
-</li>
-</ol>
-<h3 id="ox0003-bst-二叉查找树二叉排序树">OX0003. <code>BST</code> 二叉查找树/二叉排序树</h3>
-<ol>
-<li>左子树不为空，左子树的值均小于根</li>
-<li>右子树不为空，右子树的值均大于根</li>
-<li>左右子树也是 <code>BST</code></li>
-<li>时间复杂度: <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(logn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[算法基础③（哈希表简介及部分源码分析）]]></title>
-        <id>https://flyer88.github.io/post/suan-fa-ji-chu-san-ha-xi-biao-gai-nian/</id>
-        <link href="https://flyer88.github.io/post/suan-fa-ji-chu-san-ha-xi-biao-gai-nian/">
-        </link>
-        <updated>2020-06-15T08:23:53.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="0x0001-简介">0x0001. 简介</h3>
-<ol>
-<li>
-<p>基本概念</p>
-<blockquote>
-<ol>
-<li>
-<p>由两部分组成，数组 + 链表（红黑树，根据链表大小决定是否用）</p>
-</li>
-<li>
-<p>链表实现：查找时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mn>1</mn><mo>)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>  -- <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></p>
-</li>
-</ol>
-<p>红黑树实现：查找时间复杂度 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mn>1</mn><mo>)</mo></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord">1</span><span class="mclose">)</span></span></span></span>  -- <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(logn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></p>
-</blockquote>
-</li>
-<li>
-<p>关键难点</p>
-<blockquote>
-<ol>
-<li><code>LoadFactor(负载因子) * Capacity(当前长度) &gt; size</code>  ==&gt; 动态扩容</li>
-<li>解决<code>hash</code> 碰撞，链表+红黑树</li>
-<li>扰动函数，使得概率分部平均</li>
-</ol>
-</blockquote>
-</li>
-</ol>
-<h3 id="0x0002-put-函数源码解析">0x0002. <code>put</code> 函数源码解析</h3>
-<pre><code class="language-java">		public V put(K key, V value) {
-        return putVal(hash(key), key, value, false, true);
-    }
-
-    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
-                   boolean evict) {
-        Node&lt;K,V&gt;[] tab; Node&lt;K,V&gt; p; int n, i;
-      	// 为空处理，直接动态扩容（逻辑较为复杂，单独分析）
-        if ((tab = table) == null || (n = tab.length) == 0)
-            n = (tab = resize()).length;
-      	// 数组对应位置内容为空，直接放入
-        if ((p = tab[i = (n - 1) &amp; hash]) == null)
-            tab[i] = newNode(hash, key, value, null);
-        else {
-            Node&lt;K,V&gt; e; K k;
-          	// 数组的第一个位置
-            if (p.hash == hash &amp;&amp;
-                ((k = p.key) == key || (key != null &amp;&amp; key.equals(k))))
-                e = p;
-            else if (p instanceof TreeNode)
-            // 红黑树处理
-                e = ((TreeNode&lt;K,V&gt;)p).putTreeVal(this, tab, hash, key, value);
-            else {
-              	// 链表处理，无限循环，找到要覆盖的节点 e，break 出局
-                for (int binCount = 0; ; ++binCount) {
-                   // e 指向下一个节点
-                    if ((e = p.next) == null) {
-                      	// 尾部插入
-                        p.next = newNode(hash, key, value, null);
-                      	// 如果链表超过 8 个，转换成红黑树
-                        if (binCount &gt;= TREEIFY_THRESHOLD - 1) // -1 for 1st
-                            treeifyBin(tab, hash);
-                        break;
-                    }
-                  	// 找到对应位置，key 相同，结束循环
-                    if (e.hash == hash &amp;&amp;
-                        ((k = e.key) == key || (key != null &amp;&amp; key.equals(k))))
-                        break;
-                    // 链表迭代指向下一个
-                    p = e;
-                }
+<p>获取<code>TextureView</code>:</p>
+<pre><code>private TextureView findXWalkTextureView(ViewGroup group) {
+       int childCount = group.getChildCount();
+       for (int i = 0; i &lt; childCount; i++) {
+           View child = group.getChildAt(i);
+        if (child instanceof TextureView) {
+            String parentClassName = child.getParent().getClass().toString();
+            boolean isRightKindOfParent = (parentClassName.contains(&quot;XWalk&quot;));
+            if (isRightKindOfParent) {
+                return (TextureView) child;
             }
-          	// e 不为空，覆盖 e, 返回原值
-            if (e != null) { // existing mapping for key
-                V oldValue = e.value;
-                if (!onlyIfAbsent || oldValue == null)
-                    e.value = value;
-              	// 空
-                afterNodeAccess(e);
-                return oldValue;
+        } else if (child instanceof ViewGroup) {
+            TextureView textureView = findXWalkTextureView((ViewGroup) child);
+            if (textureView != null) {
+                return textureView;
             }
         }
-        // ？？
-        ++modCount;
-        //更新size，并判断是否需要扩容。
-        if (++size &gt; threshold)
-            resize();
-      	//空
-        afterNodeInsertion(evict);
+    }
+    return null;
+}
+</code></pre>
+</li>
+<li>
+<p>截图：</p>
+<pre><code>public Bitmap captureImage(XWalkView xWalkView) {
+
+if (xWalkView != null) {
+    Bitmap bitmap = null;
+
+    boolean isCrosswalk = false;
+    try {
+        Class.forName(&quot;org.xwalk.core.XWalkView&quot;);
+        isCrosswalk = true;
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    if (isCrosswalk) {
+        try {
+            TextureView textureView = findXWalkTextureView(xWalkView);
+            bitmap = textureView.getBitmap();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    } else {
+        bitmap = Bitmap.createBitmap(xWalkView.getWidth(), xWalkView.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bitmap);
+        xWalkView.draw(c);
+    }
+    return bitmap;
+    } else {
         return null;
     }
-
-
-		// hash 计算，扰动函数
- 		static final int hash(Object key) {
-        int h;
-        return (key == null) ? 0 : (h = key.hashCode()) ^ (h &gt;&gt;&gt; 16);
     }
 </code></pre>
-<h3 id="0x0003-put时内存状态和运算过程">0x0003. <code>put</code>时内存状态和运算过程</h3>
-<p><code>TestHashMap.java</code></p>
-<pre><code class="language-java">public class TestHashMap {
-    public static void main(String[] args) {
-        HashMap&lt;String, Integer&gt; programLanguage = new HashMap&lt;&gt;();
-        programLanguage.put(&quot;语文&quot;, 1);
-        programLanguage.put(&quot;数学&quot;, 2);
-        programLanguage.put(&quot;英语&quot;, 3);
-        programLanguage.put(&quot;历史&quot;, 4);
-        programLanguage.put(&quot;政治&quot;, 5);
-        programLanguage.put(&quot;地理&quot;, 6);
-        programLanguage.put(&quot;生物&quot;, 7);
-        programLanguage.put(&quot;化学&quot;, 8);
+</li>
+</ul>
+<ol start="4">
+<li>popwindow 和 menu物理键 第二次无法触发，以及第二次直接弹出并且隐藏问题<br>
+主要原因是，popwindow 添加了window从而截取了menu事件，所以activity处无法获取<br>
+http://www.bkjia.com/Androidjc/988767.html<br>
+Activity 代码：</li>
+</ol>
+<pre><code>@Override
+public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-        for (Entry&lt;String, Integer&gt; entry : programLanguage.entrySet()) {
-            System.out.println(&quot;key:&quot; + entry.getKey() + &quot; value:&quot;+ entry.getValue());
-            System.out.println(&quot;hash code:&quot; + entry.hashCode() +  &quot;\n&quot;);
+    switch (keyCode) {
+    case KeyEvent.KEYCODE_MENU:
+        isMenuShow = true;
+        showPopupWindow();
+        break;
+    }
+    return super.onKeyDown(keyCode, event);
+}
+</code></pre>
+<p>showPopupWindow:</p>
+<pre><code>    private void showPopupWindow() {
+        View view = inflater.inflate(R.layout.popupwindow, null);
+        ll.setOnKeyListener(new OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_MENU) {
+                    if (!isMenuShow) {
+                        popupWindow.dismiss();
+                    }
+                    isMenuShow = false;
+                }
+                return false;
+            }
+        });
+</code></pre>
+<ol>
+<li>Android appcompat-v7 兼容包导致 MENU 按键不能监听到的解决方案</li>
+</ol>
+<p>https://twiceyuan.com/2015/05/07/Android-appcompat-v7-兼容包导致-MENU-按键不能监听到的解决方案/</p>
+<ol>
+<li>
+<p>bug 5.0 以上 button 中设置 text 英文状态下会变成大写<br>
+解决方法：<code>android:textAllCaps=&quot;false&quot;</code></p>
+</li>
+<li>
+<p>Android 6.0（23） 源码中，String类的实现被替换了，具体调用的时候，会调用一个StringFactory来生成一个String，不过一直没有找到入口</p>
+<pre><code> public String(char[] data) {
+throw new UnsupportedOperationException(&quot;Use StringFactory instead.&quot;);
+}
+</code></pre>
+<p>除此之外，android 下 String 类实现与 Oracle 的实现完全不一样</p>
+</li>
+<li>
+<p>全球化问题，语言切换<br>
+<code>compileSdkVersion 23</code><br>
+版本的时候需要<br>
+<code>resources.updateConfiguration(config, dm);</code><br>
+不然没用<br>
+http://blog.csdn.net/sodino/article/details/6596709</p>
+</li>
+<li>
+<p>三星的傻逼，拍照会旋转，导致原<code>activity</code>重生，从而触发<code>onCreate()</code><br>
+在<code>AndroidManifest.xml</code>对应的<code>activity</code>写上 · <code>android:screenOrientation=&quot;landscape&quot;</code><br>
+（landscape = 横向 portrait = 纵向）<br>
+<code>android:configChanges=&quot;keyboardHidden|orientation&quot;</code></p>
+</li>
+<li>
+<p>遇到一个傻逼的bug，前几天还可以构建，放完假以后，运行项目突然报错，应该与我用的studio beat 版相关：<br>
+报错为：<code>Plugin is too old,please update to a more recent version,or set ANDROID_DAILY_OVERRIDE environment variable to &quot;XXXXX&quot;</code><br>
+点下面的<code>Fix plugin version and sync project</code>依旧报错，无用。<br>
+后来发现是build.gradle 里classpath的问题 我用的是 2.0.0 alpha1 改成1.2.3<br>
+或者改成最新的 alpha3，等待下载重新构建就可以了<br>
+<code>com.android.tools.build:gradle:1.2.3</code><br>
+建议用1.2.3，alpha3需要更新2.8的gradle，又要更新，有点麻烦</p>
+</li>
+<li>
+<p>&quot;Bitmap too large to be uploaded into a texture&quot;<br>
+解决方案，重新设置 bitmap 大小，OpenGL limit 是 2048 * 2048</p>
+</li>
+<li>
+<p><code>kitkat</code>之前<code>listview</code>的<code>addHeaderView()</code>需要在setAdapter之前调用，<br>
+<code>kitkat</code>之后<code>addHeaderView()</code>可以在前后调用</p>
+</li>
+<li>
+<p><code>RecyclerView</code> 23.1.1 版有 bug，解决方案，重写 <code>LineaLayoutManager</code> 的 <code>onLayoutChildren</code></p>
+<pre><code>@Override
+public void onLayoutChildren(RecyclerView.Recycler recycler,    RecyclerView.State state) {
+try {
+    super.onLayoutChildren(recycler, state);
+} catch (IndexOutOfBoundsException e) {
+    Log.e(&quot;probe&quot;, &quot;meet a IOOBE in RecyclerView&quot;);
+}
+</code></pre>
+<p>}</p>
+<p><code>java.lang.IndexOutOfBoundsException: Inconsistency detected. Invalid view holder adapter positionViewHolder</code></p>
+<p>http://stackoverflow.com/questions/31759171/recyclerview-and-java-lang-indexoutofboundsexception-inconsistency-detected-in</p>
+</li>
+<li>
+<p>Fresco 停止恢复加载<br>
+<code>Fresco.getImagePipeline().resume();</code><br>
+<code>Fresco.getImagePipeline().paused();</code></p>
+</li>
+<li>
+<p>不知道为什么的bug，记录，子布局 marginBottom 没作用，父级布局中 paddingBottom 可以用</p>
+<pre><code>    &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+    &lt;android.support.v7.widget.CardView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+    android:id=&quot;@+id/item_tc_home_root_cv&quot;
+    android:layout_marginBottom=&quot;16dp&quot;
+    app:cardBackgroundColor=&quot;@color/color_white&quot;
+    android:orientation=&quot;vertical&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot; &gt;
+    &lt;LinearLayout
+    android:orientation=&quot;vertical&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;&gt;
+        &lt;LinearLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;200dp&quot;/&gt;
+        &lt;RelativeLayout
+            android:paddingBottom=&quot;16dp&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:background=&quot;#ffffff&quot;&gt;
+            &lt;LinearLayout
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_marginLeft=&quot;50dp&quot;
+                android:layout_marginTop=&quot;10dp&quot;
+                android:id=&quot;@+id/linear_one&quot;
+                android:orientation=&quot;vertical&quot;&gt;
+                &lt;com.facebook.drawee.view.SimpleDraweeView
+                    app:placeholderImage=&quot;@mipmap/icon_head_image&quot;
+                    app:roundAsCircle=&quot;true&quot;
+                    android:layout_width=&quot;60dp&quot;
+                    android:layout_height=&quot;60dp&quot;
+                    android:src=&quot;@mipmap/icon_head_image&quot;
+                    android:id=&quot;@+id/avatar_iv&quot; /&gt;
+            &lt;/LinearLayout&gt;
+            &lt;LinearLayout
+                android:layout_width=&quot;200dp&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_alignParentRight=&quot;true&quot;
+                android:orientation=&quot;horizontal&quot;
+                android:layout_marginTop=&quot;16dp&quot;
+                android:layout_marginRight=&quot;16dp&quot;
+                android:id=&quot;@+id/linear_two&quot;
+                android:weightSum=&quot;3&quot;&gt;
+                &lt;TextView
+                    android:layout_width=&quot;0dp&quot;
+                    android:layout_height=&quot;wrap_content&quot;
+                    android:layout_weight=&quot;1&quot;
+                    android:textSize=&quot;16sp&quot;
+                    android:textColor=&quot;#ff467d&quot;
+                    android:id=&quot;@+id/post_count_tv&quot;
+                    android:text=&quot;45&quot;
+                    android:gravity=&quot;center&quot;/&gt;
+                &lt;TextView
+                    android:layout_width=&quot;0dp&quot;
+                    android:layout_height=&quot;wrap_content&quot;
+                    android:layout_weight=&quot;1&quot;
+                    android:textSize=&quot;16sp&quot;
+                    android:textColor=&quot;#ff467d&quot;
+                    android:id=&quot;@+id/fans_count_tv&quot;
+                    android:text=&quot;2322&quot;
+                    android:gravity=&quot;center&quot;/&gt;
+                &lt;TextView
+                    android:layout_width=&quot;0dp&quot;
+                    android:layout_height=&quot;wrap_content&quot;
+                    android:layout_weight=&quot;1&quot;
+                    android:textSize=&quot;16sp&quot;
+                    android:textColor=&quot;#ff467d&quot;
+                    android:id=&quot;@+id/follow_count_tv&quot;
+                    android:text=&quot;172&quot;
+                    android:gravity=&quot;center&quot;/&gt;
+            &lt;/LinearLayout&gt;
+            &lt;LinearLayout
+                android:layout_width=&quot;200dp&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:orientation=&quot;horizontal&quot;
+                android:layout_alignParentRight=&quot;true&quot;
+                android:layout_below=&quot;@+id/linear_two&quot;
+                android:layout_marginTop=&quot;16dp&quot;
+                android:layout_marginRight=&quot;16dp&quot;
+                android:id=&quot;@+id/linear_three&quot;
+                android:weightSum=&quot;3&quot;
+                &gt;
+        &lt;TextView
+            android:layout_width=&quot;0dp&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:layout_weight=&quot;1&quot;
+            android:textColor=&quot;#999999&quot;
+            android:textSize=&quot;12sp&quot;
+            android:text=&quot;帖子&quot;
+            android:gravity=&quot;center&quot;/&gt;
+        &lt;TextView
+            android:layout_width=&quot;0dp&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:layout_weight=&quot;1&quot;
+            android:textColor=&quot;#999999&quot;
+            android:textSize=&quot;12sp&quot;
+            android:text=&quot;粉丝&quot;
+            android:gravity=&quot;center&quot;/&gt;
+        &lt;TextView
+            android:layout_width=&quot;0dp&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:layout_weight=&quot;1&quot;
+            android:textColor=&quot;#999999&quot;
+            android:textSize=&quot;12sp&quot;
+            android:text=&quot;关注&quot;
+            android:gravity=&quot;center&quot;/&gt;
+    &lt;/LinearLayout&gt;
+    &lt;TextView
+        android:layout_marginLeft=&quot;48dp&quot;
+        android:layout_below=&quot;@+id/linear_one&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_marginTop=&quot;16dp&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:singleLine=&quot;true&quot;
+        android:textSize=&quot;18sp&quot;
+        android:gravity=&quot;center&quot;
+        android:id=&quot;@+id/oldDriver_name_tv&quot;
+        android:textColor=&quot;#4c4c4c&quot;
+        android:text=&quot;大哥&quot;/&gt;
+    &lt;TextView
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_below=&quot;@+id/oldDriver_name_tv&quot;
+        android:layout_marginLeft=&quot;16dp&quot;
+        android:layout_marginRight=&quot;16dp&quot;
+        android:text=&quot;cos 爱好者、我的博客地址：http:www.....&quot;
+        android:textColor=&quot;#999999&quot;
+        android:textSize=&quot;14sp&quot;
+        android:id=&quot;@+id/personal_description_tv&quot;
+        android:layout_marginTop=&quot;16dp&quot; /&gt;
+    &lt;LinearLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_below=&quot;@+id/personal_description_tv&quot;
+        android:layout_marginTop=&quot;16dp&quot;
+        android:gravity=&quot;center&quot;&gt;
+        &lt;ImageView
+            android:layout_width=&quot;114dp&quot;
+            android:layout_height=&quot;48dp&quot;
+            android:src=&quot;@mipmap/follow&quot;
+            android:id=&quot;@+id/follow_iv&quot;/&gt;
+    &lt;/LinearLayout&gt;
+
+&lt;/RelativeLayout&gt;
+</code></pre>
+</li>
+<li>
+<p><code>ICCP: Not recognizing known sRGB profile that has been edited</code> 错误，好像是<code>png</code>是<code>sRGB</code>导致的错误，解决方案在<code>buildToolsVersion</code>下面加：</p>
+<pre><code>aaptOptions.cruncherEnabled = false
+aaptOptions.useNewCruncher = false
+</code></pre>
+</li>
+</ol>
+<p>可以取消<code>Android Studio</code>对图片合法性的检查(参考：http://my.oschina.net/1pei/blog/479162)</p>
+<ol>
+<li>debug.keystore 问题（不同可以跑不同apk，不过大部分apk会有验证，回到导致APP运行失败）</li>
+<li>隐式调用在5.0后不允许，两种方案：</li>
+</ol>
+<ul>
+<li>该成显式调用</li>
+</ul>
+<pre><code>    Intent serviceIntent = new Intent(context,MyService.class);
+    context.startService(serviceIntent);
+</code></pre>
+<ul>
+<li>加上包名</li>
+</ul>
+<pre><code>        PackageManager pm = context.getPackageManager();
+        List&lt;ResolveInfo&gt; resolveInfoList = pm.queryIntentServices(implicitIntent, 0);
+        if (resolveInfoList == null || resolveInfoList.size() != 1) {
+            return null;
+        }
+        ResolveInfo serviceInfo = resolveInfoList.get(0);
+        ComponentName component = new ComponentName(serviceInfo.serviceInfo.packageName, serviceInfo.serviceInfo.name);
+        Intent explicitIntent = new Intent(implicitIntent);
+        explicitIntent.setComponent(component);
+</code></pre>
+<ol>
+<li>service 需要先unbind（如果bind过的话），不然无法stopService</li>
+<li>ExecutorService 的 execute 和 submit 方法，前者会往外部抛出错误，后者不会。参考<a href="https://segmentfault.com/a/1190000000669942">ExecutorService的坑</a></li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[【旧】引用传递和值传递(pass by value vs pass by reference)]]></title>
+        <id>https://flyer88.github.io/post/jiu-yin-yong-chuan-di-he-zhi-chuan-di-pass-by-value-vs-pass-by-reference/</id>
+        <link href="https://flyer88.github.io/post/jiu-yin-yong-chuan-di-he-zhi-chuan-di-pass-by-value-vs-pass-by-reference/">
+        </link>
+        <updated>2020-06-15T09:44:08.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>写于 2016 年 07 月 30 日</p>
+</blockquote>
+<ul>
+<li>一. 值类型和引用类型（此处先不考虑String）的传递</li>
+<li>二. String的问题：
+<ul>
+<li>
+<ol>
+<li>String问题来源</li>
+</ol>
+</li>
+<li>2.脑洞猜想可能情况</li>
+<li>3.字节码验证</li>
+<li>4.最终结论</li>
+</ul>
+</li>
+</ul>
+<p>写这个的原因主要是今天看到了<a href="https://www.zhihu.com/question/31203609">知乎的一个问题</a>，发现自己有些地方有点懵逼，写下来记录一下，<a href="http://zhihu.com/question/31203609/answer/50992895">知乎上排名第一的答案</a>说的很清楚，不过看了以后依旧有点迷迷糊糊，所以自己写了个几行代码测试。</p>
+<p>首先上一个，感觉比较对的结论：</p>
+<p><strong>Horstmann的《java核心技术》（中文第8版P115-P117）原文描述：</strong></p>
+<p><strong>”java程序设计语言总是采用值调用。也就是说，方法得到的是所有参数值的一个拷贝，特别是，方法不能修改传递给它的任何参数变量的内容。“</strong></p>
+<p><strong>”有些程序员（甚至是本书的作者），认为java程序设计语言对对象采用的是引用调用，实际上这种理解是不对的。”</strong></p>
+<p>然后补充几句我的理解：</p>
+<ol>
+<li>首先，Java在传递过程中，传递的只有值，但是表现出来的形式，却既有值传递也有引用传递，因此，没必要纠结于名字，能理解原理即可。</li>
+<li>在传递对象进函数时，对象的所有数据会被拷贝到局部变量中，这也就导致了局部变量修改其成员变量值时会导致原始的变量的成员变量值产生响应的改变，因为他们持有的成员变量的引用指向了同一个地址块(内存空间)。</li>
+<li>而对于传递8种基本变量时，也只是拷贝了值，因此对基本变量其本身的修改，无法导致原始变量的的修改。</li>
+<li>不过这里需要考虑特殊情况，就是String，其表现形式和8种基本变量一样，具体下文有分析，而对于String为何要这么做，我也不清楚，不是很懂 jvm 和 Java 的设计。</li>
+</ol>
+<hr>
+<hr>
+<h2 id="一-值类型和引用类型此处先不考虑string的传递">一. 值类型和引用类型（此处先不考虑String）的传递：</h2>
+<pre><code>public class Student {
+    int age;
+    String name;
+}
+public class TestReference {
+    public static void main(String[] args){
+        Student student = new Student();
+        student.age = 10;
+        System.out.println(student.age);//10
+        addAge(student);
+        System.out.println(student.age);//11
+        addAge(student.age);
+        System.out.println(student.age);//11
+    }
+
+    static public void addAge(Student paramStudent){
+        paramStudent.age = 11;
+    }
+
+    static public void addAge(int paramAge){
+        paramAge = 12;
+    }
+}
+</code></pre>
+<p>对以上代码进行解释</p>
+<ul>
+<li>首先<code>addAge(student)</code>调用的是<code>addAge(Student paramStudent)</code>，该部分其实很好理解，首先，<code>paramStudet</code>对象，拷贝了传入的<code>studet</code>对象所有的数据，因此<code>paramStudet</code>它所指向的地址，其实和<code>student</code>是一样的，所以，当<code>paramStudent</code>改变它的<code>age</code>值时，其触发的操作和<code>student</code>改变<code>age</code>的值是一样的 ,因为他们都指向了同一个地址块。</li>
+<li>其次<code>addAge(student.age)</code>调用的是<code>addAge(int paramAge)</code>，也很好理解，<code>paramAge</code>也只是拷贝了<code>studet.age</code>的值，此处为10，然后改变了<code>paramAge</code>的值，但此时<code>paramAge</code>与引用类型不同，它保存的只有一个值，所以其实这个<code>parmaAge</code>作为一个局部变量，并不能对原本的<code>student.age</code>产生任何影响</li>
+</ul>
+<h2 id="二-string的问题">二. String的问题：</h2>
+<h3 id="1-string问题来源">1. String问题来源</h3>
+<p>上面的例子其实很好搞清楚，但是我在碰到String的时候就有点懵逼了,如果调用以下方法，结果会如注释显示。</p>
+<pre><code>public static void main(String[] args){
+    Student student = new Student();
+    student.age = 10;
+    student.name = &quot;dove&quot;;
+    changeName(student);
+    System.out.println(student.name);//dove_2
+    changeName(student.name);
+    System.out.println(student.name);//dove_2
+    changeName2(student.name); 
+    System.out.println(student.name);//dove_2         
+}      
+static void changeName(Student paramStudent){
+    paramStudent.name = &quot;dove_2&quot;;
+}
+static void changeName(String paramName){
+    paramName = &quot;dove_3&quot;;
+}
+static void changeName2(String paramName){
+    paramName += &quot;233&quot;;
+}
+</code></pre>
+<p><code>changeName2(String paramName)</code>此处讲道理被调用后应该是&quot;dove_2233&quot;,因为<code>String</code>是一个引用类型,也就是说此处的<code>parmaName</code>应该是指向和传入的参数指向了相同的一个地址块，然后对指向的内存进行了修改,然而结果并不是,原因就在于<code>String</code>是一个不可变的类型(为啥不可变呢,具体可以看<code>String</code>类的实现,它是一个<code>final class</code>,并且其内部正真保存着字符串的<code>value[]</code>也是不可变的(<code>final</code>)，所以意味着修改<code>Sting</code>是不可能的)。</p>
+<h3 id="2脑洞猜想可能情况">2.脑洞猜想可能情况</h3>
+<p>所以猜测上述的<code>changeName2</code>过程类似于</p>
+<pre><code>    FuckString fuckString = new FuckString();//paramName
+    FuckString fuckString2 = new FuckString(fuckString);//构造出的新的值
+    fuckString = fuckString2;//把paramName指向构造出的新值
+</code></pre>
+<p>然后，这就有点想不通了，不可变的类型，String 的 <code>+</code> 是怎么弄的呢？打个断点试试看，强制进入，发现跳转到了StringBuilder的构造方法里，这说明应该是构造了一个新的StringBuilder对象。</p>
+<figure data-type="image" tabindex="1"><img src="http://www.dove.farbox.com/java/_image/%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%E5%92%8C%E5%80%BC%E4%BC%A0%E9%80%92/19-58-14.jpg" alt="img" loading="lazy"></figure>
+<p>同时，底部的Debug里抛出了个错误，说是无法获取<code>StringBuilder.toString()</code>,也就进一步证明此处有新的<code>String</code>的产生。</p>
+<figure data-type="image" tabindex="2"><img src="http://www.dove.farbox.com/java/_image/%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%E5%92%8C%E5%80%BC%E4%BC%A0%E9%80%92/19-58-59.jpg" alt="img" loading="lazy"></figure>
+<p>到这里基本上就验证了我的猜想，<code>String</code> <code>+</code>会产生一个新的<code>String</code>对象，既然这样，反编译下，看下字节码，估计基本就搞定这个懵逼的问题了。</p>
+<h3 id="3字节码验证">3.字节码验证</h3>
+<p>于是就写了以下的类，用来验证：</p>
+<pre><code>public class Main {
+    public static void main(String[] args){
+        String s = &quot;dove&quot;;
+        s += &quot;233&quot;;
+    }
+}
+</code></pre>
+<p>然后javac，然后javap -c，看字节码,如下图。</p>
+<figure data-type="image" tabindex="3"><img src="http://www.dove.farbox.com/java/_image/%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%E5%92%8C%E5%80%BC%E4%BC%A0%E9%80%92/20-03-38.png" alt="img" loading="lazy"></figure>
+<p>尝试着解释下该部分代码（不是很看的懂字节码，所以有些解释可能不是很规范，不过讲道理大概意思不会差很远)</p>
+<ul>
+<li><code>String s = &quot;dove&quot;;</code>部分字节码及解释</li>
+</ul>
+<pre><code>       0: ldc           #2                  // String dove
+       2: astore_1
+</code></pre>
+<p>第0行，将一个常量加载到操作数栈,也就是把“dove”这玩意，放进了操作数栈(也不知道是什么东西，蛤蛤)</p>
+<p>第2行，将一号数值（下划线1代表一号，大概理解，不是很准确）从操作数栈存储到局部变量表，说白了就是把“dove”给存了起来？</p>
+<ul>
+<li><code>s += &quot;233&quot;;</code>部分字节码及解释</li>
+</ul>
+<pre><code>       3: new           #3                  // class java/lang/StringBuilder
+       6: dup
+       7: invokespecial #4                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V
+      10: aload_1    
+      11: invokevirtual #5                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      14: ldc           #6                  // String 233
+      16: invokevirtual #5                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      19: invokevirtual #7                  // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+</code></pre>
+<p>第3行，这个很明显，不google也知道，<code>new StringBuilder()</code>，也就是搞了个<code>StringBUilder</code>的实例。</p>
+<p>第6行，Java虚拟机提供了一些用于直接操作操作数栈，不是很懂，貌似对整体理解影响不大，先过。</p>
+<p>第7行，invokespecial 调用一些需要特殊处理的实例方法，包括实例初始化方法、私有方法和父类方法，此处应该是在初始化StringBuilder对象。</p>
+<p>第10行，将1号局部变量(下划线1指代一号变量)加载到操作栈，这里应该是指“dove”</p>
+<p>第11行，调用对象的实例方法,此处就是调用<code>StringBuilder.append</code>,也就是把“dove”加到了<code>StringBuilder</code>中</p>
+<p>第14行，将一个常量加载到操作数栈，就是把“233”载入</p>
+<p>第16行，调用对象的实例方法,此处就是调用<code>StringBuilder.append</code>，把“233”给加到“StringBuilder”中</p>
+<p>第19行，调用对象的实例方法,此处就是调用<code>StringBuilder.toString</code>，而该方法，会触发<code>new String()</code>的操作，因此，会返还一个新的<code>String</code>对象</p>
+<h3 id="4最终结论">4.最终结论：</h3>
+<p>从脑洞断点以及最后的字节码分析可以看出，<code>s +=&quot;233&quot;</code>,会导致一个新的String对象生成，也就是说，调用<code>changeName2(String paramName)</code>会使得<code>paramName</code>指向一个新的String对象，这样就意味着，对该数据的改变并不会影响本身<code>student.name</code>的值,由此，String懵逼的问题也解决了。</p>
+<hr>
+<hr>
+<p>以上，就是整个关于Java引用传递和值传递的理解，有说的不对的，望指正。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Android 源码编译]]></title>
+        <id>https://flyer88.github.io/post/android-yuan-ma-bian-yi/</id>
+        <link href="https://flyer88.github.io/post/android-yuan-ma-bian-yi/">
+        </link>
+        <updated>2020-06-15T09:43:46.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>写于 2016 年 03 月 07 日</p>
+</blockquote>
+<p>一直想编译 Android 的源码，苦于 Mac 硬盘太小，PC 上的硬盘也只有 128G，想着机械盘编译又太慢，最终咬牙，在淘宝入了一个 256 的SSD，装了个 Ubuntu 14.04，然后开始捣鼓，现在记录一下捣鼓的过程</p>
+<ol>
+<li>
+<p>Android 开发环境</p>
+<ul>
+<li>
+<p>首先是 JAVA 环境</p>
+<pre><code>    apt-cache search openjdk //用于找到 jdk 版本，会出现一大堆列表，找到jdk，复制下名字
+    sudo apt-get install openjdk-7-jdk//根据上面找到的，开始安装
+    java -version//测试
+</code></pre>
+</li>
+<li>
+<p>然后是 Android SDK 和 Android stuido 开发环境（这步与后面源码编译并无很大关系，但是还是做了，因为后期导入源码，又要折腾一次Android studio，此处其实可以不用下载sdk，因为源码可以编译出sdk，开始不知道，就直接下载了）</p>
+<p>在<a href="http://www.androiddevtools.cn/">AndroidDevTools</a>找到自己想要的版本，我找了<a href="http://pan.baidu.com/s/1o7dHRpK">Android stuido 2.0 beta6</a>，然后下载,下载后解压，将文件整个文件夹拷贝到自己的工作目录下</p>
+<pre><code>    cd 工作目录/android-studio
+    ./bin/studio.sh
+</code></pre>
+<p>看到Android studio 运行界面，等待后，选择 Cancel</p>
+<p>选择 Re-run the setup wizard on the next Android Studio startup(Recommended)</p>
+<p>然后选择 OK</p>
+<p>继续选择右下角的 configrution</p>
+<p>选择 SDK Manager</p>
+<p>点击 Launch Standalone SDK Manager</p>
+<p>左上角 Tools=&gt;Options..</p>
+<p>然后根据 <a href="http://www.androiddevtools.cn/">AndroidDevTools</a> 中的教程，修改sdk镜像源</p>
+<p>下载镜像</p>
+</li>
+</ul>
+</li>
+<li>
+<p>拉取源码</p>
+<ul>
+<li>
+<p>首先是 <code>repo</code> 工具，这是拉取谷歌家很多源码都会用到的工具<br>
+<a href="https://mirrors.tuna.tsinghua.edu.cn/help/AOSP/">清华镜像</a>，造福社会。<br>
+清华的教程其实写的很清楚了，不过考虑到 <code>repo</code> 可能有其他用处，我把它配置到了<code>.bashrc</code>里</p>
+<pre><code>    curl https://storage.googleapis.com/git-repo-downloads/repo &gt; ~/Tools/repo    
+    chmod a+x ~/Tools/repo
+    sudo gedit .bashrc
+</code></pre>
+<p>末尾加上</p>
+<pre><code>    export REPO = /home/flyer/Tools/repo
+    export PATH=$PATH:$REPO
+</code></pre>
+<p>然后就是建立工作环境初始化仓库</p>
+<pre><code>    mkdir AOSP
+    cd AOSP
+    repo init -u https://aosp.tuna.tsinghua.edu.cn/platform/manifest            
+    //这里可能会让你配置一下 git username 和 mail 地址，如果没有 git 就安装 git
+    sudo apt-get install git
+    sudo apt-get install git-core  
+    sudo git config user.name &quot;flyer&quot;          
+    sudo git config user.email &quot;***@***&quot;
+</code></pre>
+<p>考虑到 Android 版本很多，可以通过拉取manifest，获取版本信息</p>
+<pre><code>    git clone git://aosp.tuna.tsinghua.edu.cn/aosp/platform/manifest                           
+    cd manifest            
+    git branch -al//会显示出所有的分支，也就是android的版本
+</code></pre>
+<p>拉取需要的版本</p>
+<pre><code>    repo init -u https://aosp.tuna.tsinghua.edu.cn/platform/manifest -b android-5.1.1_r19 
+    repo sync //开始拉取代码，这是一个很慢的过程，不过网速还是不错的
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>编译源码</p>
+<ul>
+<li>
+<p>安装ccache（一个C++/C的高效编译器）</p>
+<pre><code>    sudo apt-get install ccache
+    source ~/.bashrc  
+</code></pre>
+</li>
+<li>
+<p>安装第三方依赖（下面是可能会用到的依赖，我全跑了一遍，防止编译的时候出现问题，毕竟编译时间太长，不可能一直看着）</p>
+<pre><code>    sudo apt-get install git-core//前面已经安装了
+    sudo apt-get install git//前面已经安装了
+    sudo apt-get install gcc
+    sudo apt-get install gnupg
+    sudo apt-get install flex
+    sudo apt-get install bison
+    sudo apt-get install gperf
+    sudo apt-get install build-essential
+    sudo apt-get install zip
+    sudo apt-get install curl
+    sudo apt-get install libc6-dev
+    sudo apt-get install libncurses5-dev:i386
+    sudo apt-get install x11proto-core-dev
+    sudo apt-get install libx11-dev:i386
+    sudo apt-get install libreadline6-dev:i386
+    sudo apt-get install libgl1-mesa-dev
+    sudo apt-get install g++-multilib
+    sudo apt-get install mingw32
+    sudo apt-get install tofrodos
+    sudo apt-get install python-markdown
+    sudo apt-get install libxml2-utils
+    sudo apt-get install xsltproc
+    sudo apt-get install zlib1g-dev:i386
+    sudo apt-get install dpkg-dev‘
+    sudo apt-get autoremove
+    sudo apt-get autoclean//最后我清理了一下无用的东西
+</code></pre>
+</li>
+<li>
+<p>编译</p>
+<pre><code>    cd AOSP  //进入源码根目录
+    prebuilts/misc/linux-x86/ccache/ccache -M 50G //设置ccache大小
+    . build/envsetup.sh//加载环境变量
+    lunch
+    1  //此处会出现需要选择版本，我编译的是虚拟机的，直接选了 1
+    make j2  //j4为4核心，看你电脑配置
+
+    #### make completed successfully (6:38:43 (hh:mm:ss)) #### //然后第二天睡醒，看到successfully  
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>运行</p>
+<pre><code>    emulator//开启模拟器
+    //这中间，我由于去上班了，直接把电脑关了，导致后面直接运行 emulator 命令无效
+    //重新加载一遍环境即可        
+    . build/envsetup.sh
+    lunch   
+    1        
+    emulator
+</code></pre>
+</li>
+<li>
+<p>大功告成，特此记录</p>
+</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[【旧】Error inflating class 错误解决合集]]></title>
+        <id>https://flyer88.github.io/post/jiu-error-inflating-class-cuo-wu-jie-jue-he-ji/</id>
+        <link href="https://flyer88.github.io/post/jiu-error-inflating-class-cuo-wu-jie-jue-he-ji/">
+        </link>
+        <updated>2020-06-15T09:43:12.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>写于 2015 年 12 月 21 日</p>
+</blockquote>
+<p>错误信息:</p>
+<p><code>Binary XML file line #xxx: Error inflating class...</code></p>
+<ul>
+<li>
+<p>引用类名问题：在<code>Hello</code>包下自定义了一个<code>MineView</code>，将他用于布局文件中，完整报名来进行引用。<br>
+即<code>Hello.MineView</code></p>
+</li>
+<li>
+<p>构造函数问题：自定义一个View，必须派生实现基类View的三个构造函数<br>
+<code>View(Context context)</code></p>
+<p><code>View(Context context, AttributeSet attrs)</code></p>
+<p><code>View(Context context, AttributeSet attrs, int defStyle)</code></p>
+<p>从文档上的介绍来看，第二个和第三个构造函数对于<code>XML</code>这种引用方式是必须实现的，这三个构造函数应该是在不同的应用场合来实例化一个<code>View</code>对象。</p>
+</li>
+<li>
+<p>编译的中间文件没有清理干净：第三种就是你在原生系统代码的编译环境下编译APK之后，修改了<code>XML</code>，出现标题所述现象,clean build 即可。</p>
+</li>
+<li>
+<p>找不到资源文件：找不到<code>drawable</code>的资源文件，把<code>drawable</code>的<code>hdpi</code>等文件夹的图片资源都拷贝一份到<code>drawble</code>下，问题解决。(网上查询出，默认情况下，编译时 <code>drawable</code> 会选用<code>mdip</code>的，具体没去研究,验证过)。</p>
+</li>
+<li>
+<p><code>attr color</code> 引用 报错，https://code.google.com/p/android/issues/detail?id=26251<br>
+<code>Android</code> 的 <code>bug</code>，<code>color</code> 无法被引用到<code>drawable</code>中，只能一个主题一个 <code>drawable</code>，5.0以上修复此<code>bug</code>，<code>?attr/white</code> 是无法被引用的，只能 `@color/white<br>
+即</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; android:shape=&quot;rectangle&quot;&gt;
+&lt;corners android:radius=&quot;2dp&quot; /&gt;
+&lt;solid android:color=&quot;?attr/white&quot;/&gt;`
+</code></pre>
+</li>
+</ul>
+</shape>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[【旧】LayoutInflater 后记--替换系统控件]]></title>
+        <id>https://flyer88.github.io/post/jiu-layoutinflater-hou-ji-ti-huan-xi-tong-kong-jian/</id>
+        <link href="https://flyer88.github.io/post/jiu-layoutinflater-hou-ji-ti-huan-xi-tong-kong-jian/">
+        </link>
+        <updated>2020-06-15T09:42:37.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>于 2016 年 08 月 22 日</p>
+</blockquote>
+<ul>
+<li>首先需要确定，<code>LayoutInflater</code>对于<code>Android</code>自带的<code>view</code>读入的名字是没有全名的，具体创建的时候是通过写上前缀，然后借助反射进行实例化的</li>
+<li>明确，<code>Factory</code>如果可以构建<code>view</code>对象的话，后面的<code>view</code>实例化操作是不会被进行的</li>
+<li>明确<code>Factory</code>是可以被<code>set</code>进去的</li>
+<li>剩下的就是考虑<code>Activity</code>会在何时才会创建<code>view</code>，自然是<code>setContentView</code>，该方法会触发整个<code>xml</code>的<code>inflate</code></li>
+</ul>
+<p>之前记录了自己走通 <code>LayoutInflater</code> 的源码整体流程，一直想搞个好玩的东西，想起之前看到过的<a href="https://github.com/fengjundev/Android-Skin-Loader">换肤方案</a>，决定写个换系统控件的库。</p>
+<p><a href="https://github.com/flyer88/Pichu">项目地址</a>，项目的具体使用，可以看README</p>
+<hr>
+<h4 id="首先需要确定layoutinflater对于android自带的view读入的名字是没有全名的具体创建的时候是通过写上前缀然后借助反射进行实例化的">首先需要确定，<code>LayoutInflater</code>对于<code>Android</code>自带的<code>view</code>读入的名字是没有全名的，具体创建的时候是通过写上前缀，然后借助反射进行实例化的</h4>
+<p>举例：</p>
+<pre><code>   &lt;TextView
+    ...
+    /&gt;
+</code></pre>
+<p>作为xml读入以后，是只有<code>TextView</code>的</p>
+<p>而</p>
+<pre><code>    &lt;dove.flyer.xu.mineView 
+    ....    
+    /&gt;
+</code></pre>
+<p>作为xml读入后，是整个名字存在的，即<code>dove.flyer.xu.mineView</code>，具体细节<a href="http://www.dove.farbox.com/post/android/layoutinflater-hou-ji-ti-huan-xi-tong-kong-jian">前面文章</a>已经叙述了，此处不重复了</p>
+<h4 id="明确factory如果可以构建view对象的话后面的view实例化操作是不会被进行的">明确，<code>Factory</code>如果可以构建<code>view</code>对象的话，后面的<code>view</code>实例化操作是不会被进行的。</h4>
+<p>首先定位到<code>createViewFromTag</code>。</p>
+<p>源码中，以<code>Factory</code>为例子,如果<code>Factory</code>为空的时候，是不会执行里面代码的，如果设置了，则会执行。而执行后，如果<code>view</code>不为空，则下面的<code>view</code>创建都会失效，也就是说，如果<code>Factory</code>创建成功了<code>view</code>，那么后面创建<code>view</code>部分的代码并不会执行。<code>Facory2</code>也同理。</p>
+<p>而<code>Factory</code>和<code>Factory2</code>在一开始就是空的，只需要设置好这个<code>Factory</code>，那具体的<code>view</code>创建就会被它俩其中一个接手。</p>
+<pre><code>View createViewFromTag(View parent, String name, AttributeSet attrs, boolean inheritContext){
+....
+    if (mFactory2 != null) {
+                    view = mFactory2.onCreateView(parent, name, viewContext, attrs);
+    } else if (mFactory != null) {
+        view = mFactory.onCreateView(name, viewContext, attrs);
+    } else {
+        view = null;
+    }
+    if(view == null ...){
+        ...
+    }
+    if(view == null ...){
+        ...
+    }
+....
+}
+</code></pre>
+<h4 id="明确factory是可以被set进去的">明确<code>Factory</code>是可以被<code>set</code>进去的</h4>
+<p>调用<code>getLayoutInflater().setFactory(factory)</code>即可</p>
+<h4 id="剩下的就是考虑activity会在何时才会创建view自然是setcontentview该方法会触发整个xml的inflate">剩下的就是考虑<code>Activity</code>会在何时才会创建<code>view</code>，自然是<code>setContentView</code>，该方法会触发整个<code>xml</code>的<code>inflate</code>，</h4>
+<p>所以剩下的就是在<code>onCreate</code>的时候，在<code>setContentView</code>之前，把自己的<code>Factory</code>给设置进去，把传进来的名字，修改成自己的<code>view</code>就可以了。</p>
+<hr>
+<p>以上三点拼在一起就可以进行系统控件的同意替换，具体<code>Factory</code>重写的细节请参考源码。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[【旧】记 LayoutInflater 源码流程]]></title>
+        <id>https://flyer88.github.io/post/jiu-ji-layoutinflater-yuan-ma-liu-cheng/</id>
+        <link href="https://flyer88.github.io/post/jiu-ji-layoutinflater-yuan-ma-liu-cheng/">
+        </link>
+        <updated>2020-06-15T09:40:36.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>于 2016 年 08 月 19 日</p>
+</blockquote>
+<ul>
+<li>走了一遍 LayoutInflater的流程，特此记录
+<ul>
+<li>
+<ul>
+<li>获取 LayoutInflater --- <code>LayoutInflater.from(context)</code></li>
+<li>调用Inflate -- <code>LayoutInflater.from(context).inflate(R.layout.activity_layout,null,false)</code></li>
+<li><code>inflate(XmlPullParser parser, ViewGroup root, boolean attachToRoot)</code>是整个<code>inflate</code>的核心部分
+<ul>
+<li>首先是看第一部分，父布局<code>temp</code>的实例化</li>
+<li>然后是子布局的实例化</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li></li>
+</ul>
+<h1 id="走了一遍-layoutinflater的流程特此记录">走了一遍 LayoutInflater的流程，特此记录</h1>
+<h3 id="获取-layoutinflater-layoutinflaterfromcontext">获取 LayoutInflater --- <code>LayoutInflater.from(context)</code></h3>
+<p>获取LayoutInflater对象实例</p>
+<pre><code>​```
+    public static LayoutInflater from(Context context) {
+        //获取 layoutInflater，注意这是一个IPC的过程，获取的实例是PhoneLayoutInflater，与LayoutInflater 区别不大，重写了protected View onCreateView(String name, AttributeSet attrs) 函数，具体可以去看源码，位置是frameworks/base/core/java.com.android.internal.policy.impl
+            LayoutInflater LayoutInflater =
+                    (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        //如果为空抛出错误       
+            if (LayoutInflater == null) {
+                throw new AssertionError(&quot;LayoutInflater not found.&quot;);
+            }
+        //返回值
+                    return LayoutInflater;
+    }
+​```
+</code></pre>
+<h3 id="调用inflate-layoutinflaterfromcontextinflaterlayoutactivity_layoutnullfalse">调用Inflate -- <code>LayoutInflater.from(context).inflate(R.layout.activity_layout,null,false)</code></h3>
+<pre><code>​```
+ public View inflate(int resource, ViewGroup root, boolean attachToRoot) {
+        //获取resource对象
+        final Resources res = getContext().getResources();
+        ...
+        //把R.layout.activity_layout 放入，获取整个 Xml的Parser
+        final XmlResourceParser parser = res.getLayout(resource);
+        try {
+            // 开始真正的inflate
+            return inflate(parser, root, attachToRoot);
+        } finally {
+            parser.close();
         }
     }
-}
+​```
 </code></pre>
-<p><code>输出结果</code></p>
-<pre><code>key:政治 value:5
-hash code:831321
+<h3 id="inflatexmlpullparser-parser-viewgroup-root-boolean-attachtoroot是整个inflate的核心部分"><code>inflate(XmlPullParser parser, ViewGroup root, boolean attachToRoot)</code>是整个<code>inflate</code>的核心部分</h3>
+<p>整体流程：</p>
+<p>找到最外层的父级布局 ===》 处理<code>merge</code>节点情况 ===》实例化父级布局 =<mark>》根据父级布局，调用<code>rInflate</code>函数去实例化子级<code>view</code></mark>=&gt; 根据实例化结果，以及外部参数，进行<code>view</code>的添加以及结果的返回</p>
+<pre><code>​```
+    public View inflate(XmlPullParser parser, ViewGroup root, boolean attachToRoot) {
+        //同步进入
+        synchronized (mConstructorArgs) {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, &quot;inflate&quot;);
+            // 解析返回 attrs
+            final AttributeSet attrs = Xml.asAttributeSet(parser);
+            // 
+            Context lastContext = (Context)mConstructorArgs[0];
+            mConstructorArgs[0] = mContext;
+            // 传入的 viewgroup 是 null
+            View result = root;
+            try {
+                // 此处尝试寻找开始和结束节点，即找到整个layout的最外层 view
+                int type;
+                while ((type = parser.next()) != XmlPullParser.START_TAG &amp;&amp;
+                        type != XmlPullParser.END_DOCUMENT) {
+                    // Empty
+                }
+                // 如果 type != 开始节点抛出错误，也就是说没找到开始节点
+                if (type != XmlPullParser.START_TAG) {
+                    throw new InflateException(parser.getPositionDescription()
+                            * &quot;: No start tag found!&quot;);
+                }
+                // 获取当前节点的名字，也就是当前layout的根节点的名字
+                final String name = parser.getName();
 
-key:生物 value:7
-hash code:958765
+                ...
+                //处理 merge 节点
+                if (TAG_MERGE.equals(name)) {
+                    if (root == null || !attachToRoot) {
+                        throw new InflateException(&quot;&lt;merge /&gt; can be used only with a valid &quot;
+                                * &quot;ViewGroup root and attachToRoot=true&quot;);
+                    }
+                    rInflate(parser, root, attrs, false, false);
+                } else {// 不是merge的情况下
+                    // createViewFromTag 该方法是根据前面获取的 tag 的名字，创建具体的view对象
+                    // 此处特殊的地方时，Temp 就是根节点，也就是整个layout的根节点，因为 name 是前面获取的根节点的名字
+                    final View temp = createViewFromTag(root, name, attrs, false);
+                    // 初始化 params
+                    ViewGroup.LayoutParams params = null;
+                    if (root != null) {// root != 空，会初始化出一个 params
 
-key:历史 value:4
-hash code:684328
+                        ...
+                        // 如果提供了root，会根据 root 创建 layout params 
+                        params = root.generateLayoutParams(attrs);
+                        if (!attachToRoot) {
+                            // Set the layout params for temp if we are not
+                            // attaching. (If we are, we use addView, below)
+                            temp.setLayoutParams(params);
+                        }
+                    }
+                    ...
+                    // 此处，会进行所有的 temp 的子 view 的 inflate
+                    rInflate(parser, temp, attrs, true, true);
 
-key:数学 value:2
-hash code:828404
-
-key:化学 value:8
-hash code:682776
-
-key:语文 value:1
-hash code:1136443
-
-key:英语 value:3
-hash code:1074975
-
-key:地理 value:6
-hash code:721616
-</code></pre>
-<ol>
-<li><strong>内存状态</strong> （解决哈希碰撞）</li>
-</ol>
-<pre><code class="language-shell">&gt;table: HashMap$Node[16]@17
-	&gt; 0: HashMap$Node@31 &quot;政治&quot;:&quot;5&quot;
-		1: null
-		2: null
-		3: null
-		4: HashMap$Node@32 &quot;生物&quot;:&quot;7&quot;
-		5: null
-		6: HashMap$Node@33 &quot;历史&quot;:&quot;4&quot;
-		7: null
-		8: null
-		9: null
-		10: HashMap$Node@19 &quot;数学&quot;:&quot;2&quot;
-		11: HashMap$Node@34 &quot;语文&quot;:&quot;1&quot;
-		12: HashMap$Node@35 &quot;英语&quot;:&quot;3&quot;
-		13: HashMap$Node@36 &quot;地理&quot;:&quot;6&quot;
-		14: null
-		15: null
-&gt;table[10].next: HashMap$Node@22 &quot;化学&quot;:&quot;8&quot;
- table[10].hash: 828410
-</code></pre>
-<ol start="2">
-<li>
-<p><strong>扰动函数计算过程</strong>（让高位和低位同时影响最终的 <code>hashCode</code>）</p>
-<blockquote>
-<p>公式： <code>(h = key.hashCode()) ^ (h &gt;&gt;&gt; 16)</code></p>
-</blockquote>
-<pre><code class="language-java">key.hashCode() = 682768(化学)
-hashCode = 682768 ^ (682768 &gt;&gt;&gt; 16) = 682778
-	
-二进制状态下转换过程
-
-682768 = 1010 0110 1011 0001 0000
-
-补齐 0 后 ==&gt;
-
-0000 0000 0000 1010 0110 1011 0001 0000
-&gt;&gt;&gt; 16 （高位移至低位）
-=	
-0000 0000 0000 0000 0000 0000 0000 1010
-
-
-0000 0000 0000 1010 0110 1011 0001 0000 
-^ （高低位作异或运算）
-0000 0000 0000 0000 0000 0000 0000 1010
-= 
-0000 0000 0000 1010 0110 1011 0001 1010
-
-补充:异或运算取决于两个值，与和或运算只取决于单个值
-</code></pre>
-<blockquote>
-<p>补充：</p>
-<p><a href="https://www.javacodegeeks.com/2015/09/an-introduction-to-optimising-a-hashing-strategy.html">关于位移jdk1.7 和 1.8 中单次和多次的区别</a></p>
-<p><a href="https://www.zhihu.com/question/20733617/answer/111577937">知乎的简单解释</a></p>
-</blockquote>
-</li>
-<li>
-<p><strong>取模</strong></p>
-<blockquote>
-<p>获取在数组中的位置: <code>tab[i = (n - 1) &amp; hash]</code> ==&gt;  <code>tab[10]</code></p>
-<p>n 是 HashMap 的长度，2^m ， 上述情景中 m = 4，n 为 16（数组长度），n = 0B10000</p>
-</blockquote>
-<pre><code>     0000 0000 0000 0000 0000 0000 0001 0000     - 1
-=&gt;		 
-       0000 0000 0000 0000 0000 0000 0000 1111 		= 15
-	 &amp;    
-       0000 0000 0000 1010 0110 1011 0001 1010    （682778，扰动函数得到的 hashCode)
-=&gt; 	    
-       0000 0000 0000 0000 0000 0000 0000 1100 		= 10
-</code></pre>
-</li>
-<li>
-<p>数组中已经有值，插入链表末端：<code>p.next = newNode(hash, key, value, null);</code></p>
-</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[算法基础② （栈和队列基础）]]></title>
-        <id>https://flyer88.github.io/post/suan-fa-ji-chu-er-zhan-he-dui-lie-ji-chu/</id>
-        <link href="https://flyer88.github.io/post/suan-fa-ji-chu-er-zhan-he-dui-lie-ji-chu/">
-        </link>
-        <updated>2020-06-15T08:21:51.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="简介">简介</h3>
-<ol>
-<li>
-<p>物理结构和逻辑结构区别</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>线性结构</th>
-<th>非线性结构</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>逻辑结构</td>
-<td>表，队列，栈</td>
-<td>树，图</td>
-</tr>
-</tbody>
-</table>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>顺序存储结构</th>
-<th>链式存储结构</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>物理结构</td>
-<td>数组</td>
-<td>链表</td>
-</tr>
-</tbody>
-</table>
-</li>
-<li>
-<p>栈（FILO）：先进后出，导航条，递归调用</p>
-</li>
-<li>
-<p>队列 （FIFO）：Android main Looper 消息队列，爬虫队列</p>
-</li>
-</ol>
-<h3 id="基本实现">基本实现</h3>
-<ol>
-<li>
-<p>栈</p>
-<pre><code class="language-java">// 双向链表实现
-public class Stack&lt;T&gt;{
-  int height;
-  Node&lt;T&gt; head,tail;
-  
-  public void push(T item){
-    Node&lt;T&gt; tempNode = new Node&lt;T&gt;(item);
-    if (height == 0) {
-      head = tempNode;
-      tail = head;
-    } else {
-	    tail.next = tempNode;
-      tail = tempNode;
-    }  
-    height = height + 1;
-  }
-  
-  public T pop(){
-    if (height == 0) {
-			return null;
-    } else if (height == 1){
-      result = head;
-    	tail = null;
-      head = null;
-      height = 0;
-      return result;
-    } else {
-			tail = tail.pre;
-      result = tail.next;
-      tail.next = null;
-      height = height - 1;
-	    return result;
+                    ...
+                    // We are supposed to attach all the views we found (int temp)
+                    // to root. Do that now.
+                    if (root != null &amp;&amp; attachToRoot) {
+                        root.addView(temp, params);
+                    }
+                    // Decide whether to return the root that was passed in or the
+                    // top view found in xml.
+                    if (root == null || !attachToRoot) {
+                        result = temp;
+                    }
+                }
+            } catch (XmlPullParserException e) {
+                ...
+            } catch (IOException e) {
+                ...
+            } finally {
+                // Don't retain static reference on context.
+                mConstructorArgs[0] = lastContext;
+                mConstructorArgs[1] = null;
+            }
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            return result;
+        }
     }
-  }
-  
-  public T peek(){
-    
-  }
-}
+​```
 </code></pre>
-</li>
-<li>
-<p>队列</p>
-<pre><code class="language-java">// 数组实现
-public class Queue&lt;T&gt;{
-  
-  int size;
-  Object[] queue;
-  final static capacity = 10;
-  
-  public Queue() {
-    queue = new Object[capacity];
-    size = capacity;
-  }
-  
-  public void enqueue(T t){
-    if (size &gt;= queue.length) {
-      // 动态扩容
-      int[] newArray = new int[2 * capacity]{};
-	    System.copyArray(queue,newArray);
-  	  queue = newArray;
-	    size = queue.length;
+<p>其中整个流程中，核心部分分两点</p>
+<p>1.实例化父级布局，</p>
+<p>2.实例化子级<code>view</code>。</p>
+<p>而对于<code>merge</code>节点的处理情况是将其当做子<code>view</code>进行处理，调用的都是<code>rInflate</code>函数，所以，我们讨论子<code>view</code>实例化的时候可以一起讨论。</p>
+<h4 id="首先是看第一部分父布局temp的实例化">首先是看第一部分，父布局<code>temp</code>的实例化。</h4>
+<p>他是直接调用<code>createViewFromTag</code>，我们进入该函数。这个函数整体的流程是</p>
+<p>处理特殊节点<code>view</code> ===》 对当前<code>view</code>的context进行初始化 ====》 特殊节点<code>blink</code>处理 ===》根据几个工厂对象(默认情况下，工程类都为null)实例化<code>view</code> ===》 工厂类创建失败，<code>view == null</code>，调用<code>onCreateView()</code>或者<code>createView()</code>对<code>view</code>进行实例化</p>
+<pre><code>​```
+     View createViewFromTag(View parent, String name, AttributeSet attrs, boolean inheritContext) {
+        // 特殊处理 `view` 节点
+        if (name.equals(&quot;view&quot;)) {
+            name = attrs.getAttributeValue(null, &quot;class&quot;);
+        }
+        // 设置当前 view 的 context
+        Context viewContext;
+        if (parent != null &amp;&amp; inheritContext) {
+            // 如果父级 view 不为空 并且要求从父级 view 那里获取 context
+            viewContext = parent.getContext();
+        } else {
+            // 否则 当前 view 的 context 等于 LayoutInflater.fromt(context) 中传入的 context
+            viewContext = mContext;
+        }
+        // 如果有主题切换，那么就应用对应的主题
+        final TypedArray ta = viewContext.obtainStyledAttributes(attrs, ATTRS_THEME);
+        final int themeResId = ta.getResourceId(0, 0);
+        if (themeResId != 0) {
+            viewContext = new ContextThemeWrapper(viewContext, themeResId);
+        }
+        ta.recycle();
+        // blink 处理
+        if (name.equals(TAG_1995)) {
+            // Let's party like it's 1995!
+            return new BlinkLayout(viewContext, attrs);
+        }
+        ...
+        try {
+            // 用工厂类创建真正的 view 对象
+            // 默认两个工厂类都为 null
+            // 所以 view 是 null
+            View view;
+            if (mFactory2 != null) {
+                view = mFactory2.onCreateView(parent, name, viewContext, attrs);
+            } else if (mFactory != null) {
+                view = mFactory.onCreateView(name, viewContext, attrs);
+            } else {
+                view = null;
+            }
+            // 在 view 用前面两个工厂类创建为 null 
+            // 同时私有工厂类不为空的情况下，调用私有的工厂类创建 view 对象
+            if (view == null &amp;&amp; mPrivateFactory != null) {
+                view = mPrivateFactory.onCreateView(parent, name, viewContext, attrs);
+            }
+            // 私有工厂创建依旧为 null 时
+            if (view == null) {
+                final Object lastContext = mConstructorArgs[0];
+                mConstructorArgs[0] = viewContext;
+                try {
+                    if (-1 == name.indexOf('.')) {// 如果是 Android 自带 view
+                        view = onCreateView(parent, name, attrs);
+                    } else {// 如果不是 Android 自带 view
+                        view = createView(name, null, attrs);
+                    }
+                } finally {
+                    mConstructorArgs[0] = lastContext;
+                }
+            }
+            ...
+            return view;
+        } catch (InflateException e) {
+            ...
+        } catch (ClassNotFoundException e) {
+            ...
+        } catch (Exception e) {
+            ...
+        }
     }
-		queue[size] = t;
-  }
-
-  public T poll(){
-    if (size == 0) {
-      throw new Exception(&quot;队列为空&quot;);
+​```
+</code></pre>
+<p>其中这个函数的核心部分则是<code>onCreateView()</code>和<code>createView()</code>，因为默认情况下，几个factory都是null，所以都会进入这两个函数中的一个。</p>
+<pre><code>​```
+    if (-1 == name.indexOf('.')) {// 如果是 Android 自带 view
+        view = onCreateView(parent, name, attrs);
+    } else {// 如果不是 Android 自带 view
+        view = createView(name, null, attrs);
     }
-		T t = queue[size -1];
-   	queue[size-1] = null;
-    return t;
-  }
-
-  public T peek(){
-    if (size == 0) {
-      throw new Exception(&quot;队列为空&quot;);
+​```
+</code></pre>
+<p>两个函数调用条件是，<code>-1 == name.indexOf('.')</code>，而其效果则是，判断是否为<code>Android</code>自带 <code>view</code>，如果是，则调用<code>onCreateView()</code>,否则当做自定义<code>view</code>处理，调用<code>createView()</code></p>
+<p>先看<code>onCreateView</code>，该部分主要是对<code>sClassPrefixList</code>进行迭代，拼凑出整个<code>view</code>的路径，然后调用<code>createView()</code>，注意这个函数，和上面说的处理自定义<code>view</code>的<code>createView()</code>，是同一个函数，所以也就明白，为什么要有上面的判断了</p>
+<pre><code>​```
+    private static final String[] sClassPrefixList = {
+        &quot;android.widget.&quot;,
+        &quot;android.webkit.&quot;,
+        &quot;android.app.&quot;
+    };
+     ....
+     ....
+     @Override protected View onCreateView(String name, AttributeSet attrs) throws ClassNotFoundException {
+        for (String prefix : sClassPrefixList) {
+            try {
+                View view = createView(name, prefix, attrs);
+                if (view != null) {
+                    return view;
+                }
+            } catch (ClassNotFoundException e) {
+                ...
+            }
+        }
+        return super.onCreateView(name, attrs);
     }
-		return queue[size - 1];
-  }
-}
+​```
 </code></pre>
-</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[算法基础① （基础概念、数组和链表基础）]]></title>
-        <id>https://flyer88.github.io/post/suan-fa-ji-chu-yi/</id>
-        <link href="https://flyer88.github.io/post/suan-fa-ji-chu-yi/">
-        </link>
-        <updated>2020-06-15T08:18:31.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="1-基础概念">1. 基础概念</h1>
-<ol>
-<li>
-<p>算法类型</p>
-<ul>
-<li>计算</li>
-<li>查找</li>
-<li>排序</li>
-<li>最优决策</li>
-</ul>
-</li>
-<li>
-<p>数据结构</p>
-<ul>
-<li>
-<p>线性结构</p>
-<blockquote>
-<p>数组，链表，栈，队列，哈希表</p>
-</blockquote>
-</li>
-<li>
-<p>树</p>
-<blockquote>
-<p>二叉树，多插树</p>
-</blockquote>
-</li>
-<li>
-<p>图</p>
-<blockquote>
-<p>有向图，无向图，环</p>
-</blockquote>
-</li>
-</ul>
-</li>
-<li>
-<p>复杂度</p>
-<ul>
-<li>
-<p>时间复杂度</p>
-<blockquote>
-<ol>
-<li>运行时间是常数量级，则用常数 1 表示</li>
-<li>只保留时间函数中的最高阶项</li>
-<li>如果最高阶项存在，省去最高阶项的系数</li>
-</ol>
-<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>T</mi><mo>(</mo><mi>n</mi><mo>)</mo><mo>=</mo><mi>O</mi><mo>(</mo><mi>f</mi><mo>(</mo><mi>n</mi><mo>)</mo><mo>)</mo></mrow><annotation encoding="application/x-tex">T(n) = O(f(n))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mclose">)</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>f</mi><mo>(</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">f(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span> 是算法所消耗的时间函数</p>
-<p>$T(n) = 2 $  =&gt;  $ O(1)$</p>
-<p>$ T(n) =  5logn $   =&gt;   $ O(logn)$</p>
-<p>$ T(n) = 3n $   =&gt;   <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></p>
-<p>$T(n) =  0.5n^2 + 0.5n  $   =&gt;  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><msup><mi>n</mi><mn>2</mn></msup><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></p>
-<p>$ O(1)&lt;O(logn)&lt; O(n)&lt;O(n^2) $</p>
-<p>其他:  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(nlogn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><msup><mi>n</mi><mn>3</mn></msup><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n^3)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>  <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>m</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(mn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">m</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>  $O(2^n) $ <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>n</mi><mo>!</mo><mo>)</mo></mrow><annotation encoding="application/x-tex">O(n!)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">!</span><span class="mclose">)</span></span></span></span></p>
-</blockquote>
-</li>
-<li>
-<p>空间复杂度</p>
-<blockquote>
-<p><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>S</mi><mo>(</mo><mi>n</mi><mo>)</mo><mo>=</mo><mi>O</mi><mo>(</mo><mi>f</mi><mo>(</mo><mi>n</mi><mo>)</mo><mo>)</mo></mrow><annotation encoding="application/x-tex">S(n) = O(f(n))</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.05764em;">S</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mclose">)</span></span></span></span>，其中 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>f</mi><mo>(</mo><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">f(n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>是算法所消耗的存储空间函数</p>
-</blockquote>
-</li>
-</ul>
-</li>
-</ol>
-<h1 id="2-数组和链表基础">2. 数组和链表基础</h1>
-<h3 id="数组">数组</h3>
-<ol>
-<li>
-<p>物理连续</p>
-</li>
-<li>
-<p>基本操作</p>
-<ul>
-<li>
-<p>查询更新</p>
-<pre><code class="language-java">int[] array = new int[]{1,2,3,4};
-System.out.println(array[1]);// 查
-array[0] = 0;// 改
-</code></pre>
-</li>
-<li>
-<p>删除</p>
-<pre><code class="language-java">int[] array = new int[]{1,2,3,4};
+<p>然后我们看真正的动态创建出<code>view</code>对象的函数<code>createView(String name, String prefix, AttributeSet attrs)</code>，该函数的作用就是，通过反射创建出真正的对象</p>
+<p>其过程也很简单，直接在已经存在的<code>sConstructorMap</code>中找，是不是有这个名字，如果有就开始创建，没有就把前缀拼上去，再创建，然后放入<code>sConstructorMap</code>中</p>
+<pre><code>​```
+public final View createView(String name, String prefix, AttributeSet attrs)
+            throws ClassNotFoundException, InflateException {
+        Constructor&lt;? extends View&gt; constructor = sConstructorMap.get(name);
+        Class&lt;? extends View&gt; clazz = null;
+        try {
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, name);
+            if (constructor == null) {
+                // Class not found in the cache, see if it's real, and try to add it
+                clazz = mContext.getClassLoader().loadClass(
+                        prefix != null ? (prefix + name) : name).asSubclass(View.class);
 
-int deletePosition = 2;
-if(deletePosition &gt;= array.length){
-	throw new Exception(&quot;删除数字超过数组长度！&quot;);
-}
-for(int i = deletePosition;i&lt;array.size-1;i++){
-	array[i]  = array[i+1];
-}
+                if (mFilter != null &amp;&amp; clazz != null) {
+                    boolean allowed = mFilter.onLoadClass(clazz);
+                    if (!allowed) {
+                        failNotAllowed(name, prefix, attrs);
+                    }
+                }
+                constructor = clazz.getConstructor(mConstructorSignature);
+                sConstructorMap.put(name, constructor);
+            } else {
+                // If we have a filter, apply it to cached constructor
+                if (mFilter != null) {
+                    // Have we seen this name before?
+                    Boolean allowedState = mFilterMap.get(name);
+                    if (allowedState == null) {
+                        // New class -- remember whether it is allowed
+                        clazz = mContext.getClassLoader().loadClass(
+                                prefix != null ? (prefix + name) : name).asSubclass(View.class);
 
-</code></pre>
-</li>
-<li>
-<p>增加</p>
-<pre><code class="language-java">int s = 3;
-final static int capacity = 5
-int[] array;
-int size;
-
-public MyArray(){
-	array = new Array[capacity];
-  size = array.length;
-}
-
-
-public void insert(int index,int value) {
-  if (index &gt;= size) {
-    int[] newArray = new int[2 * capacity]{};
-    System.copyArray(array,newArray);
-    array = newArray;
-    size = array.length;
-    insert(index,value);// 递归调用，可以自动扩容多次
-  } else {
-    for(int i = size-1;i&gt;index:i--){
-      array[i] = array[i-1];
+                        boolean allowed = clazz != null &amp;&amp; mFilter.onLoadClass(clazz);
+                        mFilterMap.put(name, allowed);
+                        if (!allowed) {
+                            failNotAllowed(name, prefix, attrs);
+                        }
+                    } else if (allowedState.equals(Boolean.FALSE)) {
+                        failNotAllowed(name, prefix, attrs);
+                    }
+                }
+            }
+            Object[] args = mConstructorArgs;
+            args[1] = attrs;
+            constructor.setAccessible(true);
+            final View view = constructor.newInstance(args);
+            if (view instanceof ViewStub) {
+                // Use the same context when inflating ViewStub later.
+                final ViewStub viewStub = (ViewStub) view;
+                viewStub.setLayoutInflater(cloneInContext((Context) args[0]));
+            }
+            return view;
+        } catch (NoSuchMethodException e) {
+            ...
+        } catch (ClassCastException e) {
+            ...
+        } catch (ClassNotFoundException e) {
+            ...
+        } catch (Exception e) {
+            ...
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
     }
-    array[index] = value;
-  }
-}
-
-// array = new Array{1,2,3,4,5}
-// insert(2,20)
-  [1,2,3,4,5] 
-	-&gt; [1,2,3,4,5,null,null,null,null,null]
-  -&gt; [1,2,3,4,5,5,null,null,null,null]
-  -&gt; [1,2,3,4,4,5,null,null,null,null]
-  -&gt; [1,2,3,3,4,5,null,null,null,null]
-  -&gt; [1,2,2,3,4,5,null,null,null,null]
-  -&gt;
-  -&gt; [1,2,20,3,4,5,null,null,null,null]
-  
+​```
 </code></pre>
-</li>
-</ul>
-</li>
-</ol>
-<h3 id="链表">链表</h3>
-<ol>
-<li>
-<p>非物理连续，逻辑连续</p>
-</li>
-<li>
-<p>基本操作</p>
-<ul>
-<li>
-<p>查找/更新</p>
-<pre><code class="language-java">int targetIndex = 10;
-int targetValue = 233;
-int i = 0;
-Node curNode;
-// 查找
-while(!curNode.next
-     	&amp;&amp; i &lt; targetIndex) {
-  curNode = curNode.next
-	i = i + 1;
-}
-// 更新
-curNode.value = targetValue;
+<h4 id="然后是子布局的实例化">然后是子布局的实例化</h4>
+<p>该部分内容，主要是对当前节点的所有view 进行遍历，然后调用<code>createViewFromTag()</code>(该方法上面已经有解释了)方法创建实例。如果遍历到某一个view，他是有子节点的，则递归调用函数<code>rInflate()</code>对该子节点进行遍历。该部分参考下面的流程图，看起来更加清晰。</p>
+<pre><code>​```
+    void rInflate(XmlPullParser parser, View parent, final AttributeSet attrs,
+            boolean finishInflate, boolean inheritContext) throws XmlPullParserException,
+            IOException {
+        final int depth = parser.getDepth();
+        int type;
+        while (((type = parser.next()) != XmlPullParser.END_TAG ||
+                parser.getDepth() &gt; depth) &amp;&amp; type != XmlPullParser.END_DOCUMENT) {
+            if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+            final String name = parser.getName();
+
+            if (TAG_REQUEST_FOCUS.equals(name)) {
+                parseRequestFocus(parser, parent);
+            } else if (TAG_TAG.equals(name)) {
+                parseViewTag(parser, parent, attrs);
+            } else if (TAG_INCLUDE.equals(name)) {
+                if (parser.getDepth() == 0) {
+                    throw new InflateException(&quot;&lt;include /&gt; cannot be the root element&quot;);
+                }
+                parseInclude(parser, parent, attrs, inheritContext);
+            } else if (TAG_MERGE.equals(name)) {
+                throw new InflateException(&quot;&lt;merge /&gt; must be the root element&quot;);
+            } else {
+                final View view = createViewFromTag(parent, name, attrs, inheritContext);
+                final ViewGroup viewGroup = (ViewGroup) parent;
+                final ViewGroup.LayoutParams params = viewGroup.generateLayoutParams(attrs);
+                rInflate(parser, view, attrs, true, true);
+                viewGroup.addView(view, params);
+            }
+        }
+        if (finishInflate) parent.onFinishInflate();
+    }
+​```
 </code></pre>
-</li>
-<li>
-<p>增加/删除</p>
-<pre><code class="language-java">int targetIndex = 10;
-int size = 20;
-Node insertNode;
-Node head,tail;
-
-
-// 增加
-if (size == 0) {
-  head = insertNode;
-  tail = insertNode;
-  size = size + 1;
-} else if (targetIndex  == 0) {
-  insertNode.next = head;
-  head = insertNode;
-  size = size + 1;
-} else if (targetIndex == size) {
-  tail.next = insetNode;
-	tail = insertNode;
-  size = size + 1;
-} else if (targetIndex &gt; 0 &amp;&amp; targetIndex &lt; size ){
-  Node preNode = get(targetIndex -1);
-  Node nextNode = preNode.next;
-  preNode.next =  insertNode;
-  insertNode.next = nextNode;
-  size = size + 1;
-} else {
-  throw new Exception(&quot;超过链表长度&quot;);  
-}
-
-// 删除
-
-if (size == 0) {
-  throw new Exception(&quot;链表为空&quot;);
-} else if (targetIndex  == 0) {
-  Node newHead = head;
-  head = head.next;
-  newHead.next = null;
-  size = size - 1;
-} else if (targetIndex == size) {
-  tail = get(size -1);
-  tail.next = null;
-  size = size - 1;
-} else if (targetIndex &gt; 0 &amp;&amp; targetIndex &lt; size ){
-  Node preNode = get(targetIndex -1);
-  Node curNode = preNode.next;
-  preNode.next = curNode.next;
-  curNode.next = null;
-  size = size - 1;
-} else {
-  throw new Exception(&quot;超过链表长度&quot;);  
-}
-
-
-</code></pre>
-</li>
-</ul>
-</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[repo 管理 git 仓库]]></title>
-        <id>https://flyer88.github.io/post/repo-guan-li-git-cang-ku/</id>
-        <link href="https://flyer88.github.io/post/repo-guan-li-git-cang-ku/">
-        </link>
-        <updated>2020-06-11T04:25:26.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="1-同类技术方案对比">1. 同类技术方案对比</h2>
-<ol>
-<li><code>git submodule</code>/<code>git subtree</code>，都是把代码当做一个单一的大仓库，进行管理处理</li>
-<li><code>repo</code>，是把所有的代码当做一个工程处理，各个模块可以是独立的仓库，而 <code>repo</code> 只是一个执行 <code>git</code> 命令的脚本，方便组织各个 <code>git</code> 仓库，<code>repo</code> 的最佳实践就是 <code>AOSP</code> 源码的管理</li>
-</ol>
+<h1 id=""></h1>
+<p>以上就是 inflate 整个核心部分。</p>
+<p>对于整体的流程，我画了流程图，如下</p>
+<figure data-type="image" tabindex="1"><img src="https://flyer88.github.io/post-images/1592214109968.png" alt="img" loading="lazy"></figure>
 <blockquote>
-<p>注： 此处只对比了 <code>submodule</code> 和 <code>repo</code> 部分内容，<code>subtree</code> 和 <code>submodule</code> 差不多，核心区别是一个是引用仓库，一个是导入仓库，会增大 <code>.git</code> 文件容量</p>
+<p>补充，迁移过程中原始图片已丢失</p>
 </blockquote>
-<table>
-<thead>
-<tr>
-<th>核心部分对比</th>
-<th>git submodule</th>
-<th>Repo</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>管理方式</td>
-<td>查看 <code>.gitmodules</code> 文件可以看到所有 <code>submodule</code> 介绍，知己用，无须维护</td>
-<td><code>manifest</code> 文件管理，需要根据分支维护</td>
-</tr>
-<tr>
-<td>更新方式</td>
-<td>子仓库更新，父级也要更新，容易出现坑</td>
-<td>各个仓库独立更，无坑</td>
-</tr>
-<tr>
-<td>命令工具方面</td>
-<td><code>git</code> 的展示效果</td>
-<td>更多批量效果，具体可以看本文后续的几个命令介绍</td>
-</tr>
-</tbody>
-</table>
-<h2 id="2-repo-的使用">2. Repo 的使用</h2>
-<h3 id="repo-配置">repo 配置</h3>
-<ol>
-<li>下载 <code>repo</code> 脚本<pre><code class="language-shell">brew install repo	
-</code></pre>
-</li>
-<li>修改镜像地址，避免墙的问题， <code>.zshrc</code> 或者 <code>.bashrc</code> 加入<pre><code class="language-shell">export REPO_URL='https://mirrors.tuna.tsinghua.edu.cn/git/git-repo/'
-</code></pre>
-</li>
-</ol>
-<h3 id="项目中使用">项目中使用</h3>
-<ol>
-<li>
-<p>初始化设置 <code>manifest</code> 文件</p>
-<ul>
-<li>
-<p>放置位置</p>
-<blockquote>
-<ol>
-<li>主项目 <code>git</code> 仓库中</li>
-<li>另开一个<code>git</code> 仓库</li>
-</ol>
-<p>项目 <code>git</code> 仓库数量不大，频繁新增修改切出分支时，<code>manifest</code> 独立仓库不具有优势，</p>
-<p>嵌入主仓库有明显的优势，在 <code>develop</code> 中，改动 <code>mainifest</code> 文件，快速切出对应的工作分支</p>
-</blockquote>
-</li>
-<li>
-<p>文件内容</p>
-<blockquote>
-<p><a href="https://gerrit.googlesource.com/git-repo/+/master/docs/manifest-format.md"><strong><code>repo manifest</code> 参数文档</strong></a></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;manifest&gt;
-  &lt;!-- remote 指定远程分支，name 是远程分支的名字，fetch 拉去地址的 host，sync-j 是指同步拉去线程数量 --&gt;
-    &lt;remote name=&quot;taofen8&quot; fetch=&quot;http://gitlab.taofen8.com/&quot;  sync-j=&quot;1&quot;/&gt;
-	&lt;!-- default 是配置默认的参数，默认情况下，拉去 master，用远程名字叫 taofen8 的地址--&gt;  
-    &lt;default revision=&quot;master&quot; remote=&quot;taofen8&quot;/&gt;
-  &lt;!-- 此处配置项目仓库地址，name 是指在 remote 的 host 之后，补充上对应的名字即可，path 是指本地的配置路径地址--&gt;
-  &lt;!-- 注意，第一个 project 没有指定 remote，就会使用 default 中的配置参数了--&gt;
-    &lt;project name=&quot;taofen8_app/b_taofen8_flutter&quot; path=&quot;b_taofen8_flutter&quot;/&gt;
-    &lt;project name=&quot;taofen8_app/b-taofen8_phone-iOS&quot; remote=&quot;taofen8&quot; path=&quot;b-taofen8_phone-iOS&quot;/&gt;
-&lt;/manifest&gt;
-</code></pre>
-</blockquote>
-</li>
-</ul>
-</li>
-<li>
-<p>拉取同步仓库</p>
-<pre><code class="language-shell"># 该步骤指，拉取 manifest 文件，
-# -u 指定 manifest 文件所在的仓库地址，-b 指定 manifest 仓库的分支
-# 如果要拉取 develop 的分支，就 -b develop 就可以
-# 此处把 manifest 文件放置在 flutter 主项目中
-➜ repo init -u http://gitlab.taofen8.com/taofen8_app/b_taofen8_flutter -b master
-# 该步骤指，根据 manifest 文件进行 git pull 对应分支，放置到对应位置
-➜ repo sync
-</code></pre>
-</li>
-<li>
-<p>切出分支</p>
-<pre><code class="language-shell"># 根据 manifest 文件 revision 中指定的分支，切出分支，进行开发
-# 当前栗子中，feature/flutter 的 head 和 master head 是相同的
-# 因为 manifest 中 default 的 revision 值是 master
-➜ repo start feature/flutter --all
-# 查看当前仓库的分支
-➜ repo branch
-*  feature/flutter              | in all projects
-</code></pre>
-</li>
-<li>
-<p>几个特别命令介绍</p>
-<pre><code class="language-shell"># 查看各个仓库的状态
-➜ repo status
-project b-taofen8_phone-iOS/                    branch feature/flutter
-project b_taofen8_flutter/                      branch feature/flutter
-
-# 当有改动以后
-➜ repo status
-project b-taofen8_phone-iOS/                    branch feature/flutter
- -m     README.md
-project b_taofen8_flutter/                      branch feature/flutter
-
-# 所有的仓库执行同一个命令
-# repo forall -c &quot;git push&quot; 等等
-➜ repo forall -c &quot;pwd&quot;
-/Users/dove/Documents/code/work/taofen8/b-taofen8_phone-iOS
-/Users/dove/Documents/code/work/taofen8/b_taofen8_flutter
-</code></pre>
-</li>
-<li>
-<p><code>local manifest</code> 使用<br>
-有时候会出现本地临时新增一些仓库进去，或者移除部分仓库，但又不需要更新到 <code>manifest</code> 中，这个时候 <code>local manifest</code>  就有作用了。<br>
-在对应目录新增  <code>.repo/local_manifests/default.xml</code></p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;manifest&gt;
-    &lt;project name=&quot;taofen8_app/b-taofen8-Android&quot; remote=&quot;taofen8&quot; path=&quot;b-taofen8-Android&quot;/&gt;
-&lt;/manifest&gt;
-</code></pre>
-<p>执行 <code>repo sync</code>， 执行会拉取新增的项目</p>
-<pre><code class="language-shell">➜ repo sync
-warning: redirecting to http://gitlab.taofen8.com/taofen8_app/b_taofen8_flutter.git/
-Fetching project taofen8_app/b_taofen8_flutter
-warning: redirecting to http://gitlab.taofen8.com/taofen8_app/b_taofen8_flutter.git/
-Fetching projects:  50% (1/2)
-Fetching project taofen8_app/b-taofen8-Android
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-curl: (22) The requested URL returned error: 401 Unauthorized
-Server does not provide clone.bundle; ignoring.
-warning: redirecting to http://gitlab.taofen8.com/taofen8_app/b-taofen8-Android.git/
-....
-....
-</code></pre>
-<blockquote>
-<p>此处简单解释下原理，<code>repo</code> 会合并 <code>default.xml</code> 和 <code>local_manifest/default.xml</code></p>
-<p>再去拉取合并后的 <code>manifest</code> 的内容，具体可以 <a href="https://duanqz.github.io/2016-04-15-Android-Local-Manifests-Practice"><strong>参考该文章</strong></a></p>
-</blockquote>
-</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[个人简历]]></title>
-        <id>https://flyer88.github.io/post/ge-ren-jian-li/</id>
-        <link href="https://flyer88.github.io/post/ge-ren-jian-li/">
-        </link>
-        <updated>2020-06-11T03:51:55.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>🚧🚧本简历分为以下五部分：<br>
-【个人基本信息】【技能点】【工作经历】<br>
-【主要项目介绍】【自我描述】</p>
-</blockquote>
-<h2 id="个人基本信息">个人基本信息</h2>
-<p><strong>姓名:</strong> 许鹏飞  					<strong>性别:</strong> 男					<strong>年龄:</strong> 26</p>
-<p><strong>学校及专业</strong>: 杭州电子科技大学 软件工程学院 本科</p>
-<p><strong>工作年限:</strong>  4年 				<strong>邮箱:</strong> flyer88xu@gmail.com</p>
-<p><strong>GitHub:</strong> <a href="https://github.com/flyer88">https://github.com/flyer88</a> 		<strong>个人博客:</strong> <a href="http://flyer88.github.io">http://flyer88.github.io</a></p>
-<p><strong>期望职位:</strong> <code>Android</code> 开发工程师 		<strong>期望薪资:</strong>  25k+ 		<strong>期望工作地:</strong> 杭州</p>
-<hr>
-<h2 id="技能点">技能点</h2>
-<h4 id="1-android-技能点">1. <code>Android</code> 技能点</h4>
-<ul>
-<li>熟练掌握 <code>Android</code> 基础，包括四大组件的，常见布局的使用，了解 <code>inflate</code> 过程的源码（借用其中的 <code>LayoutFactory</code> 实现过一个开源库，用来批量替换控件）。</li>
-<li><code>View</code> 层，了解 <code>View</code> 层源码，能实现常见自定 <code>View</code>，能使用<code>ListView</code>,  <code>RecycleView</code>, <code>ViewPager</code> 等常见控件，了解  <code>RecyclerView</code> 原理。</li>
-<li>了解 <code>webview</code>，有 <code>Vue</code> 开发经验，能进行 <code>Hybird</code> 开发，写过 <code>JSBridge</code> 的库，实现 <code>Java</code> 和 <code>JavaScript</code> 的异步通信。</li>
-<li>熟悉使用 <code>RxJava</code> + <code>OkHttp</code> + <code>Retrofit</code> + <code>Gson</code> 进行开发，阅读过部分 <code>OkHttp</code> 和 <code>Retrofit</code> 源码。</li>
-<li>架构上，使用 <code>MVP</code> 和 <code>MVVM</code> 开发。两种架构都熟练掌握，了解原理，偏爱 <code>MVVM</code>，参考 <code>DataBinding</code> ，实现过自己的双向绑定库。</li>
-<li>业务架构上，设计过大型 <code>App</code> 的底层架构，并实现 <code>maven</code> 化工作，从而推进上层业务的模块化工作。</li>
-</ul>
-<h4 id="2-基础技能点">2. 基础技能点</h4>
-<ul>
-<li>有一定的网络基础，熟悉 <code>http</code> 协议，了解 <code>websocket</code> 等相关协议，了解下层 <code>TCP/IP</code> 协议。</li>
-<li>熟练掌握 <code>Android Studio</code> ，了解 <code>gradle</code> 一些常见配置，会用 <code>python</code> 脚本处理一些常见问题，由自动化经验，了解 <code>jekins</code>。</li>
-<li>掌握基本的 <code>git</code> 操作，了解并实行过 <code>gitflow</code> 开发流程，配合 <code>repo</code> 工具，管理仓库。</li>
-<li>在 <code>Linux/Unix</code> 上，会用基本的命令，对 <code>Unix</code> 类的系统整体结构有所把握。</li>
-</ul>
-<h4 id="3-额外技能点">3. 额外技能点</h4>
-<ul>
-<li>后端上，用 <code>node</code> 写过一些简单的后台服务，<code>php</code> 构建过自己的个人博客，<code>会用 docker</code>。</li>
-<li>前端上，会简单使用 <code>vue</code> 搭建单页应用。</li>
-<li>设计上，会用 <code>sketch</code> ，做过自己小项目的设计稿。</li>
-<li>合作上，常见第三方团队合作工具，包括不限于 钉钉, <code>bearchat</code>, <code>tower</code>, <code>github</code>, <code>gitflow</code> <code>jenkins</code> 等。</li>
-<li>管理上，有带人经验，管理过 3 人小组，能很好的分配工作，并推进工作。</li>
-<li>附加技能，英语 6 级，基本无障碍阅读文档，自带梯子，熟练使用 <code>google</code> 和 <code>StackOverflow</code>。</li>
-</ul>
-<hr>
-<h2 id="工作经历">工作经历</h2>
-<h4 id="1杭州尘埃科技有限公司-201504-201606任职-android-开发工程师">1.【杭州尘埃科技有限公司】--  (2015.04-2016.06)任职 <code>Android</code> 开发工程师</h4>
-<ul>
-<li>【云集】- <code>Android</code> 客户端(2015.04-2016.06）， 一个浏览器应用，简洁，<code>h5</code> 性能高于 <code>Chrome</code> 等浏览器。
-<ol>
-<li>菜单栏模块，包括页面收藏动画及功能，分享模块实现，网页 刷新前进后退，已打开的网页应用列表显示，回到应用主页功能等等。</li>
-<li>整个用户模块，包括用户登陆注册登 录，用户数据同步。设置模块，夜间模式的实现，语言切换功能。</li>
-</ol>
-</li>
-<li>【<code>Link</code>】- <code>Android</code> 客户端(2015.06-2016.06)，一个工具型应用，主要作用是串联一些操作，举例，一键同时发送文字等内容到 <code>QQ</code> 好友，微信朋友圈，微博。 整个 <code>APP</code> 的功能实现，下面是几个重要模块介绍。
-<ol>
-<li>主界面商店界面实现。</li>
-<li>云任务操作模块，具体单个操作的解析以及界面的实现，责任链的使用。</li>
-</ol>
-</li>
-<li>【<code>Pero</code>】- <code>Android</code> 客户端(2016.01-2016.06)， 图片社区应用。
-<ol>
-<li>首页图片瀑布流的展示处理。</li>
-<li>上传模块 的设计与实现。</li>
-<li>第三方支付模块(支付宝)的接入，以及界面的实现。</li>
-</ol>
-</li>
-</ul>
-<h4 id="2杭州火小二科技有限公司二维火-201607-201902任职-android-开发工程师">2.【杭州火小二科技有限公司（二维火）】--  (2016.07-2019.02)任职 <code>Android</code> 开发工程师</h4>
-<p>​	【火掌柜】- Android 客户端，面向B端的餐饮客户端。官网地址为，<a href="http://2dfire.com">http://2dfire.com</a>。</p>
-<ul>
-<li><strong>主要业务项目</strong>
-<ol>
-<li>微信营销，对接微信，设计整个业务子模块。</li>
-<li>信用贷，对接 <code>web</code> 端，实现通用通信方案，实现 <code>JSBridge</code> 库。</li>
-</ol>
-</li>
-</ul>
-<ul>
-<li><strong>主要技术项目</strong>
-<ol>
-<li><code>Celebi</code> -- 针对表单页面的跨平台通用动态化技术解决方案。</li>
-<li><code>App</code> 内部统一路由，包裹 <code>ARouter</code> ，用拦截器模式，方便加入业务层需要的通用代码。</li>
-<li><code>App</code> 模块化，底层 <code>Maven</code> 化，抽离各个业务层，设计底层依赖结构，同时配合 <code>facade</code> 方式，实现跨模块通信。</li>
-</ol>
-</li>
-</ul>
-<h4 id="3杭州淘粉吧网络技术有限公司-201903-至今任职-android-开发工程师">3.【杭州淘粉吧网络技术有限公司】--  (2019.03-至今)任职 <code>Android</code> 开发工程师</h4>
-<p>【淘粉吧】- <code>Android</code> 客户端，返利类 <code>App</code>，同时支持一个虚拟穿衣类功能。官网地址:<a href="https://taofen8.com">http://taofen8.com</a></p>
-<ul>
-<li>【淘粉吧】
-<ol>
-<li>本地购物车，爬虫调用，倒计时动态刷新列表等基本功能的维护</li>
-<li>商城页面改造开发，支付宝提现功能实现，最初版本的实现，已经后期多个优化项目。</li>
-<li>抖音等第三方 <code>sdk</code> 接入与对应功能开发</li>
-</ol>
-</li>
-<li>【爱穿搭】<code>App</code> 并入【淘粉吧】
-<ol>
-<li>业务上： 脸部建模，虚拟形象，身体脸部细节调整等等。</li>
-<li>代码层： <code>native</code> 代码的打 <code>so</code> 包，删除无用依赖，抽离虚拟形象核心层等。</li>
-<li>新增业务功能，搭配师相关功能开发，接入第三方美颜等等</li>
-</ol>
-</li>
-<li>【海狐海淘】- <code>Android</code> 客户端(2019.03-至今)
-<ol>
-<li>购物车/结算页功能开发更新等</li>
-<li>日常维护</li>
-</ol>
-</li>
-<li>其他技术内容
-<ol>
-<li><code>target</code> 升级 26，包括 <code>service</code> 兼容，顶部透明栏兼容等等</li>
-<li><code>Jenkins</code> 自动打包机器人</li>
-<li>爱穿搭优化，图片 <code>OOM</code> 奔溃修复，多图合成流程逻辑优化</li>
-<li><code>kotlin</code> 引入，开发</li>
-<li>搭建基于<code>sentry</code>的性能统计后台，并接入</li>
-</ol>
-</li>
-</ul>
-<hr>
-<h2 id="主要项目介绍">主要项目介绍</h2>
-<h4 id="1-celebi-跨平台ios-和-android通用动态化技术解决方案">1. <code>Celebi</code> -- 跨平台(<code>iOS</code> 和 <code>Android</code>)通用动态化技术解决方案。</h4>
-<ul>
-<li><strong>项目介绍</strong>：掌柜 <code>APP</code> 中存在大量类似的表单页面，每次开发都会耗费大量时间，因此，考虑后端下发 <code>JSON</code> 数据，客户端读取数据，动态渲染表单页面，目前已经在 <code>App</code> 中铺了大量页面。</li>
-<li><strong>同类方案对比</strong>：项目区别于 <code>ReactNative</code> 和 <code>Weex</code> 相关原理，该方案中所有的控件渲染，都是本地 <code>java</code> 代码执行。<code>JSON</code> 描述中只处理简单逻辑，复杂逻辑均由本地代码实现，针对表单页面具有很强的适用性。</li>
-<li><strong>本人工作</strong>：后端，<code>iOS</code> 端，和 <code>Android</code> 端，三端架构推进，<code>Android</code> 端负责人，<code>Android</code> 端技术架构设计并落地具体代码。</li>
-<li><strong>技术实现</strong>上:
-<ol>
-<li>底层解释器实现: 用来解析通用的的一些表达式和函数。
-<blockquote>
-<p>PS： 个人喜欢捣鼓各种语言，喜欢编译原理，实现过一些简单的解释器</p>
-</blockquote>
-</li>
-<li>运行时变量池实现：页面内变量的缓存池，全局变量和局部变量的实现。</li>
-<li>双向绑定等功能的实现：页面交互时，控件上的数据和变量池中变量的双向绑定。</li>
-<li>注解方案落地并实现：解耦并剔除模板代码，最初用反射处理过，发现字符串拼接耗时过多，后改为 <code>annotation processor</code>。</li>
-</ol>
-</li>
-<li><strong>项目成果</strong>:
-<ol>
-<li>单个表单页面，在没有新增控件情况下，熟练情况下，半小时对接完一个页面，同时适配 iOS 和 Android。</li>
-<li>在本人离职前，已经介入 5 个项目的开发，涉及 10 多个页面。</li>
-</ol>
-</li>
-</ul>
-<h4 id="2-淘粉吧-爱穿搭功能开发">2. 【淘粉吧-爱穿搭】功能开发</h4>
-<ul>
-<li><strong>项目介绍</strong>:【爱穿搭】 功能是一个虚拟穿衣的业务，该项目主要包括接入该功能，以及后续业务开发。</li>
-<li><strong>本人工作</strong>: 由于原有功能代码过于老旧，接近完全重写，同时完成接入核心功能开发
-<ol>
-<li>原有美颜功能的 <code>native</code> 代码进行打包最新的 <code>so</code> 包</li>
-<li>基于 <code>RxJava</code> 设计整套人物部位图片的下载，并且基于坐标，进行合成完整的人物形象的流程</li>
-<li>完善建脸部分失败重试逻辑</li>
-</ol>
-</li>
-<li><strong>项目成果</strong>: 人物形象加载速度从原来 2-3秒，提升至 1-2秒</li>
-</ul>
-<hr>
-<h2 id="自我描述">自我描述</h2>
-<h4 id="1-经历">1. 经历</h4>
-<ul>
-<li>本人大三跟随大神创业，写 <code>Android</code> 约一年半，共参加杭州尘埃科技公司三个项目。整个过程中，几乎从零开始自学 <code>Android</code>，在专注 <code>Android</code> 的同时，折腾过一些其他的技术，包括 <code>Linux</code> 服务器的一些知识，<code>Web</code> 前后端的相关知识。</li>
-<li>于2016年6月份毕业，同时辞职，7月份入职杭州火小二科技有限公司，于 2019 年 1 月底离职。在职期间，只有一次没有<code>OKRS</code> 7 分。除此之外，技术上打好了 <code>Android</code> 的基础，也推动了组内技术能力的发展，同时个人还了解了其他语言，包括 <code>Scala</code> <code>Python</code> <code>JavaScript</code> 等，并或多或少应用于一些小项目上。</li>
-<li>2019 年 3 月，加入淘粉吧，在此期间，主要学习了 <code>kotlin</code>，了解 <code>native</code> 编译。初步了解了 <code>flutter</code>,基于 <code>python</code> 和 <code>jenkins</code> 完成自动化(包括多渠道等)打包，通知钉钉或邮件，同时备份到 <code>NAS</code> 上，推送到蒲公英第三方平台。</li>
-</ul>
-<h4 id="2-为人">2. 为人</h4>
-<ul>
-<li>对技术充满热情，喜欢技术驱动的工作氛围，有小小的技术崇拜，热爱推广技术，喜欢分享。</li>
-<li>工作负责，学习能力强，方向明确，积极向上，不怕折腾，爱折腾。</li>
-<li>与人为善，能积极融入团队，带人积极，三观端正，不用技术作恶。</li>
-</ul>
 ]]></content>
     </entry>
 </feed>

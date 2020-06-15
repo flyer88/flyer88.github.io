@@ -3,7 +3,7 @@
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>算法基础④（树的概念和存储） | 键盘敲击者</title>
+<title>【旧】记录一些蛋疼的bug(二) | 键盘敲击者</title>
 <link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592215234590">
 <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
@@ -99,88 +99,50 @@
         <div class="post-detail gt-bg-theme-color-second">
             <article class="gt-post-content">
                 <h2 class="post-title">
-                    算法基础④（树的概念和存储）
+                    【旧】记录一些蛋疼的bug(二)
                 </h2>
                 <div class="post-info">
                     <time class="post-time gt-c-content-color-first">
                         · 2020-06-15 ·
                     </time>
                     
-                        <a href="https://flyer88.github.io/tag/algorithm/" class="post-tags">
-                            # 算法
+                        <a href="https://flyer88.github.io/tag/QBqEnb3yY/" class="post-tags">
+                            # 【旧】
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/android1/" class="post-tags">
+                            # Android 基础
                         </a>
                     
                 </div>
                 <div class="post-content">
-                    <h3 id="ox0001-基本概念">OX0001 基本概念</h3>
-<ol>
-<li>
-<p>树</p>
-<blockquote>
-<p>n(n &gt;= 0) 个节点 的有限集。当 n=0 时，称为空树，在任意一个非空树种有如下特点：</p>
-<ol>
-<li>有且仅有一个特定的称为根的节点。</li>
-<li>当 n &gt; 1 时，其余节点分为 m (m &gt; 0) 个互不相交的有限集，每个集合本身又是一个树，并称为根的子树</li>
-</ol>
+                    <blockquote>
+<p>写于 2016 年 07 月 15 日</p>
 </blockquote>
-</li>
-<li>
-<p>二叉树</p>
-<blockquote>
-<p>每个节点只有两个孩子的树</p>
-</blockquote>
-</li>
-<li>
-<p>满二插树</p>
-<blockquote>
-<p>一个二叉树的所有非叶子节点都存在左右孩子，并且所有的叶子节点都在同一个层级</p>
-</blockquote>
-</li>
-<li>
-<p>完全二叉树</p>
-<blockquote>
-<p>对一个有 n 个节点的二叉树，按层级顺序编号，所有节点的编号为 1到 n，如果这个数的所有节点和同样深度的满二叉树的编号为从1到n的节点位置相同，则这个二叉树为完全二叉树</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="ox0002-存储方式">OX0002. 存储方式</h3>
-<ol>
-<li>
-<p><strong>链表</strong></p>
-<blockquote>
-<pre><code class="language-shell">					         [NodeA|data1|left|right]
-						//									\\
-					//											\\
-				//												   \\
-[NodeB|data2|null|null]			            [NodeC|data3|null|null]
+<p>1.<code>int</code> -2^32 到 2^32，<code>long</code> -2^63 到 2^63-1，这种问题大部分在时间戳碰到，需注意</p>
+<pre><code class="language-java">public static void main(String[] args) {
+    int time = 1470022057;//注意是int类型
+    System.out.println(formatLongToDate(time));//传入的是int，参数是long不会超出int长度
+    System.out.println(format(new Date(time * 1000),&quot;MM月dd日 HH:mm&quot;));//传入的是int，秒级时间戳，位数刚好和int类型的位数相同，所以会爆，所以转换会出错
+} 
+public static String formatLongToDate(long time){
+    SimpleDateFormat sdf = new SimpleDateFormat(&quot;MM月dd日 HH:mm&quot;);
+    Date date= new Date(time * 1000);
+    String result = sdf.format(date);
+    return result;
+}
+public static String format(Date date, String regex) {
+    DateFormat df = new SimpleDateFormat(regex);
+    return df.format(date);
+}
 </code></pre>
-</blockquote>
-</li>
-<li>
-<p><strong>数组 - 层序存储 (主要用于完全二叉树，否则会大量浪费空间)</strong></p>
-<blockquote>
-<p>父节点下标为parent，则做孩子的下标为 2* parent + 1，有孩子为 2*parent + 2</p>
-<pre><code class="language-shell">				 【1】
-				//	 \\
-			【2】	  【3】
-			//	\\         \\
-		【4】 【5】   【6】
-			\\
-			【8】
-			
-[1][2][3][4][5][null][6][null][8]
- 0  1  2  3  4   5    6   7    8
-
+<p>上述运行结果</p>
+<pre><code>08月01日 11:27
+01月14日 13:34
 </code></pre>
-</blockquote>
-</li>
-</ol>
-<h3 id="ox0003-bst-二叉查找树二叉排序树">OX0003. <code>BST</code> 二叉查找树/二叉排序树</h3>
 <ol>
-<li>左子树不为空，左子树的值均小于根</li>
-<li>右子树不为空，右子树的值均大于根</li>
-<li>左右子树也是 <code>BST</code></li>
-<li>时间复杂度: <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(logn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></li>
+<li>关于<code>targetSdkVersion</code>(<a href="http://gold.xitu.io/entry/5690e33460b20f9aeaa3f085/view">几个code的区别</a>)降级问题，降级会带来很多未知问题。用户安装了<code>targetSdkVersion</code>是<code>23</code>版本的<code>app</code>，而下一个版本把<code>targetSdkVersion</code>改为了<code>22</code>，首先，第一个问题就是会导致用户无法安装，需要卸载后重装。初次之外，降级也会导致对一些<code>API</code>调用不正常。</li>
+<li>同时修改了多个<code>module</code>的<code>gradle</code>文件，出现了以下问题<code>Error:Timeout waiting to lock cp_proj class cache for</code>删除报错的cache文件夹即可</li>
 </ol>
 
                 </div>
@@ -190,8 +152,8 @@
         
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://flyer88.github.io/post/suan-fa-ji-chu-san-ha-xi-biao-gai-nian/" class="post-title gt-a-link">
-                    算法基础③（哈希表简介及部分源码分析）
+                <a href="https://flyer88.github.io/post/jiu-ji-lu-yi-xie-dan-teng-de-bugyi/" class="post-title gt-a-link">
+                    【旧】记录一些蛋疼的bug(一)
                 </a>
             </div>
         

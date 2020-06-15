@@ -3,7 +3,7 @@
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>算法基础④（树的概念和存储） | 键盘敲击者</title>
+<title>【旧】 | 键盘敲击者</title>
 <link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592215234590">
 <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
@@ -42,11 +42,11 @@
     </script>
 
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 </head>
 <body>
 <div class="main gt-bg-theme-color-first">
-    <nav class="navbar navbar-expand-lg">
+    <div class="main-content">
+        <nav class="navbar navbar-expand-lg">
     <div class="navbar-brand">
         <img class="user-avatar" src="/images/avatar.png" alt="头像">
         <div class="site-name gt-c-content-color-first">
@@ -95,138 +95,51 @@
         </div>
     </div>
 </nav>
-    <div class="post-container">
-        <div class="post-detail gt-bg-theme-color-second">
-            <article class="gt-post-content">
-                <h2 class="post-title">
-                    算法基础④（树的概念和存储）
-                </h2>
-                <div class="post-info">
-                    <time class="post-time gt-c-content-color-first">
-                        · 2020-06-15 ·
-                    </time>
-                    
-                        <a href="https://flyer88.github.io/tag/algorithm/" class="post-tags">
-                            # 算法
-                        </a>
-                    
-                </div>
-                <div class="post-content">
-                    <h3 id="ox0001-基本概念">OX0001 基本概念</h3>
-<ol>
-<li>
-<p>树</p>
-<blockquote>
-<p>n(n &gt;= 0) 个节点 的有限集。当 n=0 时，称为空树，在任意一个非空树种有如下特点：</p>
-<ol>
-<li>有且仅有一个特定的称为根的节点。</li>
-<li>当 n &gt; 1 时，其余节点分为 m (m &gt; 0) 个互不相交的有限集，每个集合本身又是一个树，并称为根的子树</li>
-</ol>
-</blockquote>
-</li>
-<li>
-<p>二叉树</p>
-<blockquote>
-<p>每个节点只有两个孩子的树</p>
-</blockquote>
-</li>
-<li>
-<p>满二插树</p>
-<blockquote>
-<p>一个二叉树的所有非叶子节点都存在左右孩子，并且所有的叶子节点都在同一个层级</p>
-</blockquote>
-</li>
-<li>
-<p>完全二叉树</p>
-<blockquote>
-<p>对一个有 n 个节点的二叉树，按层级顺序编号，所有节点的编号为 1到 n，如果这个数的所有节点和同样深度的满二叉树的编号为从1到n的节点位置相同，则这个二叉树为完全二叉树</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="ox0002-存储方式">OX0002. 存储方式</h3>
-<ol>
-<li>
-<p><strong>链表</strong></p>
-<blockquote>
-<pre><code class="language-shell">					         [NodeA|data1|left|right]
-						//									\\
-					//											\\
-				//												   \\
-[NodeB|data2|null|null]			            [NodeC|data3|null|null]
-</code></pre>
-</blockquote>
-</li>
-<li>
-<p><strong>数组 - 层序存储 (主要用于完全二叉树，否则会大量浪费空间)</strong></p>
-<blockquote>
-<p>父节点下标为parent，则做孩子的下标为 2* parent + 1，有孩子为 2*parent + 2</p>
-<pre><code class="language-shell">				 【1】
-				//	 \\
-			【2】	  【3】
-			//	\\         \\
-		【4】 【5】   【6】
-			\\
-			【8】
-			
-[1][2][3][4][5][null][6][null][8]
- 0  1  2  3  4   5    6   7    8
-
-</code></pre>
-</blockquote>
-</li>
-</ol>
-<h3 id="ox0003-bst-二叉查找树二叉排序树">OX0003. <code>BST</code> 二叉查找树/二叉排序树</h3>
-<ol>
-<li>左子树不为空，左子树的值均小于根</li>
-<li>右子树不为空，右子树的值均大于根</li>
-<li>左右子树也是 <code>BST</code></li>
-<li>时间复杂度: <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(logn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></li>
-</ol>
-
-                </div>
-            </article>
+        <div class="current-tag-container">
+            <h2 class="title gt-c-content-color-first">
+                #【旧】
+            </h2>
         </div>
-
+        <div class="post-list-container">
+    <div class="post-inner">
         
-            <div class="next-post">
-                <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://flyer88.github.io/post/suan-fa-ji-chu-san-ha-xi-biao-gai-nian/" class="post-title gt-a-link">
-                    算法基础③（哈希表简介及部分源码分析）
-                </a>
+            <div class="post gt-bg-theme-color-second">
+                <div class="post-left">
+                    <div>
+                        
+                        <a href="https://flyer88.github.io/post/jiu-ge-bie-xiao-ji-qiao/">
+                            <span class="post-title gt-c-content-color-first">【旧】个别小技巧</span>
+                        </a>
+                    </div>
+                    <div class="gt-post-content post-abstract gt-c-content-color-second">
+                        
+                    </div>
+                    <div class="post-info">
+                        <time class="post-time gt-c-content-color-first">
+                            发布于 · 2020-06-15 ·
+                        </time>
+                        
+                            <a href="https://flyer88.github.io/tag/QBqEnb3yY/" class="post-tag">
+                                # 【旧】
+                            </a>
+                        
+                            <a href="https://flyer88.github.io/tag/android1/" class="post-tag">
+                                # Android 基础
+                            </a>
+                        
+                    </div>
+                </div>
+                
             </div>
         
-
-        
-
-        
-            
-                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
-<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
-
-<div id="gitalk-container"></div>
-
-<script>
-
-  var gitalk = new Gitalk({
-    clientID: '8f894d7af601ea18e6b9',
-    clientSecret: '70f1cea8fb683c4dbf8e1b94f676ae3f3c4311a3',
-    repo: 'flyer88.github.io',
-    owner: 'flyer88',
-    admin: ['flyer88'],
-    id: location.pathname,      // Ensure uniqueness and length less than 50
-    distractionFreeMode: false  // Facebook-like distraction free mode
-  })
-
-  gitalk.render('gitalk-container')
-
-</script>
-
-            
-
-            
-        
-
-        
+    </div>
+</div>
+        <div class="pagination-container">
+    
+        <a href="https://flyer88.github.io/tag/QBqEnb3yY" class="prev-page gt-a-link">上一页</a>
+    
+    
+</div>
 
         <div class="site-footer gt-c-content-color-first">
     <div class="slogan gt-c-content-color-first">爪哇岛上程序猿 十指弯弯不弄弦 

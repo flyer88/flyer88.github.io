@@ -1,0 +1,346 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>【旧】引用传递和值传递(pass by value vs pass by reference) | 键盘敲击者</title>
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592215234590">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-57136418-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-57136418-1');
+    </script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            键盘敲击者
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="menu gt-a-link">
+                            关于我
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    【旧】引用传递和值传递(pass by value vs pass by reference)
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-06-15 ·
+                    </time>
+                    
+                        <a href="https://flyer88.github.io/tag/kh6Thkxwy/" class="post-tags">
+                            # Java 基础
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/QBqEnb3yY/" class="post-tags">
+                            # 【旧】
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <blockquote>
+<p>写于 2016 年 07 月 30 日</p>
+</blockquote>
+<ul>
+<li>一. 值类型和引用类型（此处先不考虑String）的传递</li>
+<li>二. String的问题：
+<ul>
+<li>
+<ol>
+<li>String问题来源</li>
+</ol>
+</li>
+<li>2.脑洞猜想可能情况</li>
+<li>3.字节码验证</li>
+<li>4.最终结论</li>
+</ul>
+</li>
+</ul>
+<p>写这个的原因主要是今天看到了<a href="https://www.zhihu.com/question/31203609">知乎的一个问题</a>，发现自己有些地方有点懵逼，写下来记录一下，<a href="http://zhihu.com/question/31203609/answer/50992895">知乎上排名第一的答案</a>说的很清楚，不过看了以后依旧有点迷迷糊糊，所以自己写了个几行代码测试。</p>
+<p>首先上一个，感觉比较对的结论：</p>
+<p><strong>Horstmann的《java核心技术》（中文第8版P115-P117）原文描述：</strong></p>
+<p><strong>”java程序设计语言总是采用值调用。也就是说，方法得到的是所有参数值的一个拷贝，特别是，方法不能修改传递给它的任何参数变量的内容。“</strong></p>
+<p><strong>”有些程序员（甚至是本书的作者），认为java程序设计语言对对象采用的是引用调用，实际上这种理解是不对的。”</strong></p>
+<p>然后补充几句我的理解：</p>
+<ol>
+<li>首先，Java在传递过程中，传递的只有值，但是表现出来的形式，却既有值传递也有引用传递，因此，没必要纠结于名字，能理解原理即可。</li>
+<li>在传递对象进函数时，对象的所有数据会被拷贝到局部变量中，这也就导致了局部变量修改其成员变量值时会导致原始的变量的成员变量值产生响应的改变，因为他们持有的成员变量的引用指向了同一个地址块(内存空间)。</li>
+<li>而对于传递8种基本变量时，也只是拷贝了值，因此对基本变量其本身的修改，无法导致原始变量的的修改。</li>
+<li>不过这里需要考虑特殊情况，就是String，其表现形式和8种基本变量一样，具体下文有分析，而对于String为何要这么做，我也不清楚，不是很懂 jvm 和 Java 的设计。</li>
+</ol>
+<hr>
+<hr>
+<h2 id="一-值类型和引用类型此处先不考虑string的传递">一. 值类型和引用类型（此处先不考虑String）的传递：</h2>
+<pre><code>public class Student {
+    int age;
+    String name;
+}
+public class TestReference {
+    public static void main(String[] args){
+        Student student = new Student();
+        student.age = 10;
+        System.out.println(student.age);//10
+        addAge(student);
+        System.out.println(student.age);//11
+        addAge(student.age);
+        System.out.println(student.age);//11
+    }
+
+    static public void addAge(Student paramStudent){
+        paramStudent.age = 11;
+    }
+
+    static public void addAge(int paramAge){
+        paramAge = 12;
+    }
+}
+</code></pre>
+<p>对以上代码进行解释</p>
+<ul>
+<li>首先<code>addAge(student)</code>调用的是<code>addAge(Student paramStudent)</code>，该部分其实很好理解，首先，<code>paramStudet</code>对象，拷贝了传入的<code>studet</code>对象所有的数据，因此<code>paramStudet</code>它所指向的地址，其实和<code>student</code>是一样的，所以，当<code>paramStudent</code>改变它的<code>age</code>值时，其触发的操作和<code>student</code>改变<code>age</code>的值是一样的 ,因为他们都指向了同一个地址块。</li>
+<li>其次<code>addAge(student.age)</code>调用的是<code>addAge(int paramAge)</code>，也很好理解，<code>paramAge</code>也只是拷贝了<code>studet.age</code>的值，此处为10，然后改变了<code>paramAge</code>的值，但此时<code>paramAge</code>与引用类型不同，它保存的只有一个值，所以其实这个<code>parmaAge</code>作为一个局部变量，并不能对原本的<code>student.age</code>产生任何影响</li>
+</ul>
+<h2 id="二-string的问题">二. String的问题：</h2>
+<h3 id="1-string问题来源">1. String问题来源</h3>
+<p>上面的例子其实很好搞清楚，但是我在碰到String的时候就有点懵逼了,如果调用以下方法，结果会如注释显示。</p>
+<pre><code>public static void main(String[] args){
+    Student student = new Student();
+    student.age = 10;
+    student.name = &quot;dove&quot;;
+    changeName(student);
+    System.out.println(student.name);//dove_2
+    changeName(student.name);
+    System.out.println(student.name);//dove_2
+    changeName2(student.name); 
+    System.out.println(student.name);//dove_2         
+}      
+static void changeName(Student paramStudent){
+    paramStudent.name = &quot;dove_2&quot;;
+}
+static void changeName(String paramName){
+    paramName = &quot;dove_3&quot;;
+}
+static void changeName2(String paramName){
+    paramName += &quot;233&quot;;
+}
+</code></pre>
+<p><code>changeName2(String paramName)</code>此处讲道理被调用后应该是&quot;dove_2233&quot;,因为<code>String</code>是一个引用类型,也就是说此处的<code>parmaName</code>应该是指向和传入的参数指向了相同的一个地址块，然后对指向的内存进行了修改,然而结果并不是,原因就在于<code>String</code>是一个不可变的类型(为啥不可变呢,具体可以看<code>String</code>类的实现,它是一个<code>final class</code>,并且其内部正真保存着字符串的<code>value[]</code>也是不可变的(<code>final</code>)，所以意味着修改<code>Sting</code>是不可能的)。</p>
+<h3 id="2脑洞猜想可能情况">2.脑洞猜想可能情况</h3>
+<p>所以猜测上述的<code>changeName2</code>过程类似于</p>
+<pre><code>    FuckString fuckString = new FuckString();//paramName
+    FuckString fuckString2 = new FuckString(fuckString);//构造出的新的值
+    fuckString = fuckString2;//把paramName指向构造出的新值
+</code></pre>
+<p>然后，这就有点想不通了，不可变的类型，String 的 <code>+</code> 是怎么弄的呢？打个断点试试看，强制进入，发现跳转到了StringBuilder的构造方法里，这说明应该是构造了一个新的StringBuilder对象。</p>
+<figure data-type="image" tabindex="1"><img src="http://www.dove.farbox.com/java/_image/%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%E5%92%8C%E5%80%BC%E4%BC%A0%E9%80%92/19-58-14.jpg" alt="img" loading="lazy"></figure>
+<p>同时，底部的Debug里抛出了个错误，说是无法获取<code>StringBuilder.toString()</code>,也就进一步证明此处有新的<code>String</code>的产生。</p>
+<figure data-type="image" tabindex="2"><img src="http://www.dove.farbox.com/java/_image/%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%E5%92%8C%E5%80%BC%E4%BC%A0%E9%80%92/19-58-59.jpg" alt="img" loading="lazy"></figure>
+<p>到这里基本上就验证了我的猜想，<code>String</code> <code>+</code>会产生一个新的<code>String</code>对象，既然这样，反编译下，看下字节码，估计基本就搞定这个懵逼的问题了。</p>
+<h3 id="3字节码验证">3.字节码验证</h3>
+<p>于是就写了以下的类，用来验证：</p>
+<pre><code>public class Main {
+    public static void main(String[] args){
+        String s = &quot;dove&quot;;
+        s += &quot;233&quot;;
+    }
+}
+</code></pre>
+<p>然后javac，然后javap -c，看字节码,如下图。</p>
+<figure data-type="image" tabindex="3"><img src="http://www.dove.farbox.com/java/_image/%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%E5%92%8C%E5%80%BC%E4%BC%A0%E9%80%92/20-03-38.png" alt="img" loading="lazy"></figure>
+<p>尝试着解释下该部分代码（不是很看的懂字节码，所以有些解释可能不是很规范，不过讲道理大概意思不会差很远)</p>
+<ul>
+<li><code>String s = &quot;dove&quot;;</code>部分字节码及解释</li>
+</ul>
+<pre><code>       0: ldc           #2                  // String dove
+       2: astore_1
+</code></pre>
+<p>第0行，将一个常量加载到操作数栈,也就是把“dove”这玩意，放进了操作数栈(也不知道是什么东西，蛤蛤)</p>
+<p>第2行，将一号数值（下划线1代表一号，大概理解，不是很准确）从操作数栈存储到局部变量表，说白了就是把“dove”给存了起来？</p>
+<ul>
+<li><code>s += &quot;233&quot;;</code>部分字节码及解释</li>
+</ul>
+<pre><code>       3: new           #3                  // class java/lang/StringBuilder
+       6: dup
+       7: invokespecial #4                  // Method java/lang/StringBuilder.&quot;&lt;init&gt;&quot;:()V
+      10: aload_1    
+      11: invokevirtual #5                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      14: ldc           #6                  // String 233
+      16: invokevirtual #5                  // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      19: invokevirtual #7                  // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+</code></pre>
+<p>第3行，这个很明显，不google也知道，<code>new StringBuilder()</code>，也就是搞了个<code>StringBUilder</code>的实例。</p>
+<p>第6行，Java虚拟机提供了一些用于直接操作操作数栈，不是很懂，貌似对整体理解影响不大，先过。</p>
+<p>第7行，invokespecial 调用一些需要特殊处理的实例方法，包括实例初始化方法、私有方法和父类方法，此处应该是在初始化StringBuilder对象。</p>
+<p>第10行，将1号局部变量(下划线1指代一号变量)加载到操作栈，这里应该是指“dove”</p>
+<p>第11行，调用对象的实例方法,此处就是调用<code>StringBuilder.append</code>,也就是把“dove”加到了<code>StringBuilder</code>中</p>
+<p>第14行，将一个常量加载到操作数栈，就是把“233”载入</p>
+<p>第16行，调用对象的实例方法,此处就是调用<code>StringBuilder.append</code>，把“233”给加到“StringBuilder”中</p>
+<p>第19行，调用对象的实例方法,此处就是调用<code>StringBuilder.toString</code>，而该方法，会触发<code>new String()</code>的操作，因此，会返还一个新的<code>String</code>对象</p>
+<h3 id="4最终结论">4.最终结论：</h3>
+<p>从脑洞断点以及最后的字节码分析可以看出，<code>s +=&quot;233&quot;</code>,会导致一个新的String对象生成，也就是说，调用<code>changeName2(String paramName)</code>会使得<code>paramName</code>指向一个新的String对象，这样就意味着，对该数据的改变并不会影响本身<code>student.name</code>的值,由此，String懵逼的问题也解决了。</p>
+<hr>
+<hr>
+<p>以上，就是整个关于Java引用传递和值传递的理解，有说的不对的，望指正。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://flyer88.github.io/post/android-yuan-ma-bian-yi/" class="post-title gt-a-link">
+                    Android 源码编译
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '8f894d7af601ea18e6b9',
+    clientSecret: '70f1cea8fb683c4dbf8e1b94f676ae3f3c4311a3',
+    repo: 'flyer88.github.io',
+    owner: 'flyer88',
+    admin: ['flyer88'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">爪哇岛上程序猿 十指弯弯不弄弦 
+斗室方屏十余寸 不知今夕是何年</div>
+    <div class="social-container">
+        
+            
+                <a href="http://github.com/flyer88" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

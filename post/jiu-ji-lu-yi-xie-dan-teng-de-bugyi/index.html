@@ -1,0 +1,577 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>【旧】记录一些蛋疼的bug(一) | 键盘敲击者</title>
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592215234590">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-57136418-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-57136418-1');
+    </script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            键盘敲击者
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="menu gt-a-link">
+                            关于我
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    【旧】记录一些蛋疼的bug(一)
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-06-15 ·
+                    </time>
+                    
+                        <a href="https://flyer88.github.io/tag/QBqEnb3yY/" class="post-tags">
+                            # 【旧】
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/android1/" class="post-tags">
+                            # Android 基础
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <blockquote>
+<p>写于 2015年 12 月 21 日</p>
+</blockquote>
+<ol>
+<li>
+<p>主题适配时，drawable 错误 ...... Caused by: android.content.res.Resources$NotFoundException: File res/drawable/menu_shape.xml from drawable resource ID #0x7f020179 ...... Caused by: java.lang.UnsupportedOperationException: Can't convert to color: type=0x2</p>
+<p>drawable 中 对 attr color 进行引用导致报错</p>
+<p>具体看 https://code.google.com/p/android/issues/detail?id=26251</p>
+<p>Android 系统 的 bug，color 无法被引用到drawable中，只能一个主题一个drawable，5.0以上修复此bug</p>
+</li>
+<li>
+<p>相册问题</p>
+<p>不同版本下，系统相册的位置是不同的，建议创建一个自己的文件夹，具体操作，通过<code>Environement.get..</code>来获取系统环境下的sd卡目录，然后创建文件夹</p>
+</li>
+</ol>
+<pre><code>Intent intent = newIntent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);//系统拍照
+intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);//画质
+intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);//保存到uri
+Environment.getExternalStorageDirectory();//获取uri时，用这个方法，不然容易不同版本不问题
+</code></pre>
+<ol start="3">
+<li>XwalkView（14）截图问题</li>
+</ol>
+<p>http://stackoverflow.com/questions/29483028/how-can-i-capture-the-whole-view-into-a-bitmap-when-using-crosswalk-to-display-w</p>
+<p>http://www.cnblogs.com/ct2011/p/4100132.html</p>
+<p>注意：</p>
+<ul>
+<li>
+<p><code>XWalkPreferences.setValue(XWalkPreferences.ANIMATABLE_XWALK_VIEW, true)</code>需要在load之前就设置,在<code>activity</code> 的<code>onCreate()</code>设置，<code>onDestroy()</code> 中去除</p>
+</li>
+<li>
+<p>获取<code>TextureView</code>:</p>
+<pre><code>private TextureView findXWalkTextureView(ViewGroup group) {
+       int childCount = group.getChildCount();
+       for (int i = 0; i &lt; childCount; i++) {
+           View child = group.getChildAt(i);
+        if (child instanceof TextureView) {
+            String parentClassName = child.getParent().getClass().toString();
+            boolean isRightKindOfParent = (parentClassName.contains(&quot;XWalk&quot;));
+            if (isRightKindOfParent) {
+                return (TextureView) child;
+            }
+        } else if (child instanceof ViewGroup) {
+            TextureView textureView = findXWalkTextureView((ViewGroup) child);
+            if (textureView != null) {
+                return textureView;
+            }
+        }
+    }
+    return null;
+}
+</code></pre>
+</li>
+<li>
+<p>截图：</p>
+<pre><code>public Bitmap captureImage(XWalkView xWalkView) {
+
+if (xWalkView != null) {
+    Bitmap bitmap = null;
+
+    boolean isCrosswalk = false;
+    try {
+        Class.forName(&quot;org.xwalk.core.XWalkView&quot;);
+        isCrosswalk = true;
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    if (isCrosswalk) {
+        try {
+            TextureView textureView = findXWalkTextureView(xWalkView);
+            bitmap = textureView.getBitmap();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    } else {
+        bitmap = Bitmap.createBitmap(xWalkView.getWidth(), xWalkView.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bitmap);
+        xWalkView.draw(c);
+    }
+    return bitmap;
+    } else {
+        return null;
+    }
+    }
+</code></pre>
+</li>
+</ul>
+<ol start="4">
+<li>popwindow 和 menu物理键 第二次无法触发，以及第二次直接弹出并且隐藏问题<br>
+主要原因是，popwindow 添加了window从而截取了menu事件，所以activity处无法获取<br>
+http://www.bkjia.com/Androidjc/988767.html<br>
+Activity 代码：</li>
+</ol>
+<pre><code>@Override
+public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+    switch (keyCode) {
+    case KeyEvent.KEYCODE_MENU:
+        isMenuShow = true;
+        showPopupWindow();
+        break;
+    }
+    return super.onKeyDown(keyCode, event);
+}
+</code></pre>
+<p>showPopupWindow:</p>
+<pre><code>    private void showPopupWindow() {
+        View view = inflater.inflate(R.layout.popupwindow, null);
+        ll.setOnKeyListener(new OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_MENU) {
+                    if (!isMenuShow) {
+                        popupWindow.dismiss();
+                    }
+                    isMenuShow = false;
+                }
+                return false;
+            }
+        });
+</code></pre>
+<ol>
+<li>Android appcompat-v7 兼容包导致 MENU 按键不能监听到的解决方案</li>
+</ol>
+<p>https://twiceyuan.com/2015/05/07/Android-appcompat-v7-兼容包导致-MENU-按键不能监听到的解决方案/</p>
+<ol>
+<li>
+<p>bug 5.0 以上 button 中设置 text 英文状态下会变成大写<br>
+解决方法：<code>android:textAllCaps=&quot;false&quot;</code></p>
+</li>
+<li>
+<p>Android 6.0（23） 源码中，String类的实现被替换了，具体调用的时候，会调用一个StringFactory来生成一个String，不过一直没有找到入口</p>
+<pre><code> public String(char[] data) {
+throw new UnsupportedOperationException(&quot;Use StringFactory instead.&quot;);
+}
+</code></pre>
+<p>除此之外，android 下 String 类实现与 Oracle 的实现完全不一样</p>
+</li>
+<li>
+<p>全球化问题，语言切换<br>
+<code>compileSdkVersion 23</code><br>
+版本的时候需要<br>
+<code>resources.updateConfiguration(config, dm);</code><br>
+不然没用<br>
+http://blog.csdn.net/sodino/article/details/6596709</p>
+</li>
+<li>
+<p>三星的傻逼，拍照会旋转，导致原<code>activity</code>重生，从而触发<code>onCreate()</code><br>
+在<code>AndroidManifest.xml</code>对应的<code>activity</code>写上 · <code>android:screenOrientation=&quot;landscape&quot;</code><br>
+（landscape = 横向 portrait = 纵向）<br>
+<code>android:configChanges=&quot;keyboardHidden|orientation&quot;</code></p>
+</li>
+<li>
+<p>遇到一个傻逼的bug，前几天还可以构建，放完假以后，运行项目突然报错，应该与我用的studio beat 版相关：<br>
+报错为：<code>Plugin is too old,please update to a more recent version,or set ANDROID_DAILY_OVERRIDE environment variable to &quot;XXXXX&quot;</code><br>
+点下面的<code>Fix plugin version and sync project</code>依旧报错，无用。<br>
+后来发现是build.gradle 里classpath的问题 我用的是 2.0.0 alpha1 改成1.2.3<br>
+或者改成最新的 alpha3，等待下载重新构建就可以了<br>
+<code>com.android.tools.build:gradle:1.2.3</code><br>
+建议用1.2.3，alpha3需要更新2.8的gradle，又要更新，有点麻烦</p>
+</li>
+<li>
+<p>&quot;Bitmap too large to be uploaded into a texture&quot;<br>
+解决方案，重新设置 bitmap 大小，OpenGL limit 是 2048 * 2048</p>
+</li>
+<li>
+<p><code>kitkat</code>之前<code>listview</code>的<code>addHeaderView()</code>需要在setAdapter之前调用，<br>
+<code>kitkat</code>之后<code>addHeaderView()</code>可以在前后调用</p>
+</li>
+<li>
+<p><code>RecyclerView</code> 23.1.1 版有 bug，解决方案，重写 <code>LineaLayoutManager</code> 的 <code>onLayoutChildren</code></p>
+<pre><code>@Override
+public void onLayoutChildren(RecyclerView.Recycler recycler,    RecyclerView.State state) {
+try {
+    super.onLayoutChildren(recycler, state);
+} catch (IndexOutOfBoundsException e) {
+    Log.e(&quot;probe&quot;, &quot;meet a IOOBE in RecyclerView&quot;);
+}
+</code></pre>
+<p>}</p>
+<p><code>java.lang.IndexOutOfBoundsException: Inconsistency detected. Invalid view holder adapter positionViewHolder</code></p>
+<p>http://stackoverflow.com/questions/31759171/recyclerview-and-java-lang-indexoutofboundsexception-inconsistency-detected-in</p>
+</li>
+<li>
+<p>Fresco 停止恢复加载<br>
+<code>Fresco.getImagePipeline().resume();</code><br>
+<code>Fresco.getImagePipeline().paused();</code></p>
+</li>
+<li>
+<p>不知道为什么的bug，记录，子布局 marginBottom 没作用，父级布局中 paddingBottom 可以用</p>
+<pre><code>    &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+    &lt;android.support.v7.widget.CardView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+    android:id=&quot;@+id/item_tc_home_root_cv&quot;
+    android:layout_marginBottom=&quot;16dp&quot;
+    app:cardBackgroundColor=&quot;@color/color_white&quot;
+    android:orientation=&quot;vertical&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;wrap_content&quot; &gt;
+    &lt;LinearLayout
+    android:orientation=&quot;vertical&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;&gt;
+        &lt;LinearLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;200dp&quot;/&gt;
+        &lt;RelativeLayout
+            android:paddingBottom=&quot;16dp&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:background=&quot;#ffffff&quot;&gt;
+            &lt;LinearLayout
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_marginLeft=&quot;50dp&quot;
+                android:layout_marginTop=&quot;10dp&quot;
+                android:id=&quot;@+id/linear_one&quot;
+                android:orientation=&quot;vertical&quot;&gt;
+                &lt;com.facebook.drawee.view.SimpleDraweeView
+                    app:placeholderImage=&quot;@mipmap/icon_head_image&quot;
+                    app:roundAsCircle=&quot;true&quot;
+                    android:layout_width=&quot;60dp&quot;
+                    android:layout_height=&quot;60dp&quot;
+                    android:src=&quot;@mipmap/icon_head_image&quot;
+                    android:id=&quot;@+id/avatar_iv&quot; /&gt;
+            &lt;/LinearLayout&gt;
+            &lt;LinearLayout
+                android:layout_width=&quot;200dp&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:layout_alignParentRight=&quot;true&quot;
+                android:orientation=&quot;horizontal&quot;
+                android:layout_marginTop=&quot;16dp&quot;
+                android:layout_marginRight=&quot;16dp&quot;
+                android:id=&quot;@+id/linear_two&quot;
+                android:weightSum=&quot;3&quot;&gt;
+                &lt;TextView
+                    android:layout_width=&quot;0dp&quot;
+                    android:layout_height=&quot;wrap_content&quot;
+                    android:layout_weight=&quot;1&quot;
+                    android:textSize=&quot;16sp&quot;
+                    android:textColor=&quot;#ff467d&quot;
+                    android:id=&quot;@+id/post_count_tv&quot;
+                    android:text=&quot;45&quot;
+                    android:gravity=&quot;center&quot;/&gt;
+                &lt;TextView
+                    android:layout_width=&quot;0dp&quot;
+                    android:layout_height=&quot;wrap_content&quot;
+                    android:layout_weight=&quot;1&quot;
+                    android:textSize=&quot;16sp&quot;
+                    android:textColor=&quot;#ff467d&quot;
+                    android:id=&quot;@+id/fans_count_tv&quot;
+                    android:text=&quot;2322&quot;
+                    android:gravity=&quot;center&quot;/&gt;
+                &lt;TextView
+                    android:layout_width=&quot;0dp&quot;
+                    android:layout_height=&quot;wrap_content&quot;
+                    android:layout_weight=&quot;1&quot;
+                    android:textSize=&quot;16sp&quot;
+                    android:textColor=&quot;#ff467d&quot;
+                    android:id=&quot;@+id/follow_count_tv&quot;
+                    android:text=&quot;172&quot;
+                    android:gravity=&quot;center&quot;/&gt;
+            &lt;/LinearLayout&gt;
+            &lt;LinearLayout
+                android:layout_width=&quot;200dp&quot;
+                android:layout_height=&quot;wrap_content&quot;
+                android:orientation=&quot;horizontal&quot;
+                android:layout_alignParentRight=&quot;true&quot;
+                android:layout_below=&quot;@+id/linear_two&quot;
+                android:layout_marginTop=&quot;16dp&quot;
+                android:layout_marginRight=&quot;16dp&quot;
+                android:id=&quot;@+id/linear_three&quot;
+                android:weightSum=&quot;3&quot;
+                &gt;
+        &lt;TextView
+            android:layout_width=&quot;0dp&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:layout_weight=&quot;1&quot;
+            android:textColor=&quot;#999999&quot;
+            android:textSize=&quot;12sp&quot;
+            android:text=&quot;帖子&quot;
+            android:gravity=&quot;center&quot;/&gt;
+        &lt;TextView
+            android:layout_width=&quot;0dp&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:layout_weight=&quot;1&quot;
+            android:textColor=&quot;#999999&quot;
+            android:textSize=&quot;12sp&quot;
+            android:text=&quot;粉丝&quot;
+            android:gravity=&quot;center&quot;/&gt;
+        &lt;TextView
+            android:layout_width=&quot;0dp&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:layout_weight=&quot;1&quot;
+            android:textColor=&quot;#999999&quot;
+            android:textSize=&quot;12sp&quot;
+            android:text=&quot;关注&quot;
+            android:gravity=&quot;center&quot;/&gt;
+    &lt;/LinearLayout&gt;
+    &lt;TextView
+        android:layout_marginLeft=&quot;48dp&quot;
+        android:layout_below=&quot;@+id/linear_one&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_marginTop=&quot;16dp&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:singleLine=&quot;true&quot;
+        android:textSize=&quot;18sp&quot;
+        android:gravity=&quot;center&quot;
+        android:id=&quot;@+id/oldDriver_name_tv&quot;
+        android:textColor=&quot;#4c4c4c&quot;
+        android:text=&quot;大哥&quot;/&gt;
+    &lt;TextView
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_below=&quot;@+id/oldDriver_name_tv&quot;
+        android:layout_marginLeft=&quot;16dp&quot;
+        android:layout_marginRight=&quot;16dp&quot;
+        android:text=&quot;cos 爱好者、我的博客地址：http:www.....&quot;
+        android:textColor=&quot;#999999&quot;
+        android:textSize=&quot;14sp&quot;
+        android:id=&quot;@+id/personal_description_tv&quot;
+        android:layout_marginTop=&quot;16dp&quot; /&gt;
+    &lt;LinearLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_below=&quot;@+id/personal_description_tv&quot;
+        android:layout_marginTop=&quot;16dp&quot;
+        android:gravity=&quot;center&quot;&gt;
+        &lt;ImageView
+            android:layout_width=&quot;114dp&quot;
+            android:layout_height=&quot;48dp&quot;
+            android:src=&quot;@mipmap/follow&quot;
+            android:id=&quot;@+id/follow_iv&quot;/&gt;
+    &lt;/LinearLayout&gt;
+
+&lt;/RelativeLayout&gt;
+</code></pre>
+</li>
+<li>
+<p><code>ICCP: Not recognizing known sRGB profile that has been edited</code> 错误，好像是<code>png</code>是<code>sRGB</code>导致的错误，解决方案在<code>buildToolsVersion</code>下面加：</p>
+<pre><code>aaptOptions.cruncherEnabled = false
+aaptOptions.useNewCruncher = false
+</code></pre>
+</li>
+</ol>
+<p>可以取消<code>Android Studio</code>对图片合法性的检查(参考：http://my.oschina.net/1pei/blog/479162)</p>
+<ol>
+<li>debug.keystore 问题（不同可以跑不同apk，不过大部分apk会有验证，回到导致APP运行失败）</li>
+<li>隐式调用在5.0后不允许，两种方案：</li>
+</ol>
+<ul>
+<li>该成显式调用</li>
+</ul>
+<pre><code>    Intent serviceIntent = new Intent(context,MyService.class);
+    context.startService(serviceIntent);
+</code></pre>
+<ul>
+<li>加上包名</li>
+</ul>
+<pre><code>        PackageManager pm = context.getPackageManager();
+        List&lt;ResolveInfo&gt; resolveInfoList = pm.queryIntentServices(implicitIntent, 0);
+        if (resolveInfoList == null || resolveInfoList.size() != 1) {
+            return null;
+        }
+        ResolveInfo serviceInfo = resolveInfoList.get(0);
+        ComponentName component = new ComponentName(serviceInfo.serviceInfo.packageName, serviceInfo.serviceInfo.name);
+        Intent explicitIntent = new Intent(implicitIntent);
+        explicitIntent.setComponent(component);
+</code></pre>
+<ol>
+<li>service 需要先unbind（如果bind过的话），不然无法stopService</li>
+<li>ExecutorService 的 execute 和 submit 方法，前者会往外部抛出错误，后者不会。参考<a href="https://segmentfault.com/a/1190000000669942">ExecutorService的坑</a></li>
+</ol>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://flyer88.github.io/post/jiu-yin-yong-chuan-di-he-zhi-chuan-di-pass-by-value-vs-pass-by-reference/" class="post-title gt-a-link">
+                    【旧】引用传递和值传递(pass by value vs pass by reference)
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '8f894d7af601ea18e6b9',
+    clientSecret: '70f1cea8fb683c4dbf8e1b94f676ae3f3c4311a3',
+    repo: 'flyer88.github.io',
+    owner: 'flyer88',
+    admin: ['flyer88'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">爪哇岛上程序猿 十指弯弯不弄弦 
+斗室方屏十余寸 不知今夕是何年</div>
+    <div class="social-container">
+        
+            
+                <a href="http://github.com/flyer88" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

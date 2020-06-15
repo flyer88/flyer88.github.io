@@ -1,0 +1,389 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>【旧】Android 代码混淆(一) | 键盘敲击者</title>
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592215234590">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-57136418-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-57136418-1');
+    </script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            键盘敲击者
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="menu gt-a-link">
+                            关于我
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    【旧】Android 代码混淆(一)
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-06-15 ·
+                    </time>
+                    
+                        <a href="https://flyer88.github.io/tag/android2/" class="post-tags">
+                            # Android 进阶
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/QBqEnb3yY/" class="post-tags">
+                            # 【旧】
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/tools/" class="post-tags">
+                            # 开发工具
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <blockquote>
+<p>写于 2016 年 08 月 13 日</p>
+</blockquote>
+<ul>
+<li>介绍
+<ul>
+<li>
+<ul>
+<li>反射(该部分内容具体处理和理解，会在下一文章中进行具体的记录)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>具体的使用
+<ul>
+<li>
+<ul>
+<li>Obfuse 步骤验证</li>
+<li>Optimize 步骤验证</li>
+<li>Shrink 步骤验证</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>本文对照 <a href="http://proguard.sourceforge.net/">Proguard 的文档</a>进行翻译同时加上个人的理解，如果有与原文不同，请以原文为主。</p>
+<hr>
+<h2 id="介绍">介绍</h2>
+<p>混淆器(ProGuard)会对 Java class 文件进行 shrinker(压缩)，optimizer(优化)，obfuscator(混淆)以及preverifier(校验)。shrinker(压缩)这一步会找到并移除没用到的类，变量，方法，属性。optimization(优化)这一步，会分析并且优化方法的字节码。obfuscation(混淆)则会对 class，fields，methods替换成一些短的无意义的名字。第一步会把代码量变小，运行更加有效率，同时更加难以被逆向。在 Java Micro Edition 和 Java 6或者更高版本中，最后一步的检验过程，会向class文件中添加一些预校验的信息。</p>
+<p>上述的每个步骤，都是可以选择的(可以进行也可以不进行)。例如，ProGuard 可以只进行preverify，从而更高效的运行。</p>
+<figure data-type="image" tabindex="1"><img src="https://flyer88.github.io/post-images/1592214415502.jpg" alt="img" loading="lazy"></figure>
+<ul>
+<li>首先，ProGuard(混淆器) 读入输入的 jars (也可以是 aars, wars, ears, zips, apks, 或者目录)。随后，开始进行 shrinker(压缩)，optimizer(优化)，obfuscator(混淆)以及preverifier(校验)。你可以选择性的让ProGuard(混淆器)进行多种类型的优化操作。ProGuard(混淆器)会把修改过的结果写入一个或者多个输出的 jars (也可以是 aars, wars, ears, zips, apks, 或者目录)中。</li>
+<li>混淆器需要明确输入文件(Input jars)是jars包(也可以是 aars, wars, ears, zips, apks, 或者目录)。这些 libraries 本质上是你将会用来编译的代码。混淆器为了能够正确进行整个过程，会重新构建类之间的依赖。而依赖包(Library jars) 往往是不会被改变的，但你依旧需要把它们放在最终的App的环境中。 #### Entry points(入口点)</li>
+<li>在压缩步骤(shrinker)，混淆器会从这些点(入口点)进入，并且递归寻找决定哪些类和哪些类成员会被使用。所有的其他类和类成员都会被抛弃掉</li>
+<li>在优化步骤(optimizer)，混淆器会进一步优化代码。在这些优化过程中，那些不是入口点的类和方法会变成private static或者final，不被用到的参数会被移除，一些方法会变成内敛方法</li>
+<li>在混淆这一步(obfuscator)，混淆器会重新命名那些不是入口点的类和类的成员。在这整个过程中，那些成为入口点的地方，依旧会为他们保留原来的名字</li>
+<li>预验证阶段(preverifier)是唯一一个不需要知道入口点的阶段</li>
+</ul>
+<h4 id="反射该部分内容具体处理和理解会在下一文章中进行具体的记录">反射(该部分内容具体处理和理解，会在下一文章中进行具体的记录)</h4>
+<ul>
+<li>对于反射和introspection 进行代码的自动处理时，都会存在一些特殊的问题。在混淆器进行处理时，代码中类和类成员都是被动态创建或者被动态调用的(通过对应类的名字，或者成员名字)，这些地方都必须被定义成入口点。例如，<code>Class.forName()</code>这个构造器会在运行时指向任何的类。又比如，类的名字可能会从配置文件中读入，这通常很难去计算出是那些类需要被保留(通过原始的名字)。因此，你必须得在混淆器的配置中，通过简单相同的操作<code>-keep</code>来指定他们。 然而，混淆器已经能够帮你发现并处理以下的情况： <code>Class.forName(&quot;SomeClass&quot;)</code> <code>SomeClass.class</code> <code>SomeClass.class.getField(&quot;someField&quot;)</code> <code>SomeClass.class.getDeclaredField(&quot;someField&quot;)</code> <code>SomeClass.class.getMethod(&quot;someMethod&quot;, new Class[] {})</code> <code>SomeClass.class.getMethod(&quot;someMethod&quot;, new Class[] { A.class })</code> <code>SomeClass.class.getMethod(&quot;someMethod&quot;, new Class[] { A.class, B.class })</code> <code>SomeClass.class.getDeclaredMethod(&quot;someMethod&quot;, new Class[] {})</code> <code>SomeClass.class.getDeclaredMethod(&quot;someMethod&quot;, new Class[] { A.class })</code> <code>SomeClass.class.getDeclaredMethod(&quot;someMethod&quot;, new Class[] { A.class, B.class })</code> <code>AtomicIntegerFieldUpdater.newUpdater(SomeClass.class, &quot;someField&quot;)</code> <code>AtomicLongFieldUpdater.newUpdater(SomeClass.class, &quot;someField&quot;)</code> <code>AtomicReferenceFieldUpdater.newUpdater(SomeClass.class, SomeType.class, &quot;someField&quot;)</code></li>
+<li>类和类成员的名字会不一样，但是构造方法必然是相同的，由此，混淆器能够认出他们。被引用的类和类的成员在压缩(shrinking)阶段会被保留，同时，string 类型的参数也会在混淆时(obfuscation)被准确的修改。</li>
+<li>除此之外，混淆器会提供一些建议：是否保留一些出现的类和类成员。举例，混淆器会标记<code>(SomeClass)Class.forName(variable).newInstance()</code>这样的构造器。因为这些方法可能会指向其他类，这些可能是类，也可能是接口，或者是继承自这些接口或者类的类。你需要在配置中做相应的处理。</li>
+<li>为了能够得到正确的混淆结果，你应该对进行混淆的代码多少有所熟悉。当面临大量反射代码时，混淆代码需要进行大量的试验，并处理错误，特别是对于内部代码没有足够的信息的情况下</li>
+</ul>
+<hr>
+<p>以上是对<a href="http://proguard.sourceforge.net/">官方文档首页</a>的翻译内容</p>
+<h2 id="具体的使用">具体的使用</h2>
+<p>该部分不是翻译内容，是根据<a href="http://proguard.sourceforge.net/manual/usage.html">ProGuard 的使用方法</a>和<a href="http://proguard.sourceforge.net/">文档首页</a>，对上述三个步骤的具体验证。</p>
+<p>由于大部分情况下，Android 的混淆只需要考虑 Obfuse 这个步骤，因为很多第三方依赖包的混淆规则会把 shrink 和 optimize 去掉（比如友盟）。所以先验证这一步。</p>
+<h4 id="obfuse-步骤验证">Obfuse 步骤验证</h4>
+<p>这个步骤，如上所说，主要是对类，方法进行名字的修改，也是 Android 混淆中最重要的部分。为了验证这个过程，我做了下面的demo操作</p>
+<ul>
+<li>首先写了3个类：</li>
+</ul>
+<pre><code>    package com.dove.home;
+
+    class HelloWorld {
+        public HelloWorld(){
+            System.out.println(&quot;Hello World&quot;);
+        }
+    }
+    package com.dove.home;
+
+    class HelloWorld2 {
+        public HelloWorld2(){
+            System.out.println(&quot;Hello World2&quot;);
+        }
+    }
+    package com.dove.home;
+
+    class Main {
+        public static void main(String[] args) {
+            HelloWorld helloWorld = new HelloWorld();
+        }
+    }
+</code></pre>
+<ul>
+<li>然后编译,打包</li>
+</ul>
+<pre><code>    javac com/dove/home/Main.java
+    javac com/dove/home/HelloWorld2.java
+    javac com/dove/home/HelloWorld.java
+    //注意在进行下面步骤的时候，我把 com/dove/home 下的 java源码删了
+    jar -cvf main_source.jar com
+</code></pre>
+<figure data-type="image" tabindex="2"><img src="https://flyer88.github.io/post-images/1592214446516.jpg" alt="img" loading="lazy"></figure>
+<ul>
+<li>然后使用混淆器，混淆器其具体使用方法，主要是调用 proguard.jar 包，然后配置 proguard.pro 文件进行具体的参数设置。</li>
+</ul>
+<pre><code>java -jar proguard.jar @proguard.pro
+</code></pre>
+<p>下面是我 proguard.pro 文件内容</p>
+<pre><code># 源码文件
+-injars main_source.jar
+# 混淆后输出文件
+-outjars main_source_out.jar
+# java 核心 jar 不能混淆
+-libraryjars &lt;java.home&gt;/lib/rt.jar
+-libraryjars &lt;java.home&gt;/lib/jce.jar
+# 全部不混淆，即三个class文件都会保持原样
+-keep class com.dove.home.Main{*;}
+-keep class com.dove.home.HelloWorld{*;}
+-keep class com.dove.home.HelloWorld2{*;}
+</code></pre>
+<blockquote>
+<p>注意：然后修改 proguard.pro 文件，内容如下,生成另一个混淆后的包</p>
+</blockquote>
+<pre><code>-injars main_source.jar
+# 注意输出包的名字改了
+-outjars main_source_proguard_out.jar
+-libraryjars &lt;java.home&gt;/lib/rt.jar
+-libraryjars &lt;java.home&gt;/lib/jce.jar
+-keep class com.dove.home.Main{*;}
+# 删除了HelloWorld的 keep
+-keep class com.dove.home.HelloWorld2{*;}
+</code></pre>
+<p>最后对代码逆向，进行验证，最快的方式是把生成的 jar 包，当做第三方依赖包直接导入Intellij 中(有decode的功能)，如下图，三个包的区别</p>
+<figure data-type="image" tabindex="3"><img src="https://flyer88.github.io/post-images/1592214471667.jpg" alt="img" loading="lazy"></figure>
+<p>最初是的源码包和保留<code>HelloWorld</code>,<code>HelloWorld2</code>以及<code>Main</code>入口点的包是一样的，不同的是最后没有保留<code>HelloWorld</code>入口点的包，它的<code>HelloWorld</code>变成了<code>a</code>，而<code>Main</code>和<code>HelloWorld2</code>都正常没有被修改</p>
+<h4 id="optimize-步骤验证">Optimize 步骤验证</h4>
+<p>同样，修改 proguard.pro 文件</p>
+<pre><code>-injars main_source.jar
+# 输出包名改了，方便对比
+-outjars main_source_proguard_not_optimize_out.jar
+-libraryjars &lt;java.home&gt;/lib/rt.jar
+-libraryjars &lt;java.home&gt;/lib/jce.jar
+# 加上不进行优化的限制
+-dontoptimize
+-keep class com.dove.home.Main{*;}
+-keep class com.dove.home.HelloWorld2{*;}
+</code></pre>
+<p>同上，导入IntelliJ，对比上一步中混淆后的 jar 包，发现名字没啥变化，但内容不一样了</p>
+<figure data-type="image" tabindex="4"><img src="https://flyer88.github.io/post-images/1592214485831.jpg" alt="img" loading="lazy"></figure>
+<p>首先是没有添加 <code>-dontoptimize</code></p>
+<pre><code>package com.dove.home;
+
+final class a {
+    public a() {
+        System.out.println(&quot;Hello World&quot;);
+    }
+}
+</code></pre>
+<p>然后是添加了 <code>-dontoptimize</code></p>
+<pre><code>package com.dove.home;
+
+class a {
+    public a() {
+        System.out.println(&quot;Hello World&quot;);
+    }
+}
+</code></pre>
+<p>如上述译文中所说，optimize 会进行代码优化，不是入口点的代码，会变成<code>final</code>，<code>private</code>等等</p>
+<h4 id="shrink-步骤验证">Shrink 步骤验证</h4>
+<p>修改 proguard.pro 文件，进行压缩，同时不对 HelloWorld，HelloWorld2进行入口点的保留</p>
+<pre><code>-injars main_source.jar
+-outjars main_source_proguard_shrink_out.jar
+-libraryjars &lt;java.home&gt;/lib/rt.jar
+-libraryjars &lt;java.home&gt;/lib/jce.jar
+
+-keep class com.dove.home.Main{*;}
+# 注意对比之前，删除了HelloWorld和HelloWorld2的 keep
+</code></pre>
+<p>修改 proguard.pro 文件，不进行压缩，同样不对 HelloWorld，HelloWorld2进行入口点的保留</p>
+<pre><code>-injars main_source.jar
+-outjars main_source_proguard_not_shrink_out.jar
+-libraryjars &lt;java.home&gt;/lib/rt.jar
+-libraryjars &lt;java.home&gt;/lib/jce.jar
+# 添加不进行压缩
+-dontshrink
+-keep class com.dove.home.Main{*;}
+</code></pre>
+<p>其结果对比</p>
+<p>添加了 <code>-dontshrink</code>标志</p>
+<figure data-type="image" tabindex="5"><img src="https://flyer88.github.io/post-images/1592214500132.jpg" alt="img" loading="lazy"></figure>
+<p>未添加 <code>-dontshrink</code>标志</p>
+<figure data-type="image" tabindex="6"><img src="https://flyer88.github.io/post-images/1592214511632.jpg" alt="img" loading="lazy"></figure>
+<p>由此验证，shrink阶段，Proguard(混淆器)会把无用类文件等删除，一些被动态获取的类就需要注意了，需要进行<code>-keep</code>操作</p>
+<hr>
+<p>以上就是对混淆整个过程的验证</p>
+<p>对于 Android 混淆，一些需要注意的东西，会在下一篇文章中记录</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://flyer88.github.io/post/jiu-ji-lu-yi-xie-dan-teng-de-buger/" class="post-title gt-a-link">
+                    【旧】记录一些蛋疼的bug(二)
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '8f894d7af601ea18e6b9',
+    clientSecret: '70f1cea8fb683c4dbf8e1b94f676ae3f3c4311a3',
+    repo: 'flyer88.github.io',
+    owner: 'flyer88',
+    admin: ['flyer88'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">爪哇岛上程序猿 十指弯弯不弄弦 
+斗室方屏十余寸 不知今夕是何年</div>
+    <div class="social-container">
+        
+            
+                <a href="http://github.com/flyer88" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

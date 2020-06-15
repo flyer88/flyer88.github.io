@@ -3,7 +3,7 @@
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>算法基础④（树的概念和存储） | 键盘敲击者</title>
+<title>Android 源码编译 | 键盘敲击者</title>
 <link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592215234590">
 <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
@@ -99,88 +99,160 @@
         <div class="post-detail gt-bg-theme-color-second">
             <article class="gt-post-content">
                 <h2 class="post-title">
-                    算法基础④（树的概念和存储）
+                    Android 源码编译
                 </h2>
                 <div class="post-info">
                     <time class="post-time gt-c-content-color-first">
                         · 2020-06-15 ·
                     </time>
                     
-                        <a href="https://flyer88.github.io/tag/algorithm/" class="post-tags">
-                            # 算法
+                        <a href="https://flyer88.github.io/tag/android-source/" class="post-tags">
+                            # Android 源码
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/QBqEnb3yY/" class="post-tags">
+                            # 【旧】
                         </a>
                     
                 </div>
                 <div class="post-content">
-                    <h3 id="ox0001-基本概念">OX0001 基本概念</h3>
+                    <blockquote>
+<p>写于 2016 年 03 月 07 日</p>
+</blockquote>
+<p>一直想编译 Android 的源码，苦于 Mac 硬盘太小，PC 上的硬盘也只有 128G，想着机械盘编译又太慢，最终咬牙，在淘宝入了一个 256 的SSD，装了个 Ubuntu 14.04，然后开始捣鼓，现在记录一下捣鼓的过程</p>
 <ol>
 <li>
-<p>树</p>
-<blockquote>
-<p>n(n &gt;= 0) 个节点 的有限集。当 n=0 时，称为空树，在任意一个非空树种有如下特点：</p>
-<ol>
-<li>有且仅有一个特定的称为根的节点。</li>
-<li>当 n &gt; 1 时，其余节点分为 m (m &gt; 0) 个互不相交的有限集，每个集合本身又是一个树，并称为根的子树</li>
-</ol>
-</blockquote>
-</li>
+<p>Android 开发环境</p>
+<ul>
 <li>
-<p>二叉树</p>
-<blockquote>
-<p>每个节点只有两个孩子的树</p>
-</blockquote>
-</li>
-<li>
-<p>满二插树</p>
-<blockquote>
-<p>一个二叉树的所有非叶子节点都存在左右孩子，并且所有的叶子节点都在同一个层级</p>
-</blockquote>
-</li>
-<li>
-<p>完全二叉树</p>
-<blockquote>
-<p>对一个有 n 个节点的二叉树，按层级顺序编号，所有节点的编号为 1到 n，如果这个数的所有节点和同样深度的满二叉树的编号为从1到n的节点位置相同，则这个二叉树为完全二叉树</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="ox0002-存储方式">OX0002. 存储方式</h3>
-<ol>
-<li>
-<p><strong>链表</strong></p>
-<blockquote>
-<pre><code class="language-shell">					         [NodeA|data1|left|right]
-						//									\\
-					//											\\
-				//												   \\
-[NodeB|data2|null|null]			            [NodeC|data3|null|null]
+<p>首先是 JAVA 环境</p>
+<pre><code>    apt-cache search openjdk //用于找到 jdk 版本，会出现一大堆列表，找到jdk，复制下名字
+    sudo apt-get install openjdk-7-jdk//根据上面找到的，开始安装
+    java -version//测试
 </code></pre>
-</blockquote>
 </li>
 <li>
-<p><strong>数组 - 层序存储 (主要用于完全二叉树，否则会大量浪费空间)</strong></p>
-<blockquote>
-<p>父节点下标为parent，则做孩子的下标为 2* parent + 1，有孩子为 2*parent + 2</p>
-<pre><code class="language-shell">				 【1】
-				//	 \\
-			【2】	  【3】
-			//	\\         \\
-		【4】 【5】   【6】
-			\\
-			【8】
-			
-[1][2][3][4][5][null][6][null][8]
- 0  1  2  3  4   5    6   7    8
+<p>然后是 Android SDK 和 Android stuido 开发环境（这步与后面源码编译并无很大关系，但是还是做了，因为后期导入源码，又要折腾一次Android studio，此处其实可以不用下载sdk，因为源码可以编译出sdk，开始不知道，就直接下载了）</p>
+<p>在<a href="http://www.androiddevtools.cn/">AndroidDevTools</a>找到自己想要的版本，我找了<a href="http://pan.baidu.com/s/1o7dHRpK">Android stuido 2.0 beta6</a>，然后下载,下载后解压，将文件整个文件夹拷贝到自己的工作目录下</p>
+<pre><code>    cd 工作目录/android-studio
+    ./bin/studio.sh
+</code></pre>
+<p>看到Android studio 运行界面，等待后，选择 Cancel</p>
+<p>选择 Re-run the setup wizard on the next Android Studio startup(Recommended)</p>
+<p>然后选择 OK</p>
+<p>继续选择右下角的 configrution</p>
+<p>选择 SDK Manager</p>
+<p>点击 Launch Standalone SDK Manager</p>
+<p>左上角 Tools=&gt;Options..</p>
+<p>然后根据 <a href="http://www.androiddevtools.cn/">AndroidDevTools</a> 中的教程，修改sdk镜像源</p>
+<p>下载镜像</p>
+</li>
+</ul>
+</li>
+<li>
+<p>拉取源码</p>
+<ul>
+<li>
+<p>首先是 <code>repo</code> 工具，这是拉取谷歌家很多源码都会用到的工具<br>
+<a href="https://mirrors.tuna.tsinghua.edu.cn/help/AOSP/">清华镜像</a>，造福社会。<br>
+清华的教程其实写的很清楚了，不过考虑到 <code>repo</code> 可能有其他用处，我把它配置到了<code>.bashrc</code>里</p>
+<pre><code>    curl https://storage.googleapis.com/git-repo-downloads/repo &gt; ~/Tools/repo    
+    chmod a+x ~/Tools/repo
+    sudo gedit .bashrc
+</code></pre>
+<p>末尾加上</p>
+<pre><code>    export REPO = /home/flyer/Tools/repo
+    export PATH=$PATH:$REPO
+</code></pre>
+<p>然后就是建立工作环境初始化仓库</p>
+<pre><code>    mkdir AOSP
+    cd AOSP
+    repo init -u https://aosp.tuna.tsinghua.edu.cn/platform/manifest            
+    //这里可能会让你配置一下 git username 和 mail 地址，如果没有 git 就安装 git
+    sudo apt-get install git
+    sudo apt-get install git-core  
+    sudo git config user.name &quot;flyer&quot;          
+    sudo git config user.email &quot;***@***&quot;
+</code></pre>
+<p>考虑到 Android 版本很多，可以通过拉取manifest，获取版本信息</p>
+<pre><code>    git clone git://aosp.tuna.tsinghua.edu.cn/aosp/platform/manifest                           
+    cd manifest            
+    git branch -al//会显示出所有的分支，也就是android的版本
+</code></pre>
+<p>拉取需要的版本</p>
+<pre><code>    repo init -u https://aosp.tuna.tsinghua.edu.cn/platform/manifest -b android-5.1.1_r19 
+    repo sync //开始拉取代码，这是一个很慢的过程，不过网速还是不错的
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>编译源码</p>
+<ul>
+<li>
+<p>安装ccache（一个C++/C的高效编译器）</p>
+<pre><code>    sudo apt-get install ccache
+    source ~/.bashrc  
+</code></pre>
+</li>
+<li>
+<p>安装第三方依赖（下面是可能会用到的依赖，我全跑了一遍，防止编译的时候出现问题，毕竟编译时间太长，不可能一直看着）</p>
+<pre><code>    sudo apt-get install git-core//前面已经安装了
+    sudo apt-get install git//前面已经安装了
+    sudo apt-get install gcc
+    sudo apt-get install gnupg
+    sudo apt-get install flex
+    sudo apt-get install bison
+    sudo apt-get install gperf
+    sudo apt-get install build-essential
+    sudo apt-get install zip
+    sudo apt-get install curl
+    sudo apt-get install libc6-dev
+    sudo apt-get install libncurses5-dev:i386
+    sudo apt-get install x11proto-core-dev
+    sudo apt-get install libx11-dev:i386
+    sudo apt-get install libreadline6-dev:i386
+    sudo apt-get install libgl1-mesa-dev
+    sudo apt-get install g++-multilib
+    sudo apt-get install mingw32
+    sudo apt-get install tofrodos
+    sudo apt-get install python-markdown
+    sudo apt-get install libxml2-utils
+    sudo apt-get install xsltproc
+    sudo apt-get install zlib1g-dev:i386
+    sudo apt-get install dpkg-dev‘
+    sudo apt-get autoremove
+    sudo apt-get autoclean//最后我清理了一下无用的东西
+</code></pre>
+</li>
+<li>
+<p>编译</p>
+<pre><code>    cd AOSP  //进入源码根目录
+    prebuilts/misc/linux-x86/ccache/ccache -M 50G //设置ccache大小
+    . build/envsetup.sh//加载环境变量
+    lunch
+    1  //此处会出现需要选择版本，我编译的是虚拟机的，直接选了 1
+    make j2  //j4为4核心，看你电脑配置
 
+    #### make completed successfully (6:38:43 (hh:mm:ss)) #### //然后第二天睡醒，看到successfully  
 </code></pre>
-</blockquote>
 </li>
-</ol>
-<h3 id="ox0003-bst-二叉查找树二叉排序树">OX0003. <code>BST</code> 二叉查找树/二叉排序树</h3>
-<ol>
-<li>左子树不为空，左子树的值均小于根</li>
-<li>右子树不为空，右子树的值均大于根</li>
-<li>左右子树也是 <code>BST</code></li>
-<li>时间复杂度: <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(logn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></li>
+</ul>
+</li>
+<li>
+<p>运行</p>
+<pre><code>    emulator//开启模拟器
+    //这中间，我由于去上班了，直接把电脑关了，导致后面直接运行 emulator 命令无效
+    //重新加载一遍环境即可        
+    . build/envsetup.sh
+    lunch   
+    1        
+    emulator
+</code></pre>
+</li>
+<li>
+<p>大功告成，特此记录</p>
+</li>
 </ol>
 
                 </div>
@@ -190,8 +262,8 @@
         
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://flyer88.github.io/post/suan-fa-ji-chu-san-ha-xi-biao-gai-nian/" class="post-title gt-a-link">
-                    算法基础③（哈希表简介及部分源码分析）
+                <a href="https://flyer88.github.io/post/jiu-error-inflating-class-cuo-wu-jie-jue-he-ji/" class="post-title gt-a-link">
+                    【旧】Error inflating class 错误解决合集
                 </a>
             </div>
         

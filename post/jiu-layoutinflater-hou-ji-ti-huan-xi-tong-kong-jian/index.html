@@ -3,7 +3,7 @@
     <meta charset="utf-8"/>
 <meta name="description" content=""/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>算法基础④（树的概念和存储） | 键盘敲击者</title>
+<title>【旧】LayoutInflater 后记--替换系统控件 | 键盘敲击者</title>
 <link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592215234590">
 <link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
 <link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
@@ -99,89 +99,76 @@
         <div class="post-detail gt-bg-theme-color-second">
             <article class="gt-post-content">
                 <h2 class="post-title">
-                    算法基础④（树的概念和存储）
+                    【旧】LayoutInflater 后记--替换系统控件
                 </h2>
                 <div class="post-info">
                     <time class="post-time gt-c-content-color-first">
                         · 2020-06-15 ·
                     </time>
                     
-                        <a href="https://flyer88.github.io/tag/algorithm/" class="post-tags">
-                            # 算法
+                        <a href="https://flyer88.github.io/tag/android-source/" class="post-tags">
+                            # Android 源码
+                        </a>
+                    
+                        <a href="https://flyer88.github.io/tag/QBqEnb3yY/" class="post-tags">
+                            # 【旧】
                         </a>
                     
                 </div>
                 <div class="post-content">
-                    <h3 id="ox0001-基本概念">OX0001 基本概念</h3>
-<ol>
-<li>
-<p>树</p>
-<blockquote>
-<p>n(n &gt;= 0) 个节点 的有限集。当 n=0 时，称为空树，在任意一个非空树种有如下特点：</p>
-<ol>
-<li>有且仅有一个特定的称为根的节点。</li>
-<li>当 n &gt; 1 时，其余节点分为 m (m &gt; 0) 个互不相交的有限集，每个集合本身又是一个树，并称为根的子树</li>
-</ol>
+                    <blockquote>
+<p>于 2016 年 08 月 22 日</p>
 </blockquote>
-</li>
-<li>
-<p>二叉树</p>
-<blockquote>
-<p>每个节点只有两个孩子的树</p>
-</blockquote>
-</li>
-<li>
-<p>满二插树</p>
-<blockquote>
-<p>一个二叉树的所有非叶子节点都存在左右孩子，并且所有的叶子节点都在同一个层级</p>
-</blockquote>
-</li>
-<li>
-<p>完全二叉树</p>
-<blockquote>
-<p>对一个有 n 个节点的二叉树，按层级顺序编号，所有节点的编号为 1到 n，如果这个数的所有节点和同样深度的满二叉树的编号为从1到n的节点位置相同，则这个二叉树为完全二叉树</p>
-</blockquote>
-</li>
-</ol>
-<h3 id="ox0002-存储方式">OX0002. 存储方式</h3>
-<ol>
-<li>
-<p><strong>链表</strong></p>
-<blockquote>
-<pre><code class="language-shell">					         [NodeA|data1|left|right]
-						//									\\
-					//											\\
-				//												   \\
-[NodeB|data2|null|null]			            [NodeC|data3|null|null]
+<ul>
+<li>首先需要确定，<code>LayoutInflater</code>对于<code>Android</code>自带的<code>view</code>读入的名字是没有全名的，具体创建的时候是通过写上前缀，然后借助反射进行实例化的</li>
+<li>明确，<code>Factory</code>如果可以构建<code>view</code>对象的话，后面的<code>view</code>实例化操作是不会被进行的</li>
+<li>明确<code>Factory</code>是可以被<code>set</code>进去的</li>
+<li>剩下的就是考虑<code>Activity</code>会在何时才会创建<code>view</code>，自然是<code>setContentView</code>，该方法会触发整个<code>xml</code>的<code>inflate</code></li>
+</ul>
+<p>之前记录了自己走通 <code>LayoutInflater</code> 的源码整体流程，一直想搞个好玩的东西，想起之前看到过的<a href="https://github.com/fengjundev/Android-Skin-Loader">换肤方案</a>，决定写个换系统控件的库。</p>
+<p><a href="https://github.com/flyer88/Pichu">项目地址</a>，项目的具体使用，可以看README</p>
+<hr>
+<h4 id="首先需要确定layoutinflater对于android自带的view读入的名字是没有全名的具体创建的时候是通过写上前缀然后借助反射进行实例化的">首先需要确定，<code>LayoutInflater</code>对于<code>Android</code>自带的<code>view</code>读入的名字是没有全名的，具体创建的时候是通过写上前缀，然后借助反射进行实例化的</h4>
+<p>举例：</p>
+<pre><code>   &lt;TextView
+    ...
+    /&gt;
 </code></pre>
-</blockquote>
-</li>
-<li>
-<p><strong>数组 - 层序存储 (主要用于完全二叉树，否则会大量浪费空间)</strong></p>
-<blockquote>
-<p>父节点下标为parent，则做孩子的下标为 2* parent + 1，有孩子为 2*parent + 2</p>
-<pre><code class="language-shell">				 【1】
-				//	 \\
-			【2】	  【3】
-			//	\\         \\
-		【4】 【5】   【6】
-			\\
-			【8】
-			
-[1][2][3][4][5][null][6][null][8]
- 0  1  2  3  4   5    6   7    8
-
+<p>作为xml读入以后，是只有<code>TextView</code>的</p>
+<p>而</p>
+<pre><code>    &lt;dove.flyer.xu.mineView 
+    ....    
+    /&gt;
 </code></pre>
-</blockquote>
-</li>
-</ol>
-<h3 id="ox0003-bst-二叉查找树二叉排序树">OX0003. <code>BST</code> 二叉查找树/二叉排序树</h3>
-<ol>
-<li>左子树不为空，左子树的值均小于根</li>
-<li>右子树不为空，右子树的值均大于根</li>
-<li>左右子树也是 <code>BST</code></li>
-<li>时间复杂度: <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>O</mi><mo>(</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>n</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">O(logn)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span></li>
-</ol>
+<p>作为xml读入后，是整个名字存在的，即<code>dove.flyer.xu.mineView</code>，具体细节<a href="http://www.dove.farbox.com/post/android/layoutinflater-hou-ji-ti-huan-xi-tong-kong-jian">前面文章</a>已经叙述了，此处不重复了</p>
+<h4 id="明确factory如果可以构建view对象的话后面的view实例化操作是不会被进行的">明确，<code>Factory</code>如果可以构建<code>view</code>对象的话，后面的<code>view</code>实例化操作是不会被进行的。</h4>
+<p>首先定位到<code>createViewFromTag</code>。</p>
+<p>源码中，以<code>Factory</code>为例子,如果<code>Factory</code>为空的时候，是不会执行里面代码的，如果设置了，则会执行。而执行后，如果<code>view</code>不为空，则下面的<code>view</code>创建都会失效，也就是说，如果<code>Factory</code>创建成功了<code>view</code>，那么后面创建<code>view</code>部分的代码并不会执行。<code>Facory2</code>也同理。</p>
+<p>而<code>Factory</code>和<code>Factory2</code>在一开始就是空的，只需要设置好这个<code>Factory</code>，那具体的<code>view</code>创建就会被它俩其中一个接手。</p>
+<pre><code>View createViewFromTag(View parent, String name, AttributeSet attrs, boolean inheritContext){
+....
+    if (mFactory2 != null) {
+                    view = mFactory2.onCreateView(parent, name, viewContext, attrs);
+    } else if (mFactory != null) {
+        view = mFactory.onCreateView(name, viewContext, attrs);
+    } else {
+        view = null;
+    }
+    if(view == null ...){
+        ...
+    }
+    if(view == null ...){
+        ...
+    }
+....
+}
+</code></pre>
+<h4 id="明确factory是可以被set进去的">明确<code>Factory</code>是可以被<code>set</code>进去的</h4>
+<p>调用<code>getLayoutInflater().setFactory(factory)</code>即可</p>
+<h4 id="剩下的就是考虑activity会在何时才会创建view自然是setcontentview该方法会触发整个xml的inflate">剩下的就是考虑<code>Activity</code>会在何时才会创建<code>view</code>，自然是<code>setContentView</code>，该方法会触发整个<code>xml</code>的<code>inflate</code>，</h4>
+<p>所以剩下的就是在<code>onCreate</code>的时候，在<code>setContentView</code>之前，把自己的<code>Factory</code>给设置进去，把传进来的名字，修改成自己的<code>view</code>就可以了。</p>
+<hr>
+<p>以上三点拼在一起就可以进行系统控件的同意替换，具体<code>Factory</code>重写的细节请参考源码。</p>
 
                 </div>
             </article>
@@ -190,8 +177,8 @@
         
             <div class="next-post">
                 <div class="next gt-c-content-color-first">下一篇</div>
-                <a href="https://flyer88.github.io/post/suan-fa-ji-chu-san-ha-xi-biao-gai-nian/" class="post-title gt-a-link">
-                    算法基础③（哈希表简介及部分源码分析）
+                <a href="https://flyer88.github.io/post/jiu-ji-layoutinflater-yuan-ma-liu-cheng/" class="post-title gt-a-link">
+                    【旧】记 LayoutInflater 源码流程
                 </a>
             </div>
         
