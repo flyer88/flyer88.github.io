@@ -1,0 +1,633 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Activity 基础知识 | 键盘敲击者</title>
+<link rel="shortcut icon" href="https://flyer88.github.io/favicon.ico?v=1592492085430">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.css" rel="stylesheet">
+<link rel="stylesheet" href="https://flyer88.github.io/styles/main.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/go.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-57136418-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-57136418-1');
+    </script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            键盘敲击者
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="https://flyer88.github.io/post/ge-ren-jian-li" class="menu gt-a-link">
+                            个人简历
+                        </a>
+                    
+                </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Activity 基础知识
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-06-18 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <ul>
+<li><strong>生命周期</strong></li>
+<li><strong>Activity 栈</strong></li>
+</ul>
+<h3 id="生命周期">生命周期</h3>
+<ol>
+<li><strong>整体介绍</strong></li>
+</ol>
+<pre><code># 完整流程
+onCreate -&gt; onStart -&gt; onResume -&gt; onPause -&gt; onStop -&gt; onDestroy
+
+# 切到后台时不可见，缓慢切回
+onStop -&gt; onRestart -&gt; onStart -&gt; ....
+
+
+# 暂停回来，两个 Activity 快速切回
+onPause -&gt; onResume -&gt; ...
+
+# 被杀死
+onStop -&gt; killed -&gt; onCreate -&gt; ....
+</code></pre>
+<ol start="2">
+<li>
+<p><strong>各个阶段</strong></p>
+<ul>
+<li><code>onCreate</code>: 初始化</li>
+<li><code>onStart</code>: 已经可见，但是无法交互</li>
+<li><code>onResume</code>: 可见，且可以交互</li>
+<li><code>onPause</code>: 暂停，在前台并可见，可以进行暂存数据，不能太耗时</li>
+<li><code>onStop</code>: 不可见，无法交互，但还在内存中，未被销毁，进行资源回收</li>
+<li><code>onDestroy</code>: 不可见，Activity 进行销毁，进行资源回收</li>
+<li><code>onRestart</code>: 重新打开出发</li>
+</ul>
+</li>
+<li>
+<p><strong>几个问题</strong></p>
+<blockquote>
+<ol>
+<li>
+<p><strong>如果所有的初始化都在onCreate()中实现，会有什么问题？</strong></p>
+<ul>
+<li>
+<p>初始化的动画是无效的</p>
+</li>
+<li>
+<p>切到后台后 <strong>Activity</strong> 再次展示（<strong>onPause -&gt; onResume -&gt;...</strong>），可能需要初始化，此时不会被调用</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>如果所有的初始化都在onStart()中实现，会有什么问题？</strong></p>
+<ul>
+<li>切到后台后 <strong>Activity</strong> 再次展示（<strong>onPause -&gt; onResume -&gt;...</strong>），可能需要初始化，此时不会被调用</li>
+<li>官方推荐布局设置，<strong>view</strong> 绑定，放到 <strong>onCreate</strong> 中</li>
+</ul>
+</li>
+<li>
+<p><strong>如果把所有的去初始化都在onStop()中实现，会有什么问题？</strong></p>
+<ul>
+<li>在 <strong>onResume()</strong> 的注释中，建议是在<strong>onResume()<strong>中打开独占设备（比如相机），与</strong>onResume()<strong>对应的是</strong>onPause()</strong>，所以所有的去初始化操作放在**onStop()**中执行，可能会引出新的问题；</li>
+<li>在<strong>onStop()</strong> 的注释中明确地写了，在内存不足而导致系统无法保留此进程的情况下，<strong>onStop()</strong> 可能都不会被执行。</li>
+</ul>
+</li>
+<li>
+<p><strong>A -&gt; B，会执行 A#onPause() -&gt; B#onCreate -&gt; B#onStart -&gt; B#onResume -&gt; A#onStop()</strong></p>
+</li>
+</ol>
+</blockquote>
+</li>
+</ol>
+<p>​</p>
+<h3 id="栈">栈</h3>
+<ol>
+<li>
+<p><strong>四种基础模式 (核心，把握好栈的跳转)</strong></p>
+<ul>
+<li>
+<p><strong>standard，标准方式，类似于对象的创建</strong></p>
+<blockquote>
+<p>standard 在同一个栈中时，会创建新的对象</p>
+</blockquote>
+</li>
+<li>
+<p><strong>singleInstance，全局唯一的栈中的单例，single activity 全局单例</strong></p>
+<p><strong>Main -&gt; ANormal -&gt; SingleInstance -&gt; BNormal -&gt; SingleInstance -&gt; BNormal</strong></p>
+<blockquote>
+<p>补充，此时，一直返回键</p>
+<p>经历的过程就是出栈逻辑，同时注意当前一个栈退出以后，后面的栈会补上</p>
+<p><strong>BNormal -&gt; BNormal -&gt; ANormal -&gt; Main -&gt; SingleInstance</strong></p>
+<p>核心是 <strong>SingleInstace</strong> 不在同一个栈</p>
+</blockquote>
+<pre><code>Main -&gt; ANormal
+|                       |     
+|     前台               |                                                                                      
+|                       |     
+|                       |     
+|-----------------------|     
+|                       |     
+|     ANormal           |     
+|                       |     
+|-----------------------|     
+|                       |     
+|     Main              |     
+|                       |     
+|-----------------------|
+
+
+Main -&gt; ANormal -&gt; SingleInstance
+
+|                       |      |                       |
+|                       |      |                       |
+|     后台               |      |       前台             |
+|                       |      |                       |
+|-----------------------|      |-----------------------|
+|                       |      |                       |
+|          ANormal      |      |                       |
+|                       |      |                       |
+|-----------------------|      |-----------------------|
+|                       |      |                       |
+|           Main        |      |      SingleInstance   |
+|                       |      |                       |
+|-----------------------|      |-----------------------|
+
+
+Main -&gt; ANormal -&gt; SingleInstance -&gt; BNormal
+
+					前台
+|-----------------------|      |                       |
+|                       |      |       后台             |
+|          BNormal      |      |                       |
+|                       |      |                       |
+|-----------------------|      |-----------------------|
+|                       |      |                       |
+|          ANormal      |      |                       |
+|                       |      |                       |
+|-----------------------|      |-----------------------|
+|                       |      |                       |
+|           Main        |      |      SingleInstance   |
+|                       |      |       onCreate        |
+|-----------------------|      |-----------------------|
+
+
+Main -&gt; ANormal -&gt; SingleInstance -&gt; BNormal -&gt; SingleInstance
+
+				后台 
+|-----------------------|      |                       |
+|                       |      |                       |
+|          BNormal      |      |         前台           |
+|                       |      |                       |
+|-----------------------|      |-----------------------|
+|                       |      |                       |
+|          ANormal      |      |                       |
+|                       |      |                       |
+|-----------------------|      |-----------------------|
+|                       |      |                       |
+|           Main        |      |      SingleInstance   |
+|                       |      |       onNewIntent     |
+|-----------------------|      |-----------------------|
+
+
+Main -&gt; ANormal -&gt; SingleInstance -&gt; BNormal -&gt; SingleInstance -&gt; BNormal
+
+				前台 
+|-----------------------|
+|                       |
+|          BNormal      |
+|                       |
+|-----------------------|      |                       |
+|                       |      |                       |
+|          BNormal      |      |       后台             |
+|                       |      |                       |
+|-----------------------|      |-----------------------|
+|                       |      |                       |
+|          ANormal      |      |                       |
+|                       |      |                       |
+|-----------------------|      |-----------------------|
+|                       |      |                       |
+|           Main        |      |      SingleInstance   |
+|                       |      |                       |
+|-----------------------|      |-----------------------|
+
+此时返回，整个过程 BNormal -&gt; BNormal -&gt; ANormal -&gt; Main -&gt; SingleInstance
+
+</code></pre>
+</li>
+<li>
+<p><strong>singleTask，一个栈中有且仅有一个单例，single activity in task，如果没有 task，会创建，如果有，直接跳转，自带 clearTop 功能，onNewIntent 接收</strong></p>
+<p>以下是同一个 Task 中的跳转介绍，关于创建 task 的例子，在 <code>taskAffinity</code> 中会进行举例</p>
+<pre><code class="language-java"> Main -&gt; ANormal                              Main -&gt; ANormal -&gt; SingleTask
+                                              |                       |
+                                              |      SingleTask       |
+                                              |       (onCreate)      |
+                                              |-----------------------|
+ |                       |                    |                       |
+ |     ANormal           |    ========&gt;&gt;&gt;&gt;    |          ANormal      |
+ |                       |                    |                       |
+ |-----------------------|                    |-----------------------|
+ |                       |                    |                       |
+ |     Main              |                    |           Main        |
+ |                       |                    |                       |
+ |-----------------------|                    |-----------------------|
+
+
+Main -&gt; ANormal -&gt; SingleTask -&gt; BNormal									
+ |-----------------------|
+ |                       |
+ |          BNormal1     |
+ |                       |
+ |-----------------------|                                      
+ |                       |                                      
+ |       SingleTask      |                                      
+ |                       |                                      
+ |-----------------------|                                      
+ |                       |                                      
+ |          ANormal      |                     
+ |                       |                                      
+ |-----------------------|                                      
+ |                       |                                      
+ |           Main        |                                      
+ |                       |                                      
+ |-----------------------|     
+ 
+ 
+Main -&gt; ANormal -&gt; SingleTask -&gt; BNormal -&gt; SingleTask
+ |-----------------------|    
+ |                       |    
+ |       SingleTask      |    
+ |       (onNewIntent)   |    
+ |-----------------------|    
+ |                       |    
+ |          ANormal      |    
+ |                       |    
+ |-----------------------|    
+ |                       |    
+ |           Main        |    
+ |                       |    
+ |-----------------------|  
+ 
+ 
+ Main -&gt; ANormal -&gt; SingleTask -&gt; BNormal -&gt; SingleTask -&gt; BNormal
+ |-----------------------|
+ |                       |
+ |          BNormal2     |
+ |                       |
+ |-----------------------|
+ |                       |
+ |       SingleTask      |
+ |                       |
+ |-----------------------|
+ |                       |
+ |          ANormal      |
+ |                       |
+ |-----------------------|
+ |                       |
+ |           Main        |
+ |                       |
+ |-----------------------|
+</code></pre>
+</li>
+<li>
+<p><strong>singleTop，single activity on top，如果要跳转的 Activity 在栈顶，那直接跳转原有 Activity，并且回调 onNewIntent，否则会创建一个新的。</strong></p>
+<p><strong>配合 Intent.FLAG_ACTIVITY_CLEAR_TOP，可以模拟 SingleTask 的功能，</strong></p>
+<pre><code class="language-java"># 非栈顶，创建新的
+ANormal -&gt; SingleOnTop1 -&gt; BNormal -&gt; SingleOnTop2
+
+# 栈顶，复用栈顶
+ANormal -&gt; SingleOnTop1（onCreate） -&gt; SingleOnTop1 (onNewIntent)
+
+# SingleTask 功能
+ANormal -&gt; SingleOnTop1（onCreate） -&gt; BNormal --[Intent.FLAG_ACTIVITY_CLEAR_TOP]--&gt; SingleOnTop1（onNewIntent）
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p><code>taskAffinity</code> 属性</p>
+<blockquote>
+<ol>
+<li><strong>taskAffinity 与 standard 模式配合无用</strong></li>
+</ol>
+</blockquote>
+</li>
+</ol>
+<blockquote>
+<ol start="2">
+<li><strong>配合 SingleTask 使用</strong></li>
+<li><strong>配合 allowTaskReparenting 使用</strong></li>
+<li><strong>配合 Intent.FLAG_ACTIVITY_NEW_TASK 使用</strong></li>
+</ol>
+</blockquote>
+<ul>
+<li>
+<p><strong>配合 SingleTask 使用，先给出整个跳转流程：</strong></p>
+<p>**Main -&gt; ANormal **</p>
+<p>**-&gt; SingleTask2(taskAffinity = io.test, onCreate) -&gt; BNormal(taskAffinity = io.test) **</p>
+<p><strong>-&gt; SingleTask(taskAffinity = io.dove.offer) -&gt; BNormal(taskAffinity = io.dove.offer)</strong></p>
+<p><strong>-&gt; SingleTask2(taskAffinity = io.test, onNewIntent)</strong></p>
+<pre><code class="language-java">
+Main -&gt; ANormal
+|-----------------------| 
+|                       |
+|     ANormal           |
+|                       |
+|-----------------------|
+|                       |
+|     Main              |
+|                       |
+|-----------------------|
+
+  
+Main -&gt; ANormal -&gt; SingleTask2(taskAffinity = io.test,onCreate)
+|-----------------------| 
+|                       |
+|          ANormal      |
+|                       |
+|-----------------------|       |-----------------------|
+|                       |       |      SingleTask2      |
+|           Main        |       |       (onCreate)      |
+|       io.dove.offer   |       |       io.test         |
+|-----------------------|       |-----------------------|
+
+
+Main -&gt; ANormal -&gt; SingleTask2(taskAffinity = io.test,onCreate) -&gt; BNormal(taskAffinity = io.test)
+|-----------------------|    |-----------------------|
+|                       |    |                       |
+|          ANormal      |    |          BNormal      |
+|                       |    |                       |
+|-----------------------|    |-----------------------|
+|                       |    |      SingleTask2      |
+|           Main        |    |       (onCreate)      |
+|                       |    |       io.test         |
+|-----------------------|    |-----------------------|
+
+
+Main -&gt; ANormal -&gt; SingleTask2(taskAffinity = io.test,onCreate) -&gt; BNormal(taskAffinity = io.test) -&gt; SingleTask(taskAffinity = io.dove.offer)
+|-----------------------| 
+|      SingleTask       |
+|       (onCreate)      |
+|                       |
+|-----------------------|    |-----------------------|
+|                       |    |                       |
+|          ANormal      |    |          BNormal      |
+|                       |    |                       |
+|-----------------------|    |-----------------------|
+|                       |    |      SingleTask2      |
+|           Main        |    |       (onCreate)      |
+|        io.dove.offer  |    |       io.test         |
+|-----------------------|    |-----------------------|
+
+  
+Main -&gt; ANormal -&gt; SingleTask2(taskAffinity = io.test,onCreate) -&gt; BNormal(taskAffinity = io.test)-&gt; SingleTask(taskAffinity = io.dove.offer) -&gt; BNormal(taskAffinity = io.dove.offer)
+|-----------------------|
+|                       |
+|          BNormal      |
+|                       |
+|-----------------------|
+|      SingleTask       |
+|       (onCreate)      |
+|                       |
+|-----------------------|    |-----------------------|
+|                       |    |                       |
+|          ANormal      |    |          BNormal      |
+|                       |    |                       |
+|-----------------------|    |-----------------------|
+|                       |    |      SingleTask2      |
+|           Main        |    |       (onCreate)      |
+|        io.dove.offer  |    |       io.test         |
+|-----------------------|    |-----------------------|
+
+  
+Main -&gt; ANormal -&gt; SingleTask2(taskAffinity = io.test,onCreate) -&gt; BNormal(taskAffinity = io.test) -&gt; SingleTask(taskAffinity = io.dove.offer) -&gt; BNormal(taskAffinity = io.dove.offer) -&gt; SingleTask2(taskAffinity = io.test,onNewIntent)
+|-----------------------|
+|                       |
+|          BNormal      |
+|                       |
+|-----------------------|
+|      SingleTask       |
+|       (onCreate)      |
+|                       |
+|-----------------------|
+|                       |
+|          ANormal      |
+|                       |
+|-----------------------|    |-----------------------|
+|                       |    |      SingleTask2      |
+|           Main        |    |       (onNewIntent)   |
+|        io.dove.offer  |    |       io.test         |
+|-----------------------|    |-----------------------|
+
+
+此时返回，SingleTask2 -&gt; BNormal -&gt; SingleTask -&gt; ANormal -&gt; Main
+</code></pre>
+<ul>
+<li>
+<p><strong>配合 allowTaskReparenting = true 使用</strong></p>
+<blockquote>
+<p>9.0 以上不适用，重排逻辑触发不确定</p>
+<p>8.0 以下可以</p>
+</blockquote>
+<pre><code class="language-java">ANormal(App A) -&gt; BNormal(AppB)
+
+
+|-----------------------|
+|                       |
+|          BNormal      |
+|                       |
+|-----------------------|
+|                       |
+|          ANormal      |
+|                       |
+|-----------------------|  
+
+打开 AppB
+								   |-----------------------|  
+								   |                       |  
+								   |          BNormal      |  
+								   |                       |   
+|-----------------------|		|-----------------------|
+|                       |		|                       |
+|          ANormal      |		|          BMain        |
+|                       |		|                       |
+|-----------------------|		|-----------------------|  
+</code></pre>
+</li>
+<li>
+<p><strong>配合 Intent.FLAG_ACTIVITY_NEW_TASK 使用，和 SingleTask 效果一样，会创建新的栈</strong></p>
+</li>
+</ul>
+</li>
+</ul>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://flyer88.github.io/post/guan-yu-oom/" class="post-title gt-a-link">
+                    关于 OOM
+                </a>
+            </div>
+        
+
+        
+
+        
+            
+                <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '8f894d7af601ea18e6b9',
+    clientSecret: '70f1cea8fb683c4dbf8e1b94f676ae3f3c4311a3',
+    repo: 'flyer88.github.io',
+    owner: 'flyer88',
+    admin: ['flyer88'],
+    id: location.pathname,      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+            
+
+            
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">爪哇岛上程序猿 十指弯弯不弄弦 
+斗室方屏十余寸 不知今夕是何年</div>
+    <div class="social-container">
+        
+            
+                <a href="http://github.com/flyer88" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+                <a href="https://twitter.com/flyerXu88" target="_blank">
+                    <i class="fab fa-twitter gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+                <a href="https://www.zhihu.com/people/baiyanwu" target="_blank">
+                    <i class="fab fa-zhihu gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://flyer88.github.io/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+    hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
